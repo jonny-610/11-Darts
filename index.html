@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-D768CQQxKJ4EaOidghwwt7UzyApCtJONyA5uq/zsDhI='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-RhBg/g3TCHZqTR0vAwxfkZKr/pcPngiY5E2SrenIjuQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -23,8 +23,8 @@ header{background:var(--head);color:var(--head-ink);position:sticky;top:0;z-inde
 .brand h1{margin:0;font:700 28px/1 var(--display);letter-spacing:.02em;text-transform:uppercase}
 .brand .by{font-size:12px;opacity:.55;letter-spacing:.06em}
 .beta{font:700 10px var(--body);letter-spacing:.08em;text-transform:uppercase;background:var(--accent);color:var(--accent-ink);border-radius:5px;padding:2px 6px;vertical-align:middle;margin-left:4px}
-nav{max-width:720px;margin:0 auto;display:flex;padding:0 8px}
-nav button{flex:1;background:none;border:0;color:var(--head-ink);opacity:.7;font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:12px 4px;border-bottom:3px solid transparent;cursor:pointer}
+nav{max-width:720px;margin:0 auto;display:flex;padding:0 8px;overflow-x:auto;scrollbar-width:none}nav::-webkit-scrollbar{display:none}
+nav button{flex:1 0 auto;background:none;border:0;color:var(--head-ink);opacity:.7;font:600 14px var(--display);letter-spacing:.06em;text-transform:uppercase;padding:12px 4px;border-bottom:3px solid transparent;cursor:pointer}
 nav button[aria-selected="true"]{opacity:1;border-color:var(--accent)}
 main{max-width:720px;margin:0 auto;padding:14px 16px 60px;display:grid;gap:14px}
 section.view{display:grid;gap:14px;min-width:0}
@@ -63,6 +63,14 @@ textarea{resize:vertical}
 .code{font:700 26px var(--display);letter-spacing:.12em;background:var(--sunk);border:2px dashed var(--accent);border-radius:8px;padding:6px 14px;display:inline-block}
 .photo{max-width:100%;max-height:340px;border-radius:8px;border:1px solid var(--line)}
 .list{display:grid;gap:10px}.item{border:1px solid var(--line);border-radius:10px;padding:12px;background:var(--sunk)}
+table{width:100%;border-collapse:collapse;font-size:14px}th,td{padding:7px 5px;text-align:center;border-bottom:1px solid var(--line)}th{font:700 12px var(--display);letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}td.l,th.l{text-align:left}
+tr.up td{background:var(--ok-soft)}tr.down td{background:var(--bad-soft)}.tw{overflow-x:auto}
+.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{padding:8px 12px;border-radius:99px;border:1px solid var(--line);background:var(--sunk);color:var(--ink);font:600 14px var(--body);cursor:pointer}.chip[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.score2{display:grid;grid-template-columns:1fr 1fr;gap:8px}.side{border-radius:12px;padding:12px;background:var(--sunk);border:2px solid transparent}.side.on{border-color:var(--accent);background:var(--soft)}.side .rem{font:700 54px/1 var(--display)}.side .nm{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pad{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pad button{font:700 26px var(--display);padding:14px 0;border-radius:10px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}.pad button.go{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.typed{font:700 34px var(--display);text-align:center;min-height:42px}
+.vis{font-size:13px;color:var(--muted);max-height:120px;overflow:auto}
+svg.graph{width:100%;height:auto;display:block}
 footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:12px;text-align:center}
 @media (max-width:380px){.brand h1{font-size:24px}nav button{font-size:12px}}
 </style>
@@ -75,6 +83,9 @@ footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font
   </div>
   <nav id="tabs" role="tablist" hidden>
     <button data-v="home" aria-selected="true">Home</button>
+    <button data-v="play" aria-selected="false">Play</button>
+    <button data-v="tables" aria-selected="false">Tables</button>
+    <button data-v="training" aria-selected="false">Training</button>
     <button data-v="progress" aria-selected="false">Progress</button>
     <button data-v="me" aria-selected="false">Profile</button>
     <button data-v="staff" aria-selected="false" hidden id="staffTab">Chalkers</button>
@@ -109,6 +120,10 @@ footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font
 
   <section id="v-division" class="view" hidden><div class="card" id="divOut"></div></section>
   <section id="v-progress" class="view" hidden><div id="progOut" style="display:grid;gap:14px"></div></section>
+  <section id="v-play" class="view" hidden><div id="playOut" style="display:grid;gap:14px"></div></section>
+  <section id="v-scorer" class="view" hidden><div id="scOut" style="display:grid;gap:14px"></div></section>
+  <section id="v-tables" class="view" hidden><div id="tabOut" style="display:grid;gap:14px"></div></section>
+  <section id="v-training" class="view" hidden><div id="trOut" style="display:grid;gap:14px"></div></section>
 
   <section id="v-profile" class="view" hidden><div class="card" id="profOut"></div></section>
 
@@ -127,6 +142,7 @@ footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font
   </section>
 
   <section id="v-staff" class="view" hidden>
+    <div id="stTop" style="display:grid;gap:14px"></div>
     <div class="card"><h2>Waiting for approval</h2><p class="note">Check the photo shows a dartboard with the player's code written on paper. The photo is removed as soon as you decide.</p><div class="list" id="stPending"></div></div>
     <div class="card"><h2>Blocks and reports</h2><p class="note">Every block starts a safeguarding check: read the reason, check on the person who blocked, and look at anyone blocked 3 or more times. Bans need two Chalkers or admins to agree.</p><div id="stSafety"></div></div>
   </section>
@@ -142,12 +158,13 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const flag=cc=>cc&&/^[A-Z]{2}$/.test(cc)?String.fromCodePoint(...[...cc].map(c=>0x1F1E6+c.charCodeAt(0)-65)):"🏳️";
 const COUNTRIES=[["GB","United Kingdom"],["IE","Ireland"],["NL","Netherlands"],["BE","Belgium"],["DE","Germany"],["AT","Austria"],["CH","Switzerland"],["FR","France"],["ES","Spain"],["PT","Portugal"],["IT","Italy"],["DK","Denmark"],["SE","Sweden"],["NO","Norway"],["FI","Finland"],["IS","Iceland"],["PL","Poland"],["CZ","Czechia"],["SK","Slovakia"],["HU","Hungary"],["RO","Romania"],["BG","Bulgaria"],["GR","Greece"],["CY","Cyprus"],["MT","Malta"],["HR","Croatia"],["SI","Slovenia"],["RS","Serbia"],["LT","Lithuania"],["LV","Latvia"],["EE","Estonia"],["UA","Ukraine"],["TR","Türkiye"],["GI","Gibraltar"],["US","United States"],["CA","Canada"],["MX","Mexico"],["BR","Brazil"],["AR","Argentina"],["CL","Chile"],["AU","Australia"],["NZ","New Zealand"],["ZA","South Africa"],["NG","Nigeria"],["KE","Kenya"],["IN","India"],["PK","Pakistan"],["NP","Nepal"],["PH","Philippines"],["SG","Singapore"],["MY","Malaysia"],["HK","Hong Kong"],["JP","Japan"],["KR","South Korea"],["CN","China"],["TH","Thailand"],["AE","United Arab Emirates"],["SA","Saudi Arabia"],["QA","Qatar"],["IL","Israel"],["FJ","Fiji"]].sort((a,b)=>a[1].localeCompare(b[1]));
 const CNAME=Object.fromEntries(COUNTRIES);
-let ME=null,STATE=null,PLAYERS=[],DIVS=[],PROF=null,DIV=null,CUR="home";
+let ME=null,STATE=null,PLAYERS=[],DIVS=[],SEASONS=[],MATCHES=[],CHALL=[],TRAIN=[],PROF=null,DIV=null,CUR="home";
+const isMemberData=()=>!!(STATE&&["placement","active"].includes(STATE.profile.status));
 const pl=n=>n+(n===1?" player":" players");
 const isMember=()=>!!(STATE&&["placement","active"].includes(STATE.profile.status));
 
-function show(v){if(!isMember()&&!["home","profile"].includes(v))v="home";CUR=v;document.querySelectorAll(".view").forEach(s=>s.hidden=s.id!=="v-"+v);
-  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.v===v||(v==="division"&&b.dataset.v==="home")||(v==="profile"&&PROF!==(ME&&ME.id)&&b.dataset.v==="home")||(v==="profile"&&ME&&PROF===ME.id&&b.dataset.v==="me"))));
+function show(v){if(!isMember()&&!["home","profile"].includes(v))v="home";if(v!=="scorer")stopPoll();CUR=v;document.querySelectorAll(".view").forEach(s=>s.hidden=s.id!=="v-"+v);
+  document.querySelectorAll("#tabs button").forEach(b=>b.setAttribute("aria-selected",String(b.dataset.v===v||(v==="division"&&b.dataset.v==="tables")||(v==="scorer"&&b.dataset.v==="play")||(v==="profile"&&PROF!==(ME&&ME.id)&&b.dataset.v==="home")||(v==="profile"&&ME&&PROF===ME.id&&b.dataset.v==="me"))));
   window.scrollTo(0,0);render()}
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.dataset.v));
 
@@ -156,7 +173,12 @@ async function load(){
   STATE=null;if(ME){const r=await db.rpc("v2_my_join_state");if(!r.error)STATE=r.data}
   const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id").in("status",["placement","active"]).order("display_name");
   PLAYERS=p.data||[];
-  const d=await db.from("divisions").select("id,tier,name,league_id,leagues(name,is_placement)").order("tier");DIVS=d.data||[];
+  const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS=d.data||[];
+  const se=await db.from("seasons").select("*").order("start_date");SEASONS=se.data||[];
+  const lm=await db.from("matches").select("*").in("status",["confirmed","submitted","scheduled","disputed","forfeit"]).order("created_at");MATCHES=lm.data||[];
+  CHALL=[];TRAIN=[];
+  if(ME&&isMemberData()){const c=await db.from("challenges").select("*").order("created_at",{ascending:false});CHALL=c.data||[];
+    const t=await db.from("training").select("*").eq("user_id",ME.id).order("at");TRAIN=t.data||[];}
   $("staffTab").hidden=!(STATE&&["chalker","admin"].includes(STATE.profile.role)&&!["banned","suspended"].includes(STATE.profile.status));
   $("tabs").hidden=!isMember();if(!isMember()&&!["home","profile"].includes(CUR))CUR="home";
   render();
@@ -180,7 +202,8 @@ function render(){
   // guests and not-yet-accepted players do everything on Home
   const gate=$("gate");if(!mem){["signin","join","pending","mine"].forEach(id=>gate.appendChild($(id)));renderMe()}else{["signin","join","pending","mine"].forEach(id=>$("v-me").appendChild($(id)))}
   if(mem){renderHonour();$("divLinks").innerHTML=DIVS.filter(d=>!(d.leagues&&d.leagues.is_placement)).map(d=>`<a href="#" data-div="${d.id}">${esc(d.name)}<small>${pl(PLAYERS.filter(p=>p.division_id===d.id).length)}</small></a>`).join("")+DIVS.filter(d=>d.leagues&&d.leagues.is_placement).map(d=>`<a href="#" data-div="${d.id}">Placement<small>${pl(PLAYERS.filter(p=>p.status==="placement").length)}</small></a>`).join("")}
-  if(CUR==="me")renderMe();if(CUR==="progress")renderProgress();if(CUR==="division")renderDivision();if(CUR==="profile")renderProfile();if(CUR==="staff")renderStaff();
+  if(CUR==="me")renderMe();if(CUR==="progress")renderProgress();if(CUR==="division")renderDivision();
+  if(CUR==="play")renderPlay();if(CUR==="tables")renderTables();if(CUR==="training")renderTraining();if(CUR==="scorer")renderScorer();if(CUR==="profile")renderProfile();if(CUR==="staff")renderStaff();
 }
 $("pSearch").oninput=render;
 document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("[data-div]");if(!a)return;e.preventDefault();DIV=+a.dataset.div;show("division")});
@@ -298,6 +321,299 @@ async function renderStaff(){
     const {data,error}=await db.rpc("v2_staff_ban",{p_user:b.dataset.ban,p_reason:it.querySelector("p:not(.err)")?.textContent||"See block"});
     it.querySelector(".err").innerHTML=error?esc(error.message):data==="requested"?'<span class="okmsg">Ban requested. A second Chalker or admin must confirm it.</span>':'<span class="okmsg">Banned.</span>';});
 }
+// ===================== v2: play, scorer, tables, training, progress, chalkers =====================
+const PN=id=>{const p=PLAYERS.find(x=>x.id===id);return p?p.display_name:"Player"};
+const PF=id=>{const p=PLAYERS.find(x=>x.id===id);return p?flag(p.country):""};
+const nameLink=id=>`<a class="pn" href="#" data-prof="${id}" style="color:inherit">${PF(id)} ${esc(PN(id))}</a>`;
+const KIND={league:"League",placement:"Placement",challenge:"Challenge",fun:"Fun"};
+const fmtD=t=>t?new Date(t).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
+const liveSeason=()=>SEASONS.find(s=>s.status==="live")||null;
+const nextSeason=()=>SEASONS.find(s=>s.status==="planned")||null;
+const mine=()=>ME?MATCHES.filter(m=>m.player_a===ME.id||m.player_b===ME.id):[];
+const myStats=(m,id)=>m.player_a===id?m.stats_a||{}:m.stats_b||{};
+const myLegs=(m,id)=>m.player_a===id?[m.legs_a,m.legs_b]:[m.legs_b,m.legs_a];
+const opp=(m,id)=>m.player_a===id?m.player_b:m.player_a;
+
+// ---------- PLAY ----------
+function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
+  const ms=mine();const now=Date.now();
+  const toPlay=ms.filter(m=>m.status==="scheduled"&&(!m.released_at||new Date(m.released_at)<=now));
+  const toConfirm=ms.filter(m=>m.status==="submitted"&&m.submitted_by!==ME.id);
+  const waiting=ms.filter(m=>m.status==="submitted"&&m.submitted_by===ME.id);
+  const inC=CHALL.filter(c=>c.to_id===ME.id&&c.status==="open"&&new Date(c.expires_at)>now);
+  const outC=CHALL.filter(c=>c.from_id===ME.id&&["open"].includes(c.status));
+  const card=m=>`<div class="item"><b>${KIND[m.kind]}${m.week?" · week "+m.week:""}${m.coach_me?' · <span class="pill">Coach me</span>':""}</b> v ${nameLink(opp(m,ME.id))}
+     <div class="note">First to ${m.first_to}${m.kind==="league"?" (4-4 is a draw)":""} · play by ${fmtD(m.due_at)}</div>
+     <div class="row" style="margin-top:8px"><button class="btn primary" data-score="${m.id}" data-mode="local">Score on one phone</button><button class="btn primary" data-score="${m.id}" data-mode="online">Score online</button><button class="btn" data-app="${m.id}">Enter result from an app</button></div><div data-appform="${m.id}"></div></div>`;
+  const res=m=>{const [a,b]=myLegs(m,ME.id),sa=myStats(m,ME.id),so=myStats(m,opp(m,ME.id));return `<b>${a}-${b}</b> v ${nameLink(opp(m,ME.id))} · your avg ${(+sa.tda||0).toFixed(2)}, theirs ${(+so.tda||0).toFixed(2)}`};
+  out.innerHTML=`
+   <div class="card"><h2>Your matches</h2>${toPlay.length?`<div class="list">${toPlay.map(card).join("")}</div>`:`<p class="note">Nothing to play right now. ${STATE.profile.status==="placement"?"Placement matches are paired automatically as other players join.":"League fixtures are released every Monday."}</p>`}
+     <p class="note">Online: you and your opponent both open this match on your own phones and tap <b>Score online</b>. No codes needed. Video call on Discord with your camera on the board.</p></div>
+   <div class="card"><h2>Check and accept</h2>${toConfirm.length?`<div class="list">${toConfirm.map(m=>`<div class="item">${KIND[m.kind]}: ${res(m)}<div class="row" style="margin-top:8px"><button class="btn primary" data-acc="${m.id}">Accept</button><button class="btn" data-dis="${m.id}">Dispute</button></div><div data-disform="${m.id}"></div></div>`).join("")}</div>`:'<p class="note">Nothing waiting. Results you need to check appear here. If you don\'t respond within 48 hours they are accepted automatically.</p>'}
+     ${waiting.length?`<h3>Waiting for your opponent</h3>${waiting.map(m=>`<div class="note">${KIND[m.kind]}: ${res(m)}</div>`).join("")}`:""}</div>
+   <div class="card"><h2>Challenges</h2>
+     ${inC.map(c=>`<div class="item">${nameLink(c.from_id)} challenged you${c.coach_me?' and asked you to <b>coach</b> them':""}. First to 3.${c.message?`<div class="note">"${esc(c.message)}"</div>`:""}<div class="row" style="margin-top:8px"><button class="btn primary" data-cacc="${c.id}">Accept</button><button class="btn" data-cdec="${c.id}">Decline</button></div></div>`).join("")||'<p class="note">No challenges waiting for you.</p>'}
+     ${outC.length?`<p class="note">Sent: ${outC.map(c=>esc(PN(c.to_id))).join(", ")} (expires after 7 days)</p>`:""}
+     <h3>Challenge someone</h3>
+     <div class="row"><label class="f">Player<select id="chTo"><option value="">Choose…</option>${PLAYERS.filter(p=>p.id!==ME.id&&!p.challenge_opt_out).map(p=>`<option value="${p.id}">${flag(p.country)} ${esc(p.display_name)}${p.claimed_avg?" ("+(+p.claimed_avg).toFixed(0)+")":""}</option>`).join("")}</select></label><label class="f">Message (optional)<input id="chMsg" maxlength="200"></label></div>
+     <label class="check"><input type="checkbox" id="chCoach"> Coach me: I'd like to learn from this player</label>
+     <div class="row"><button class="btn primary" id="chGo">Send challenge</button></div><p class="err" id="chErr"></p>
+     <p class="note">Challenges are first to 3 and just for fun. You can send 2 every 4 weeks, and anyone can decline without giving a reason.</p></div>`;
+  out.querySelectorAll("[data-score]").forEach(b=>b.onclick=()=>openScorer(+b.dataset.score,b.dataset.mode));
+  out.querySelectorAll("[data-app]").forEach(b=>b.onclick=()=>appForm(+b.dataset.app));
+  out.querySelectorAll("[data-acc]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_respond_result",{p_match:+b.dataset.acc,p_accept:true,p_note:null});if(error)alert(error.message);else load()});
+  out.querySelectorAll("[data-dis]").forEach(b=>b.onclick=()=>{const f=out.querySelector(`[data-disform="${b.dataset.dis}"]`);f.innerHTML=`<label class="f">What's wrong?<input class="disNote"></label><div class="row" style="margin-top:6px"><button class="btn danger">Send dispute to the Chalkers</button></div><p class="err"></p>`;
+    f.querySelector("button").onclick=async()=>{const {error}=await db.rpc("v2_respond_result",{p_match:+b.dataset.dis,p_accept:false,p_note:f.querySelector(".disNote").value});if(error)f.querySelector(".err").textContent=error.message;else load()}});
+  out.querySelectorAll("[data-cacc],[data-cdec]").forEach(b=>b.onclick=async()=>{const id=+(b.dataset.cacc||b.dataset.cdec);const {error}=await db.rpc("v2_challenge_respond",{p_id:id,p_accept:!!b.dataset.cacc});if(error)alert(error.message);else load()});
+  $("chGo").onclick=async()=>{const to=$("chTo").value;if(!to){$("chErr").textContent="Choose a player.";return}
+    const {error}=await db.rpc("v2_challenge",{p_to:to,p_coach:$("chCoach").checked,p_msg:$("chMsg").value});$("chErr").innerHTML=error?esc(error.message):'<span class="okmsg">Challenge sent.</span>';if(!error)load()};
+}
+function appForm(id){const m=MATCHES.find(x=>x.id===id);const f=document.querySelector(`[data-appform="${id}"]`);const A=m.player_a,B=m.player_b;
+  const blk=(p,k)=>`<h3>${esc(PN(p))}</h3><div class="row"><label class="f">Legs<input id="af_l${k}" type="number" min="0" max="${m.first_to}" inputmode="numeric"></label><label class="f">3-dart avg<input id="af_t${k}" type="number" step="0.01" inputmode="decimal"></label><label class="f">180s<input id="af_m${k}" type="number" min="0" inputmode="numeric" value="0"></label><label class="f">High finish<input id="af_h${k}" type="number" min="0" max="170" inputmode="numeric" value="0"></label><label class="f">Checkout %<input id="af_c${k}" type="number" min="0" max="100" step="0.1" inputmode="decimal"></label></div>`;
+  f.innerHTML=`<div style="margin-top:10px">${blk(A,"a")}${blk(B,"b")}<label class="f" style="margin-top:8px">Screenshots of the app's stats (required, up to 3)<input type="file" id="af_p" accept="image/*" multiple></label><div class="row" style="margin-top:8px"><button class="btn primary" id="af_go">Send for your opponent to accept</button></div><p class="err" id="af_err"></p></div>`;
+  $("af_go").onclick=async()=>{const files=[...($("af_p").files||[])].slice(0,3);if(!files.length){$("af_err").textContent="Add at least one screenshot.";return}
+    $("af_go").disabled=true;const proofs=[];for(const fl of files){try{const b=await shrink(fl);const path=`${ME.id}/proof-${id}-${Date.now()}-${proofs.length}.jpg`;const r=await db.storage.from("setup").upload(path,b,{contentType:"image/jpeg"});if(!r.error)proofs.push(path)}catch(_){}}
+    const st=k=>({tda:+$("af_t"+k).value||0,b180:+$("af_m"+k).value||0,hf:+$("af_h"+k).value||0,cop:$("af_c"+k).value===""?null:+$("af_c"+k).value,src:"app"});
+    const {error}=await db.rpc("v2_submit_result",{p_match:id,p_la:+$("af_la").value,p_lb:+$("af_lb").value,p_sa:st("a"),p_sb:st("b"),p_proofs:proofs});
+    $("af_go").disabled=false;if(error)$("af_err").textContent=error.message;else load()};
+}
+
+// ---------- SCORER (one phone or online) ----------
+let SC=null,POLL=null;const BOGEY=[169,168,166,165,163,162,159],IMPOSS=[179,178,176,175,173,172,169,166,163];
+function stopPoll(){if(POLL){clearInterval(POLL);POLL=null}}
+function newState(m){return {first_to:m.first_to,draw:m.kind==="league",legs:[{starter:"A",visits:[],winner:null}],done:false}}
+async function openScorer(id,mode){const m=MATCHES.find(x=>x.id===id);if(!m)return;
+  const side=m.player_a===ME.id?"A":"B";let st=null,ver=0;
+  const r=await db.from("live_state").select("*").eq("match_id",id).maybeSingle();if(r.data){st=r.data.state;ver=r.data.version}
+  if(!st){try{const loc=JSON.parse(localStorage.getItem("11d-sc-"+id)||"null");if(loc&&mode==="local")st=loc}catch(_){}}
+  SC={m,mode,side,st:st||newState(m),ver,typed:"",dbl:0,ask:null,msg:""};
+  show("scorer");if(mode==="online"){stopPoll();POLL=setInterval(pollLive,2000)}}
+async function pollLive(){if(!SC||SC.mode!=="online")return;const r=await db.from("live_state").select("*").eq("match_id",SC.m.id).maybeSingle();
+  if(r.data&&r.data.version!==SC.ver){SC.st=r.data.state;SC.ver=r.data.version;renderScorer()}}
+async function saveSC(){if(SC.mode==="local"){try{localStorage.setItem("11d-sc-"+SC.m.id,JSON.stringify(SC.st))}catch(_){}return true}
+  const {data,error}=await db.rpc("v2_live_save",{p_match:SC.m.id,p_version:SC.ver,p_state:SC.st});
+  if(error){SC.msg=error.message;await pollLive();renderScorer();return false}SC.ver=data;return true}
+const legRem=(L,p)=>501-L.visits.filter(v=>v.p===p).reduce((a,v)=>a+v.s,0);
+const turnOf=L=>{if(L.winner)return null;const n=L.visits.length;return n%2===0?L.starter:(L.starter==="A"?"B":"A")};
+const legsWon=(st,p)=>st.legs.filter(l=>l.winner===p).length;
+function matchOver(st){const a=legsWon(st,"A"),b=legsWon(st,"B"),w=st.first_to;return a>=w||b>=w||(st.draw&&a===w-1&&b===w-1)}
+function calcStats(st,p){let sc=0,d=0,f9s=0,f9d=0,m180=0,t140=0,t100=0,hf=0,bl=0,co=0,dbl=0;
+  st.legs.forEach(L=>{let k=0,ld=0;L.visits.forEach(v=>{if(v.p!==p)return;const dd=v.co?v.co:3;sc+=v.s;d+=dd;ld+=dd;if(k<3){f9s+=v.s;f9d+=dd}k++;
+    if(v.s===180)m180++;else if(v.s>=140)t140++;else if(v.s>=100)t100++;dbl+=(v.dbl||0);if(v.co){co++;hf=Math.max(hf,v.s)}});
+    if(L.winner===p)bl=bl?Math.min(bl,ld):ld});
+  return {tda:d?+(sc/d*3).toFixed(2):0,f9:f9d?+(f9s/f9d*3).toFixed(2):0,b180:m180,b140:t140,b100:t100,hf,bl,co,dbl,cop:dbl?+(co/dbl*100).toFixed(1):null,src:"scorer"}}
+async function scoreVisit(s){const st=SC.st,L=st.legs[st.legs.length-1],p=turnOf(L);if(!p)return;
+  if(SC.mode==="online"&&p!==SC.side){SC.msg="Wait for your opponent's turn.";renderScorer();return}
+  if(s>180||IMPOSS.includes(s)){SC.msg=s+" isn't possible with 3 darts.";SC.typed="";renderScorer();return}
+  const rem=legRem(L,p);let v={p,s,dbl:SC.dbl||0};
+  if(rem-s<0||rem-s===1){v={p,s:0,bust:1,dbl:SC.dbl||0}}
+  else if(rem-s===0){if(s>170||BOGEY.includes(s)){SC.msg="You can't check out "+s+".";SC.typed="";renderScorer();return}
+    SC.ask={v};SC.typed="";renderScorer();return}
+  L.visits.push(v);SC.typed="";SC.dbl=0;SC.msg="";if(await saveSC())renderScorer()}
+async function finishLeg(darts,dbl){const st=SC.st,L=st.legs[st.legs.length-1];const v=SC.ask.v;v.co=darts;v.dbl=Math.max(1,dbl);L.visits.push(v);L.winner=v.p;SC.ask=null;
+  if(matchOver(st))st.done=true;else st.legs.push({starter:L.starter==="A"?"B":"A",visits:[],winner:null});if(await saveSC())renderScorer()}
+async function undo(){const st=SC.st;let L=st.legs[st.legs.length-1];
+  if(!L.visits.length&&st.legs.length>1){st.legs.pop();L=st.legs[st.legs.length-1];L.winner=null;st.done=false}
+  const last=L.visits[L.visits.length-1];if(!last)return;if(SC.mode==="online"&&last.p!==SC.side){SC.msg="You can only undo your own score.";renderScorer();return}
+  L.visits.pop();L.winner=null;st.done=false;if(await saveSC())renderScorer()}
+function renderScorer(){const box=$("scOut");if(!SC){box.innerHTML="";return}const {m,st}=SC;const L=st.legs[st.legs.length-1],p=turnOf(L);
+  const side=k=>{const id=k==="A"?m.player_a:m.player_b;const s=calcStats(st,k);return `<div class="side ${p===k?"on":""}"><div class="nm">${PF(id)} ${esc(PN(id))}</div><div class="rem">${legRem(L,k)}</div><div class="note">Legs <b>${legsWon(st,k)}</b> · avg ${s.tda.toFixed(1)}</div></div>`};
+  const last=L.visits.slice(-6).map(v=>`${esc(PN(v.p==="A"?m.player_a:m.player_b))}: ${v.bust?"bust":v.s}${v.co?" ✓ out":""}`).reverse().join("<br>");
+  if(st.done){const a=legsWon(st,"A"),b=legsWon(st,"B");const sa=calcStats(st,"A"),sb=calcStats(st,"B");
+    box.innerHTML=`<div class="card"><h2>Match finished</h2><p style="font-size:22px"><b>${esc(PN(m.player_a))} ${a}-${b} ${esc(PN(m.player_b))}</b>${a===b?" (draw)":""}</p>
+     <div class="tw"><table><tr><th class="l"></th><th>Avg</th><th>First 9</th><th>180</th><th>High CO</th><th>CO %</th></tr>${[["A",sa],["B",sb]].map(([k,s])=>`<tr><td class="l">${esc(PN(k==="A"?m.player_a:m.player_b))}</td><td>${s.tda.toFixed(2)}</td><td>${s.f9.toFixed(2)}</td><td>${s.b180}</td><td>${s.hf||"–"}</td><td>${s.cop==null?"–":s.cop+"%"}</td></tr>`).join("")}</table></div>
+     <div class="row" style="margin-top:10px"><button class="btn primary" id="scSubmit">Submit result</button><button class="btn" id="scUndo">Undo last score</button><button class="btn" id="scBack">Back</button></div><p class="err" id="scErr">${esc(SC.msg)}</p>
+     <p class="note">Your opponent then checks and accepts it on their Play page.</p></div>`;
+    $("scSubmit").onclick=async()=>{const {error}=await db.rpc("v2_submit_result",{p_match:m.id,p_la:a,p_lb:b,p_sa:sa,p_sb:sb,p_proofs:null});if(error&&!/already has a result/.test(error.message)){$("scErr").textContent=error.message;return}
+      try{localStorage.removeItem("11d-sc-"+m.id)}catch(_){}stopPoll();SC=null;await load();show("play")};
+    $("scUndo").onclick=undo;$("scBack").onclick=()=>{stopPoll();show("play")};return}
+  const myTurn=SC.mode==="local"||p===SC.side;
+  box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><b>${KIND[m.kind]} · first to ${m.first_to} · leg ${st.legs.length}</b><span class="pill">${SC.mode==="online"?"Online":"One phone"}</span></div>
+    <div class="score2" style="margin-top:10px">${side("A")}${side("B")}</div>
+    <p style="text-align:center;margin:10px 0 0"><b>${p?esc(PN(p==="A"?m.player_a:m.player_b))+" to throw":""}</b>${!myTurn?" · waiting for their score…":""}</p>
+    ${SC.ask?`<div class="item" style="margin-top:10px"><b>Checkout! How many darts did the finish take?</b><div class="chips" style="margin-top:6px">${[1,2,3].map(n=>`<button class="chip" data-co="${n}">${n}</button>`).join("")}</div><p class="note">Darts thrown at a double this visit:</p><div class="chips">${[1,2,3].map(n=>`<button class="chip" data-codbl="${n}" aria-pressed="${n===1}">${n}</button>`).join("")}</div></div>`:`
+    <div class="typed">${SC.typed||'<span class="note">Type the 3-dart score</span>'}</div>
+    <div class="note">Darts at a double this visit:</div><div class="chips" style="margin:4px 0 10px">${[0,1,2,3].map(n=>`<button class="chip" data-dbl="${n}" aria-pressed="${SC.dbl===n}">${n}</button>`).join("")}</div>
+    <div class="pad" ${myTurn?"":'style="opacity:.4;pointer-events:none"'}>${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-k="${n}">${n}</button>`).join("")}<button data-k="del">⌫</button><button data-k="0">0</button><button class="go" data-k="ok">Enter</button></div>`}
+    <p class="err">${esc(SC.msg)}</p><div class="vis">${last}</div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="scUndo">Undo</button><button class="btn" id="scBack">Back to Play</button></div></div>`;
+  let codbl=1;
+  box.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{const k=b.dataset.k;SC.msg="";if(k==="del")SC.typed=SC.typed.slice(0,-1);else if(k==="ok"){if(SC.typed!=="")scoreVisit(+SC.typed);return}else if(SC.typed.length<3)SC.typed+=k;renderScorer()});
+  box.querySelectorAll("[data-dbl]").forEach(b=>b.onclick=()=>{SC.dbl=+b.dataset.dbl;renderScorer()});
+  box.querySelectorAll("[data-codbl]").forEach(b=>b.onclick=()=>{codbl=+b.dataset.codbl;box.querySelectorAll("[data-codbl]").forEach(x=>x.setAttribute("aria-pressed",String(x===b)))});
+  box.querySelectorAll("[data-co]").forEach(b=>b.onclick=()=>finishLeg(+b.dataset.co,Math.min(codbl,+b.dataset.co)));
+  $("scUndo").onclick=undo;$("scBack").onclick=()=>{stopPoll();show("play")};
+}
+
+// ---------- TABLES ----------
+let TDIV=null;
+function leagueTable(divId,season){const ps=PLAYERS.filter(p=>p.division_id===divId&&p.status==="active");const T={};ps.forEach(p=>T[p.id]={id:p.id,P:0,W:0,D:0,L:0,LF:0,LA:0,Pts:0});
+  MATCHES.filter(m=>m.kind==="league"&&m.status==="confirmed"&&m.division_id===divId&&(!season||m.season_id===season.id)).forEach(m=>{
+    [[m.player_a,m.legs_a,m.legs_b],[m.player_b,m.legs_b,m.legs_a]].forEach(([id,f,g])=>{const t=T[id]||(T[id]={id,P:0,W:0,D:0,L:0,LF:0,LA:0,Pts:0});t.P++;t.LF+=f;t.LA+=g;if(f>g){t.W++;t.Pts+=3}else if(f===g){t.D++;t.Pts+=1}else t.L++})});
+  return Object.values(T).sort((a,b)=>b.Pts-a.Pts||(b.LF-b.LA)-(a.LF-a.LA)||b.LF-a.LF||PN(a.id).localeCompare(PN(b.id)))}
+function renderTables(){const out=$("tabOut");const divs=DIVS.filter(d=>!(d.leagues&&d.leagues.is_placement));const plac=DIVS.find(d=>d.leagues&&d.leagues.is_placement);
+  if(TDIV==null)TDIV=(STATE&&STATE.profile.division_id)||(divs[0]&&divs[0].id);
+  const s=liveSeason(),nx=nextSeason();
+  const head=s?`<p class="note">${esc(s.name)} · started ${new Date(s.start_date).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · win 3, draw 1, loss 0 · top 1 up, bottom 1 down</p>`:`<p class="note">${nx?`${esc(nx.name)} starts Monday ${new Date(nx.start_date).toLocaleDateString("en-GB",{day:"numeric",month:"long",year:"numeric"})}.`:"No season scheduled yet."} Tables fill in as results are confirmed.</p>`;
+  const t=leagueTable(TDIV,s);const n=t.length;
+  const placRows=PLAYERS.filter(p=>p.status==="placement").map(p=>{const ms=MATCHES.filter(m=>m.kind==="placement"&&m.status==="confirmed"&&(m.player_a===p.id||m.player_b===p.id));const av=ms.length?ms.reduce((a,m)=>a+(+myStats(m,p.id).tda||0),0)/ms.length:null;return {p,n:ms.length,av}});
+  out.innerHTML=`<div class="card"><h2>League tables</h2>${head}<div class="chips">${divs.map(d=>`<button class="chip" data-tdiv="${d.id}" aria-pressed="${d.id===TDIV}">${esc(d.name)}</button>`).join("")}</div>
+    <div class="tw" style="margin-top:10px"><table><tr><th>#</th><th class="l">Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Legs</th><th>+/-</th><th>Pts</th></tr>
+    ${t.map((r,i)=>`<tr class="${n>=4&&i===0?"up":n>=4&&i===n-1?"down":""}"><td>${i+1}</td><td class="l">${nameLink(r.id)}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.LF}-${r.LA}</td><td>${r.LF-r.LA>0?"+":""}${r.LF-r.LA}</td><td><b>${r.Pts}</b></td></tr>`).join("")||'<tr><td colspan="9" class="note">No players in this division yet.</td></tr>'}</table></div>
+    <p class="note">Green goes up a division, red goes down, at the end of the season.</p></div>
+   <div class="card"><h2>Placement</h2><p class="note">New players play 3 placement matches. Their average from those matches helps the Chalkers choose their division.</p>
+    <div class="tw"><table><tr><th class="l">Player</th><th>Played</th><th>Avg</th></tr>${placRows.map(r=>`<tr><td class="l">${nameLink(r.p.id)}</td><td>${r.n} of 3</td><td>${r.av==null?"–":r.av.toFixed(2)}</td></tr>`).join("")||'<tr><td colspan="3" class="note">Nobody in placement.</td></tr>'}</table></div></div>`;
+  out.querySelectorAll("[data-tdiv]").forEach(b=>b.onclick=()=>{TDIV=+b.dataset.tdiv;renderTables()});
+}
+function renderDivision(){TDIV=DIV;show("tables")}
+
+// ---------- TRAINING ----------
+const DRILLS={scoring100:{n:"100-dart scoring",d:"Throw 33 visits at treble 20 (99 darts). Type each 3-dart score. Your result is your 3-dart average.",unit:"avg",better:"higher"},
+ co121:{n:"Checkout 121",d:"10 attempts at 121, 9 darts each. Tap Checked out or Missed after each attempt. Result: % checked out.",unit:"%",better:"higher"},
+ co170:{n:"Checkout 170",d:"10 attempts at 170, 9 darts each. Result: % checked out.",unit:"%",better:"higher"},
+ atc:{n:"Around the Clock",d:"Hit 1 to 20 in order, then the bull. Count your darts. Result: darts taken.",unit:"darts",better:"lower"},
+ doubles:{n:"Doubles practice",d:"Throw 30 darts at doubles. Count the hits. Result: % hit.",unit:"%",better:"higher"}};
+let DRILL=null,DR={};
+function graph(points,unit){if(points.length<2)return `<p class="note">${points.length?"One session so far. ":""}Your graph appears after 2 sessions.</p>`;
+  const W=600,H=180,P=30,vs=points.map(p=>p.v),lo=Math.min(...vs),hi=Math.max(...vs),span=hi-lo||1;const X=i=>P+i*(W-2*P)/(points.length-1),Y=v=>H-P-(v-lo)/span*(H-2*P);
+  const d=points.map((p,i)=>`${i?"L":"M"}${X(i).toFixed(1)} ${Y(p.v).toFixed(1)}`).join(" ");
+  return `<svg class="graph" viewBox="0 0 ${W} ${H}" role="img" aria-label="Results over time"><line x1="${P}" x2="${W-P}" y1="${H-P}" y2="${H-P}" stroke="var(--line)"/><text x="${P}" y="${H-8}" font-size="11" fill="var(--muted)">${esc(points[0].l)}</text><text x="${W-P}" y="${H-8}" font-size="11" fill="var(--muted)" text-anchor="end">${esc(points[points.length-1].l)}</text><text x="4" y="${Y(hi)+4}" font-size="11" fill="var(--muted)">${+hi.toFixed(1)}</text><text x="4" y="${Y(lo)+4}" font-size="11" fill="var(--muted)">${+lo.toFixed(1)}</text><path d="${d}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linejoin="round"/>${points.map((p,i)=>`<circle cx="${X(i).toFixed(1)}" cy="${Y(p.v).toFixed(1)}" r="4" fill="var(--accent)"/>`).join("")}</svg><p class="note">Unit: ${unit}</p>`}
+function renderTraining(){const out=$("trOut");
+  if(DRILL){const D=DRILLS[DRILL];let body="";
+    if(DRILL==="scoring100"){DR.v=DR.v||[];DR.t=DR.t||"";const tot=DR.v.reduce((a,b)=>a+b,0);
+      body=`<p><b>Visit ${Math.min(DR.v.length+1,33)} of 33</b> · running average ${DR.v.length?(tot/DR.v.length).toFixed(2):"–"}</p><div class="typed">${DR.t||'<span class="note">Type the score</span>'}</div><div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-tk="${n}">${n}</button>`).join("")}<button data-tk="del">⌫</button><button data-tk="0">0</button><button class="go" data-tk="ok">Enter</button></div>`}
+    else if(DRILL==="co121"||DRILL==="co170"){DR.r=DR.r||[];body=`<p><b>Attempt ${Math.min(DR.r.length+1,10)} of 10</b> · ${DR.r.filter(Boolean).length} checked out</p><div class="row"><button class="btn primary" data-att="1">Checked out</button><button class="btn" data-att="0">Missed</button><button class="btn" data-att="u">Undo</button></div>`}
+    else if(DRILL==="atc")body=`<label class="f">Darts taken to finish 1–20 and bull<input id="drIn" type="number" min="21" max="999" inputmode="numeric"></label>`;
+    else body=`<label class="f">Hits out of 30 darts<input id="drIn" type="number" min="0" max="30" inputmode="numeric"></label>`;
+    const done=(DRILL==="scoring100"&&DR.v.length>=33)||((DRILL==="co121"||DRILL==="co170")&&DR.r.length>=10);
+    out.innerHTML=`<div class="card"><h2>${D.n}</h2><p class="note">${D.d}</p>${body}<div class="row" style="margin-top:10px">${["atc","doubles"].includes(DRILL)||done?'<button class="btn primary" id="drSave">Save result</button>':""}<button class="btn" id="drBack">Back</button></div><p class="err" id="drErr"></p></div>`;
+    out.querySelectorAll("[data-tk]").forEach(b=>b.onclick=()=>{const k=b.dataset.tk;if(k==="del")DR.t=DR.t.slice(0,-1);else if(k==="ok"){const v=+DR.t;if(DR.t===""||v>180||IMPOSS.includes(v))return;DR.v.push(v);DR.t=""}else if(DR.t.length<3)DR.t+=k;renderTraining()});
+    out.querySelectorAll("[data-att]").forEach(b=>b.onclick=()=>{const k=b.dataset.att;if(k==="u")DR.r.pop();else if(DR.r.length<10)DR.r.push(k==="1");renderTraining()});
+    $("drBack").onclick=()=>{DRILL=null;DR={};renderTraining()};
+    const sv=$("drSave");if(sv)sv.onclick=async()=>{let score;
+      if(DRILL==="scoring100")score=DR.v.reduce((a,b)=>a+b,0)/33;else if(DRILL==="co121"||DRILL==="co170")score=DR.r.filter(Boolean).length*10;else if(DRILL==="atc"){score=+$("drIn").value;if(score<21){$("drErr").textContent="At least 21 darts.";return}}else{const h=+$("drIn").value;if($("drIn").value===""||h>30){$("drErr").textContent="Enter 0 to 30.";return}score=h/30*100}
+      const {error}=await db.rpc("v2_log_training",{p_drill:DRILL,p_score:+score.toFixed(2),p_detail:DR.v?{visits:DR.v}:DR.r?{attempts:DR.r}:{}});
+      if(error){$("drErr").textContent=error.message;return}DRILL=null;DR={};await load();show("training")};
+    return}
+  out.innerHTML=`<div class="card"><h2>Training</h2><p class="note">Pick a drill. Your results are saved and graphed so you can see when you're improving or dipping.</p><div class="divs">${Object.entries(DRILLS).map(([k,d])=>{const l=TRAIN.filter(t=>t.drill===k);const last=l[l.length-1];return `<a href="#" data-drill="${k}">${d.n}<small>${last?"Last: "+(+last.score).toFixed(1)+" "+d.unit:"Not tried yet"}</small></a>`}).join("")}</div></div>
+   ${Object.entries(DRILLS).filter(([k])=>TRAIN.some(t=>t.drill===k)).map(([k,d])=>`<div class="card"><h3>${d.n} (${d.better} is better)</h3>${graph(TRAIN.filter(t=>t.drill===k).slice(-20).map(t=>({v:+t.score,l:new Date(t.at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})})),d.unit)}</div>`).join("")}`;
+  out.querySelectorAll("[data-drill]").forEach(a=>a.onclick=e=>{e.preventDefault();DRILL=a.dataset.drill;DR={};renderTraining()});
+}
+
+// ---------- PROGRESS ----------
+function renderProgress(){const p=STATE.profile,id=ME.id;const done=mine().filter(m=>m.status==="confirmed");
+  const plac=done.filter(m=>m.kind==="placement").length;const next=mine().filter(m=>m.status==="scheduled");
+  const w=done.filter(m=>myLegs(m,id)[0]>myLegs(m,id)[1]).length,dr=done.filter(m=>myLegs(m,id)[0]===myLegs(m,id)[1]).length;
+  const pts=done.slice(-20).map(m=>({v:+myStats(m,id).tda||0,l:new Date(m.confirmed_at||m.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})})).filter(x=>x.v>0);
+  $("progOut").innerHTML=`<div class="card"><h2>${flag(p.country)} ${esc(p.display_name)}</h2><p>${badges(p)}</p>
+     ${p.status==="placement"?`<p><b>Placement:</b> ${plac} of 3 matches played.${plac>=3?" A Chalker will place you in a division soon.":""}</p>`:`<p><b>Division:</b> ${esc((DIVS.find(d=>d.id===p.division_id)||{}).name||"Not set")}</p>`}
+     <div class="kv"><div><b>${done.length}</b><span>Played</span></div><div><b>${w}-${dr}-${done.length-w-dr}</b><span>W-D-L</span></div><div><b>${pts.length?(pts.reduce((a,b)=>a+b.v,0)/pts.length).toFixed(1):"–"}</b><span>Match avg</span></div><div><b>${TRAIN.length}</b><span>Training sessions</span></div></div></div>
+   <div class="card"><h2>Coming up</h2>${next.length?next.map(m=>`<div class="note">${KIND[m.kind]}${m.week?" week "+m.week:""} v ${nameLink(opp(m,id))} · play by ${fmtD(m.due_at)}</div>`).join(""):'<p class="note">Nothing scheduled. League fixtures are revealed every Monday.</p>'}<div class="row" style="margin-top:8px"><button class="btn primary" data-go="play">Go to Play</button></div></div>
+   <div class="card"><h2>Match average</h2>${graph(pts,"3-dart average per match")}</div>
+   <div class="card"><h2>Results</h2>${done.slice().reverse().map(m=>{const [a,b]=myLegs(m,id);return `<div class="note">${new Date(m.confirmed_at||m.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · ${KIND[m.kind]} · <span class="pill ${a>b?"ok":a<b?"bad":""}">${a>b?"W":a<b?"L":"D"}</span> <b>${a}-${b}</b> v ${nameLink(opp(m,id))} · avg ${(+myStats(m,id).tda||0).toFixed(2)}</div>`}).join("")||'<p class="note">No results yet.</p>'}</div>
+   <div class="card"><h2>Training</h2><p class="note">${TRAIN.length?TRAIN.length+" sessions logged.":"No training yet."}</p><button class="btn" data-go="training">Open training</button></div>`;
+  $("progOut").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+}
+
+// ---------- CHALKERS ----------
+async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_staff_overview");if(r.error){box.innerHTML=`<div class="card">${esc(r.error.message)}</div>`;return}const o=r.data,adm=o.is_admin;
+  const pl=await db.rpc("v2_staff_players");const players=pl.data||[];const divs=o.divisions||[];
+  const divOpts=sel=>divs.map(d=>`<option value="${d.id}" ${d.id===sel?"selected":""}>${esc(d.name)} (${d.players}/${d.max})</option>`).join("");
+  let settings={};if(adm){const s=await db.rpc("v2_admin_settings");settings=s.data||{}}
+  box.innerHTML=`<div class="card"><h2>Overview</h2><div class="kv"><div><b>${o.pending}</b><span>Waiting approval</span></div><div><b>${o.placement}</b><span>In placement</span></div><div><b>${o.active}</b><span>In divisions</span></div><div><b>${o.disputes}</b><span>Disputes</span></div><div><b>${o.awaiting}</b><span>Awaiting accept</span></div><div><b>${o.blocks_unreviewed}</b><span>Blocks to check</span></div><div><b>${o.reports_open}</b><span>Open reports</span></div></div>
+     <p class="note">You are ${adm?"an <b>admin</b> (all powers)":"a <b>Chalker</b>. Seasons, roles and settings are for admins."}</p></div>
+   <div class="card"><h2>Seasons</h2>${(o.seasons||[]).map(s=>`<div class="item"><b>${esc(s.name)}</b> · ${s.status} · starts ${new Date(s.start_date).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})} · ${s.weeks} weeks
+       ${adm&&s.status==="planned"?`<div class="row" style="margin-top:6px"><button class="btn primary" data-start="${s.id}">Make fixtures and start</button></div><p class="note">Do this once every division has its players. Fixtures are hidden until each Monday.</p>`:""}<p class="err"></p></div>`).join("")||'<p class="note">No seasons.</p>'}
+     ${adm?`<h3>New season</h3><div class="row"><label class="f">Name<input id="nsName" placeholder="Season 2"></label><label class="f">Start (a Monday)<input id="nsStart" type="date"></label><label class="f">Weeks<input id="nsWeeks" type="number" value="10" min="4" max="20"></label><button class="btn" id="nsGo">Create</button></div><p class="err" id="nsErr"></p>`:""}</div>
+   <div class="card"><h2>Divisions</h2><div class="divs">${divs.map(d=>`<a href="#" data-div="${d.id}">${esc(d.name)}<small>${d.players} of ${d.max} players</small></a>`).join("")}</div></div>
+   <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · ${p.played} of 3 placement matches · placement avg ${p.avg??"–"} · said ${p.claimed??"–"}
+       <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}</div>
+   <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
+   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${p.status==="active"||p.status==="placement"?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p></div>
+   ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">Make a webhook in your private Chalkers channel (Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL) and paste it here. Disputes are posted there, tagged with the division.</p>
+     ${["discord_chalkers","discord_results","discord_general"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_chalkers:"Private Chalkers channel",discord_results:"Results channel",discord_general:"General channel"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}<p class="err" id="whErr"></p></div>`:""}`;
+  const errOf=b=>b.closest(".item,.card").querySelector(".err");
+  box.querySelectorAll("[data-start]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm: make fixtures";return}const {data,error}=await db.rpc("v2_admin_start_season",{p_season:+b.dataset.start});errOf(b).innerHTML=error?esc(error.message):`<span class="okmsg">${data} fixtures made.</span>`;if(!error){await load();renderStaff()}});
+  const ns=$("nsGo");if(ns)ns.onclick=async()=>{const {error}=await db.rpc("v2_admin_create_season",{p_league:DIVS.find(d=>d.tier>0).league_id,p_name:$("nsName").value,p_start:$("nsStart").value||null,p_weeks:+$("nsWeeks").value});$("nsErr").innerHTML=error?esc(error.message):'<span class="okmsg">Season created.</span>';if(!error){await load();renderStaff()}};
+  box.querySelectorAll("[data-place]").forEach(b=>b.onclick=async()=>{const sel=box.querySelector(`[data-psel="${b.dataset.place}"]`);const {error}=await db.rpc("v2_staff_place",{p_user:b.dataset.place,p_division:+sel.value});errOf(b).innerHTML=error?esc(error.message):'<span class="okmsg">Placed.</span>';if(!error){await load();renderStaff()}});
+  box.querySelectorAll("[data-mv]").forEach(s=>s.onchange=async()=>{if(!s.value)return;const {error}=await db.rpc("v2_staff_place",{p_user:s.dataset.mv,p_division:+s.value});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Moved.</span>';if(!error)load()});
+  box.querySelectorAll("[data-role],[data-fno]").forEach(s=>s.onchange=async()=>{const id=s.dataset.role||s.dataset.fno;const role=box.querySelector(`[data-role="${id}"]`).value,fno=box.querySelector(`[data-fno="${id}"]`).value;
+    const {error}=await db.rpc("v2_admin_set_role",{p_user:id,p_role:role,p_founder_no:fno?+fno:null});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Saved.</span>';if(!error)load()});
+  box.querySelectorAll("[data-uph],[data-rep]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_staff_resolve",{p_match:+(b.dataset.uph||b.dataset.rep),p_uphold:!!b.dataset.uph});errOf(b).innerHTML=error?esc(error.message):'<span class="okmsg">Done.</span>';if(!error){await load();renderStaff()}});
+  box.querySelectorAll("[data-whs]").forEach(b=>b.onclick=async()=>{const k=b.dataset.whs;const {error}=await db.rpc("v2_admin_set_setting",{p_key:k,p_value:box.querySelector(`[data-wh="${k}"]`).value.trim()});$("whErr").innerHTML=error?esc(error.message):'<span class="okmsg">Saved. A test message was sent to that channel.</span>';if(!error)renderStaff()});
+}
+const _renderStaffOld=renderStaff;
+renderStaff=async function(){await renderStaffTop();await _renderStaffOld()};
+
+// profile: add stats + challenge button
+const _renderProfileOld=renderProfile;
+renderProfile=function(){_renderProfileOld();const p=PLAYERS.find(x=>x.id===PROF);if(!p)return;const box=$("profOut");
+  const done=MATCHES.filter(m=>m.status==="confirmed"&&(m.player_a===p.id||m.player_b===p.id));const w=done.filter(m=>myLegs(m,p.id)[0]>myLegs(m,p.id)[1]).length,dr=done.filter(m=>myLegs(m,p.id)[0]===myLegs(m,p.id)[1]).length;
+  const avs=done.map(m=>+myStats(m,p.id).tda||0).filter(Boolean);
+  const extra=document.createElement("div");extra.innerHTML=`<h3>Record</h3><div class="kv"><div><b>${done.length}</b><span>Played</span></div><div><b>${w}-${dr}-${done.length-w-dr}</b><span>W-D-L</span></div><div><b>${avs.length?(avs.reduce((a,b)=>a+b,0)/avs.length).toFixed(1):"–"}</b><span>Match avg</span></div></div>
+    ${ME&&isMemberData()&&ME.id!==p.id&&!p.challenge_opt_out?`<div class="row" style="margin-top:10px"><button class="btn primary" id="pChal">Challenge ${esc(p.display_name)}</button></div>`:""}`;
+  const note=box.querySelector("p.note");if(note)note.replaceWith(extra);else box.appendChild(extra);
+  const c=$("pChal");if(c)c.onclick=()=>{show("play");setTimeout(()=>{const s=$("chTo");if(s){s.value=p.id;s.scrollIntoView({behavior:"smooth"})}},50)};
+};
+
+// ===================== sessions 5-6: honours, medals, forfeits, season end, backup, rename =====================
+let HON=null;const MEDAL={platinum:"💠 Platinum",gold:"🥇 Gold",silver:"🥈 Silver",bronze:"🥉 Bronze"};
+const _badgesOld=badges;
+badges=function(p){let b=_badgesOld(p);const md=HON&&HON.held&&HON.held[p.id];if(md)b+=` <span class="pill gold" title="Won ${esc(HON.held_season||"last season")}, held this season">${MEDAL[md]}</span>`;return b};
+async function loadHonours(){const r=await db.rpc("v2_honours",{p_season:null});HON=r.error?null:r.data}
+const _loadOld=load;
+load=async function(){await loadHonours();await _loadOld()};
+const UNITS={"Highest checkout":"","Most 180s":"","Best checkout rate":"%","Most legs won":"","Most matches won":"","Most improved":" avg"};
+const ICON={"Highest checkout":"🎯","Most 180s":"💯","Best checkout rate":"✅","Most legs won":"🦵","Most matches won":"🏆","Most improved":"📈"};
+renderHonour=function(){const box=$("honour");const h=HON&&HON.honours;
+  $("honourNote").textContent=HON&&HON.season?`${HON.season.name}${HON.season.status==="live"?" so far":" (final)"}. Medals: platinum for topping 3 lists, gold 2, silver 1, bronze for making the top 3. Held through the next season.`:"Season 1 hasn't started yet. The leaders appear here as results come in.";
+  if(!h){box.innerHTML=Object.keys(ICON).concat(["Wooden spoon"]).map(n=>`<div><b>${ICON[n]||"🥄"} ${n}</b><span>To be decided</span></div>`).join("");return}
+  box.innerHTML=Object.keys(ICON).map(n=>{const l=(h.lists&&h.lists[n])||[];return `<div><b>${ICON[n]} ${n}</b>${l.length?l.map((e,i)=>`<span style="display:block">${i+1}. ${nameLink(e.id)} · ${e.v}${UNITS[n]}</span>`).join(""):"<span>To be decided</span>"}</div>`}).join("")+
+   `<div><b>🥄 Wooden spoon</b>${(h.spoon||[]).length?h.spoon.map(s=>`<span style="display:block">${esc(s.division)}: ${nameLink(s.id)}</span>`).join(""):"<span>To be decided</span>"}</div>`};
+
+// tables: forfeits count (win 3 points, 5-0)
+leagueTable=function(divId,season){const ps=PLAYERS.filter(p=>p.division_id===divId&&p.status==="active");const T={};ps.forEach(p=>T[p.id]={id:p.id,P:0,W:0,D:0,L:0,LF:0,LA:0,Pts:0});
+  MATCHES.filter(m=>m.kind==="league"&&["confirmed","forfeit"].includes(m.status)&&m.division_id===divId&&(!season||m.season_id===season.id)).forEach(m=>{
+    [[m.player_a,m.legs_a,m.legs_b],[m.player_b,m.legs_b,m.legs_a]].forEach(([id,f,g])=>{const t=T[id]||(T[id]={id,P:0,W:0,D:0,L:0,LF:0,LA:0,Pts:0});t.P++;t.LF+=f;t.LA+=g;if(f>g){t.W++;t.Pts+=3}else if(f===g){t.D++;t.Pts+=1}else t.L++})});
+  return Object.values(T).sort((a,b)=>b.Pts-a.Pts||(b.LF-b.LA)-(a.LF-a.LA)||b.LF-a.LF||PN(a.id).localeCompare(PN(b.id)))};
+
+// play: "I've messaged my opponent" + deadline wording
+const _renderPlayOld=renderPlay;
+renderPlay=function(){_renderPlayOld();if(!ME)return;
+  document.querySelectorAll("#playOut [data-appform]").forEach(f=>{const id=+f.dataset.appform;const m=MATCHES.find(x=>x.id===id);if(!m||!["league","placement"].includes(m.kind))return;
+    const mineC=m.player_a===ME.id?m.contact_a:m.contact_b,theirC=m.player_a===ME.id?m.contact_b:m.contact_a;
+    const d=document.createElement("div");d.className="note";d.style.marginTop="8px";
+    d.innerHTML=mineC?`✅ You told the site you messaged your opponent on ${fmtD(mineC)}.${theirC?" They've replied too.":" If they don't reply within 72 hours, you're awarded the match."}`:
+      `Message your opponent on Discord to arrange it, then tap: <button class="btn" data-contact="${id}" style="padding:6px 10px;font-size:12px">I've messaged my opponent</button><br>If neither of you arranges it by the deadline, the match is void.`;
+    f.before(d)});
+  document.querySelectorAll("#playOut [data-contact]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_contact",{p_match:+b.dataset.contact});if(error)alert(error.message);else load()})};
+
+// profile settings: rename
+const _renderMeOld=renderMe;
+renderMe=function(){_renderMeOld();const box=$("mine");if(!box||box.hidden||!STATE||!isMemberData()||box.querySelector("#mName"))return;
+  const d=document.createElement("div");d.innerHTML=`<h3>Display name</h3><div class="row"><label class="f">Name other players see<input id="mName" maxlength="30" value="${esc(STATE.profile.display_name)}"></label><button class="btn" id="mNameGo">Change name</button></div><p class="note">You can change it once every 30 days.</p><p class="err" id="mNameErr"></p>`;
+  box.appendChild(d);$("mNameGo").onclick=async()=>{const {error}=await db.rpc("v2_rename",{p_name:$("mName").value});$("mNameErr").innerHTML=error?esc(error.message):'<span class="okmsg">Name changed.</span>';if(!error)load()}};
+
+// chalkers: deadlines + extend, end season, backup
+const _renderStaffTopOld=renderStaffTop;
+renderStaffTop=async function(){await _renderStaffTopOld();const box=$("stTop");const o=await db.rpc("v2_staff_overview");const adm=o.data&&o.data.is_admin;
+  const om=await db.rpc("v2_staff_open_matches");const list=om.data||[];
+  const sec=document.createElement("div");sec.className="card";
+  sec.innerHTML=`<h2>Matches to be played</h2><p class="note">72-hour rule: if one player taps "I've messaged my opponent" and the other doesn't respond within 72 hours, the match is awarded 5-0. If nobody arranges it by the deadline, it's void. Extending a deadline switches the 72-hour rule off for that match.</p>
+   ${list.map(m=>`<div class="item"><b>${esc(m.label)}</b>${m.week?" · week "+m.week:""} · due ${fmtD(m.due)}${m.extended?' <span class="pill">Extended</span>':""}<div class="note">Messaged: ${m.contact_a?"player A ✓":"player A ✗"} · ${m.contact_b?"player B ✓":"player B ✗"}</div>
+     <div class="row" style="margin-top:6px"><button class="btn" data-ext="${m.id}" data-days="3">+3 days</button><button class="btn" data-ext="${m.id}" data-days="7">+7 days</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nothing waiting to be played.</p>'}`;
+  box.appendChild(sec);
+  sec.querySelectorAll("[data-ext]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_staff_extend",{p_match:+b.dataset.ext,p_days:+b.dataset.days});b.closest(".item").querySelector(".err").innerHTML=error?esc(error.message):'<span class="okmsg">Extended.</span>';if(!error)renderStaff()});
+  if(adm){const live=(o.data.seasons||[]).find(s=>s.status==="live");
+    const ad=document.createElement("div");ad.className="card";
+    ad.innerHTML=`<h2>Admin tools</h2>${live?`<h3>End ${esc(live.name)}</h3><p class="note">Locks the final tables, awards medals, moves the top player in each division up and the bottom player down, and posts the honours to Discord. Every result must be accepted first.</p><div class="row"><button class="btn danger" id="endS">End ${esc(live.name)}</button></div><p class="err" id="endErr"></p>`:'<p class="note">No live season to end.</p>'}
+      <h3>Backup</h3><p class="note">Downloads everything (players, matches, seasons, training, blocks, reports and the audit log) as one file. Do it weekly and keep it somewhere private, like your backup Gmail or Drive.</p><div class="row"><button class="btn primary" id="bkGo">Download backup</button></div><p class="err" id="bkErr"></p>`;
+    box.appendChild(ad);
+    const es=$("endS");if(es)es.onclick=async()=>{if(es.dataset.armed!=="1"){es.dataset.armed="1";es.textContent="Confirm: end season now";return}const {data,error}=await db.rpc("v2_admin_end_season",{p_season:live.id});$("endErr").innerHTML=error?esc(error.message):`<span class="okmsg">Season ended. ${data.moves} players moved division.</span>`;if(!error){await load();renderStaff()}};
+    $("bkGo").onclick=async()=>{const {data,error}=await db.rpc("v2_admin_backup");if(error){$("bkErr").textContent=error.message;return}
+      const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:"application/json"}));a.download=`11darts-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();$("bkErr").innerHTML='<span class="okmsg">Backup downloaded.</span>'};}
+};
+
 load();
 </script>
 </body>
