@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-imA3LVrxgAtgMfJEmXNVCx88+nQhq41usyrb8GmwSTk='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-rjBNxhnM9hY+fOn6WBJ0kVKALGBrjnXYsWVWUQb+U7k='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -318,7 +318,9 @@ function renderProfile(){const p=PLAYERS.find(x=>x.id===PROF);const box=$("profO
 }
 
 // ---------- staff ----------
-async function signed(path){const {data}=await db.storage.from("setup").createSignedUrl(path,600);return data&&data.signedUrl}
+async function signed(path){try{const d=await db.storage.from("setup").download(path);if(d.data&&d.data.size)return URL.createObjectURL(d.data.type?d.data:new Blob([d.data],{type:"image/jpeg"}))}catch(_){}
+  const {data}=await db.storage.from("setup").createSignedUrl(path,600);return data&&data.signedUrl}
+function photoFail(img){img.onerror=()=>img.replaceWith(Object.assign(document.createElement("p"),{className:"note",textContent:"This browser blocked the photo. Try Chrome, or turn off privacy add-ons for this site."}))}
 async function renderStaff(){
   const pend=await db.rpc("v2_staff_pending");const box=$("stPending");
   if(pend.error){box.textContent=pend.error.message;return}
@@ -327,7 +329,7 @@ async function renderStaff(){
     <p class="note">Code to look for: <b>${esc(r.verify_code)}</b></p><img class="photo" data-path="${esc(r.setup_photo||"")}" alt="Board photo">
     <label class="f" style="margin-top:6px">Note (optional)<input class="stNote"></label>
     <div class="row" style="margin-top:8px"><button class="btn primary" data-ok="1">Approve</button><button class="btn" data-ok="0">Send back</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody waiting.</p>';
-  for(const img of box.querySelectorAll("img[data-path]")){if(img.dataset.path){const u=await signed(img.dataset.path);if(u)img.src=u}else img.replaceWith(Object.assign(document.createElement("p"),{className:"note",textContent:"No photo."}))}
+  for(const img of box.querySelectorAll("img[data-path]")){if(img.dataset.path){photoFail(img);const u=await signed(img.dataset.path);if(u)img.src=u}else img.replaceWith(Object.assign(document.createElement("p"),{className:"note",textContent:"No photo."}))}
   box.querySelectorAll("[data-ok]").forEach(b=>b.onclick=async()=>{const it=b.closest(".item");const ok=b.dataset.ok==="1";
     if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent=ok?"Confirm approve":"Confirm send back";return}
     const {error}=await db.rpc("v2_staff_decide",{p_id:it.dataset.id,p_approve:ok,p_note:it.querySelector(".stNote").value});
@@ -336,7 +338,7 @@ async function renderStaff(){
   const bl=s.data.blocks||[],rp=s.data.reports||[];
   sb.innerHTML=`<h3>Blocks (${bl.length})</h3><div class="list">${bl.map(b=>`<div class="item">${b.times_blocked>=3?'<span class="pill bad">🚩 Blocked '+b.times_blocked+' times</span> ':""}<b>${esc(b.blocker)}</b> blocked <b>${esc(b.blocked)}</b> <span class="note">${new Date(b.at).toLocaleString("en-GB")}</span><p>${esc(b.reason)}</p>${(b.evidence||[]).map(p=>`<img class="photo" data-ev="${esc(p)}" alt="Evidence">`).join("")}<div class="row"><button class="btn danger" data-ban="${b.blocked_id}">Ban ${esc(b.blocked)}</button></div><p class="err"></p></div>`).join("")||'<p class="note">None.</p>'}</div>
    <h3>Reports (${rp.length})</h3><div class="list">${rp.map(r=>`<div class="item"><b>${esc(r.reporter||"?")}</b> about <b>${esc(r.about||"general")}</b> <span class="note">${new Date(r.at).toLocaleString("en-GB")}</span><p>${esc(r.details)}</p>${(r.evidence||[]).map(p=>`<img class="photo" data-ev="${esc(p)}" alt="Evidence">`).join("")}</div>`).join("")||'<p class="note">None.</p>'}</div>`;
-  for(const img of sb.querySelectorAll("img[data-ev]")){const u=await signed(img.dataset.ev);if(u)img.src=u}
+  for(const img of sb.querySelectorAll("img[data-ev]")){photoFail(img);const u=await signed(img.dataset.ev);if(u)img.src=u}
   sb.querySelectorAll("[data-ban]").forEach(b=>b.onclick=async()=>{const it=b.closest(".item");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm: permanent ban";return}
     const {data,error}=await db.rpc("v2_staff_ban",{p_user:b.dataset.ban,p_reason:it.querySelector("p:not(.err)")?.textContent||"See block"});
     it.querySelector(".err").innerHTML=error?esc(error.message):data==="requested"?'<span class="okmsg">Ban requested. A second Chalker or admin must confirm it.</span>':'<span class="okmsg">Banned.</span>';});
@@ -639,13 +641,13 @@ const VQ={low:{w:480,h:360,br:350000,fps:20,n:"Low"},med:{w:640,h:480,br:700000,
 let V={match:null,side:null,ch:null,pc:null,ice:null,raw:null,canvas:null,out:null,raf:0,zoom:1,q:"med",live:false,setup:false,mic:false,muted:false,remote:null,pending:[],status:"",turn:false};
 const isWide=()=>window.matchMedia("(min-width: 768px)").matches;
 function vidEl(){let b=$("vidBox");if(!b){b=document.createElement("div");b.id="vidBox";b.className="card";b.hidden=true;
-  b.innerHTML=`<div class="vstage"><video id="vRemote" playsinline autoplay></video><video id="vSelf" playsinline autoplay muted></video><div class="vlabel" id="vLabel"></div></div><div class="row" style="margin-top:8px;justify-content:space-between"><span class="note" id="vStatus"></span><span class="row"><button class="btn" id="vMute" style="padding:6px 10px;font-size:12px">Mute</button><button class="btn" id="vHd" style="padding:6px 10px;font-size:12px">HD</button><button class="btn" id="vStop" style="padding:6px 10px;font-size:12px">Camera off</button></span></div>`;
-  $("v-scorer").insertBefore(b,$("scOut"));$("vMute").onclick=toggleMute;$("vHd").onclick=()=>setQuality(V.q==="hd"?"med":"hd");$("vStop").onclick=()=>stopCamera(true)}return b}
+  b.innerHTML=`<div class="vstage"><video id="vRemote" playsinline autoplay></video><video id="vSelf" playsinline autoplay muted></video><div class="vlabel" id="vLabel"></div></div><div class="row" style="margin-top:8px;justify-content:space-between"><span class="note" id="vStatus"></span><span class="row"><button class="btn" id="vMute" style="padding:6px 10px;font-size:12px">Mute</button><button class="btn" id="vHd" style="padding:6px 10px;font-size:12px">HD</button><button class="btn" id="vFlip" style="padding:6px 10px;font-size:12px">🔄</button><button class="btn" id="vStop" style="padding:6px 10px;font-size:12px">Camera off</button></span></div>`;
+  $("v-scorer").insertBefore(b,$("scOut"));$("vMute").onclick=toggleMute;$("vHd").onclick=()=>setQuality(V.q==="hd"?"med":"hd");$("vStop").onclick=()=>stopCamera(true);$("vFlip").onclick=switchCam}return b}
 
 // ---------- camera set-up: permission, zoom, confirm ----------
 async function cameraButton(){if(V.live||V.setup){V.setup=true;renderCamSetup();return}
   V.setup=true;renderCamSetup();V.status="Asking for permission…";renderCamSetup();
-  try{V.raw=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}},audio:true});V.mic=true}
+  try{const vc=f=>({facingMode:f,width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}});try{V.raw=await navigator.mediaDevices.getUserMedia({video:vc({exact:"environment"}),audio:true})}catch(_){V.raw=await navigator.mediaDevices.getUserMedia({video:vc({ideal:"environment"}),audio:true})}V.mic=true}
   catch(e){try{V.raw=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});V.mic=false}catch(e2){V.setup=false;V.status="";alert("Camera permission was refused or no camera was found. You can still score without video.");renderScorer();return}}
   startCanvas();V.status="";renderCamSetup()}
 function startCanvas(){const q=VQ[V.q];V.canvas=V.canvas||document.createElement("canvas");V.canvas.width=q.w;V.canvas.height=q.h;const ctx=V.canvas.getContext("2d");
@@ -660,10 +662,10 @@ function renderCamSetup(){let o=$("camSetup");if(!o){o=document.createElement("d
    <label class="f" style="margin-top:8px">Zoom <input id="camZoom" type="range" min="1" max="3" step="0.05" value="${V.zoom}"></label>
    <div class="row" style="margin-top:6px"><label class="f">Quality<select id="camQ">${Object.entries(VQ).map(([k,q])=>`<option value="${k}" ${k===V.q?"selected":""}>${q.n}</option>`).join("")}</select></label></div>
    <p class="note">${V.mic?"🎤 Microphone allowed. You can mute at any time.":"🎤 Microphone not allowed: video only."} ${V.status}</p>
-   <div class="row"><button class="btn primary" id="camGo" ${V.raw?"":"disabled"}>${V.live?"Done":"Confirm and go live"}</button><button class="btn" id="camCancel">Cancel</button></div>`;
+   <div class="row"><button class="btn primary" id="camGo" ${V.raw?"":"disabled"}>${V.live?"Done":"Confirm and go live"}</button><button class="btn" id="camFlip">🔄 Switch camera</button><button class="btn" id="camCancel">Cancel</button></div>`;
   if(V.canvas){V.canvas.className="prev";$("camPrev").appendChild(V.canvas)}
   $("camZoom").oninput=e=>{V.zoom=+e.target.value};$("camQ").onchange=e=>setQuality(e.target.value);
-  $("camGo").onclick=()=>{V.setup=false;goLive();renderCamSetup();renderScorer()};$("camCancel").onclick=()=>{V.setup=false;if(!V.live)stopCamera(false);renderCamSetup();renderScorer()}}
+  $("camGo").onclick=()=>{V.setup=false;goLive();renderCamSetup();renderScorer()};$("camFlip").onclick=switchCam;$("camCancel").onclick=()=>{V.setup=false;if(!V.live)stopCamera(false);renderCamSetup();renderScorer()}}
 async function setQuality(k){V.q=k;const q=VQ[k];if(V.canvas){V.canvas.width=q.w;V.canvas.height=q.h}
   const t=V.raw&&V.raw.getVideoTracks()[0];if(t)try{await t.applyConstraints({width:{ideal:q.w},height:{ideal:q.h}})}catch(_){}
   applyBitrate();const b=$("vHd");if(b)b.textContent=k==="hd"?"Normal":"HD"}
@@ -672,31 +674,53 @@ function stopCamera(rerender){cancelAnimationFrame(V.raf);if(V.raw)V.raw.getTrac
 function toggleMute(){V.muted=!V.muted;if(V.raw)V.raw.getAudioTracks().forEach(t=>t.enabled=!V.muted);$("vMute").textContent=V.muted?"Unmute":"Mute"}
 
 // ---------- connection: Supabase Realtime for signalling, WebRTC for media ----------
-async function videoJoin(m,side){if(V.match===m.id)return;videoLeave();V.match=m.id;V.side=side;
+// Side A always makes the offer. Every message carries this device's session id (sid) and the offer id (oid),
+// so stale or duplicate messages from an earlier attempt are ignored instead of crossing wires.
+let SIGQ=Promise.resolve();
+async function videoJoin(m,side){if(V.match===m.id)return;videoLeave();V.match=m.id;V.side=side;V.sid=Math.random().toString(36).slice(2,10);V.peer=null;V.oid=0;V.offerAt=0;
   try{const r=await db.functions.invoke("turn",{body:{}});V.ice=(r.data&&r.data.iceServers)||[{urls:"stun:stun.l.google.com:19302"}]}catch(_){V.ice=[{urls:"stun:stun.l.google.com:19302"}]}
+  if(V.match!==m.id)return;
   V.ch=db.channel("match-"+m.id,{config:{broadcast:{self:false}}});
-  V.ch.on("broadcast",{event:"sig"},({payload})=>onSig(payload)).on("broadcast",{event:"state"},()=>pollLive());
-  V.ch.subscribe(st=>{if(st==="SUBSCRIBED")send({t:"hello"})})}
-function videoLeave(){if(V.ch){try{db.removeChannel(V.ch)}catch(_){}}V.ch=null;if(V.pc){try{V.pc.close()}catch(_){}}V.pc=null;V.remote=null;V.match=null;stopCamera(false);const b=$("vidBox");if(b)b.hidden=true}
-function send(p){if(V.ch)V.ch.send({type:"broadcast",event:"sig",payload:{...p,from:V.side}})}
+  V.ch.on("broadcast",{event:"sig"},({payload})=>{SIGQ=SIGQ.then(()=>onSig(payload)).catch(()=>{})}).on("broadcast",{event:"state"},()=>pollLive());
+  V.ch.subscribe(st=>{if(st==="SUBSCRIBED")send({t:"hello"})});
+  clearInterval(V.dog);V.dog=setInterval(watchdog,6000)}
+function connected(){return V.pc&&V.pc.connectionState==="connected"}
+function watchdog(){if(!V.ch||connected())return;
+  if(V.side==="B")send({t:"hello"});
+  else if(V.peer&&Date.now()-V.offerAt>10000)SIGQ=SIGQ.then(makeOffer).catch(()=>{})}
+function videoLeave(){clearInterval(V.dog);if(V.ch){try{db.removeChannel(V.ch)}catch(_){}}V.ch=null;if(V.pc){try{V.pc.close()}catch(_){}}V.pc=null;V.remote=null;V.match=null;V.peer=null;stopCamera(false);const b=$("vidBox");if(b)b.hidden=true}
+function send(p){if(V.ch)V.ch.send({type:"broadcast",event:"sig",payload:{...p,from:V.side,sid:V.sid,oid:p.oid??V.oid}})}
 function newPC(){if(V.pc){try{V.pc.close()}catch(_){}}const pc=new RTCPeerConnection({iceServers:V.ice});V.pc=pc;V.pending=[];V.remote=new MediaStream();
-  pc.ontrack=e=>{V.remote.addTrack(e.track);const rv=$("vRemote");if(rv){rv.srcObject=V.remote;rv.play().catch(()=>{})}vidUpdate()};
-  pc.onicecandidate=e=>{if(e.candidate)send({t:"ice",c:e.candidate})};
-  pc.onconnectionstatechange=()=>{const s=pc.connectionState;V.status=s==="connected"?"Video connected":s==="failed"?"Video couldn't connect. Tap the camera button to retry.":s==="connecting"?"Connecting video…":"";vidUpdate()};
+  pc.ontrack=e=>{if(V.pc!==pc)return;V.remote.addTrack(e.track);const rv=$("vRemote");if(rv){rv.srcObject=V.remote;rv.play().catch(()=>{})}vidUpdate()};
+  pc.onicecandidate=e=>{if(e.candidate&&V.pc===pc)send({t:"ice",c:e.candidate.toJSON?e.candidate.toJSON():e.candidate})};
+  pc.onconnectionstatechange=()=>{if(V.pc!==pc)return;const s=pc.connectionState;V.status=s==="connected"?"Video connected":s==="failed"?"Video dropped. Reconnecting…":s==="connecting"||s==="new"?"Connecting video…":s==="disconnected"?"Connection wobbling…":"";vidUpdate()};
   return pc}
 async function attachLocal(){if(!V.pc)return;const tr=V.pc.getTransceivers();const vT=V.out&&V.out.getVideoTracks()[0],aT=V.raw&&V.mic?V.raw.getAudioTracks()[0]:null;
-  for(const t of tr){const kind=t.receiver.track&&t.receiver.track.kind;if(kind==="video")await t.sender.replaceTrack(V.live?vT:null);if(kind==="audio")await t.sender.replaceTrack(V.live?aT:null)}applyBitrate()}
+  for(const t of tr){const kind=t.receiver.track&&t.receiver.track.kind;try{if(kind==="video")await t.sender.replaceTrack(V.live?vT:null);if(kind==="audio")await t.sender.replaceTrack(V.live?aT:null)}catch(_){}}applyBitrate()}
 async function applyBitrate(){if(!V.pc)return;for(const s of V.pc.getSenders()){if(!s.track||s.track.kind!=="video")continue;try{const p=s.getParameters();p.encodings=p.encodings&&p.encodings.length?p.encodings:[{}];p.encodings[0].maxBitrate=VQ[V.q].br;await s.setParameters(p)}catch(_){}}}
-async function makeOffer(){const pc=newPC();pc.addTransceiver("video",{direction:"sendrecv"});pc.addTransceiver("audio",{direction:"sendrecv"});await attachLocal();
-  const o=await pc.createOffer();await pc.setLocalDescription(o);send({t:"offer",sdp:pc.localDescription})}
-async function onSig(p){if(p.from===V.side)return;
-  if(p.t==="hello"){if(V.side==="A")await makeOffer();else send({t:"hello"});return}
-  if(p.t==="offer"){const pc=newPC();await pc.setRemoteDescription(p.sdp);pc.getTransceivers().forEach(t=>t.direction="sendrecv");await attachLocal();
-    const a=await pc.createAnswer();await pc.setLocalDescription(a);send({t:"answer",sdp:pc.localDescription});for(const c of V.pending)try{await pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
-  if(p.t==="answer"&&V.pc){await V.pc.setRemoteDescription(p.sdp);for(const c of V.pending)try{await V.pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
-  if(p.t==="ice"){if(V.pc&&V.pc.remoteDescription)try{await V.pc.addIceCandidate(p.c)}catch(_){}else V.pending.push(p.c)}}
-async function goLive(){V.live=true;const sv=$("vSelf");if(sv){sv.srcObject=V.out;sv.play().catch(()=>{})}if(V.pc)await attachLocal();else if(V.side==="A")await makeOffer();else send({t:"hello"});vidUpdate()}
+async function makeOffer(){if(V.side!=="A"||!V.ch)return;V.oid=Date.now();V.offerAt=Date.now();const pc=newPC();pc.addTransceiver("video",{direction:"sendrecv"});pc.addTransceiver("audio",{direction:"sendrecv"});await attachLocal();
+  const o=await pc.createOffer();if(V.pc!==pc)return;await pc.setLocalDescription(o);send({t:"offer",sdp:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}})}
+async function onSig(p){if(!p||p.from===V.side||p.sid===V.sid)return;
+  if(p.t==="hello"){
+    if(V.side==="A"){const busy=V.peer===p.sid&&V.pc&&(connected()||Date.now()-V.offerAt<8000);if(busy)return;V.peer=p.sid;await makeOffer()}
+    else if(!(V.peer===p.sid&&connected()))send({t:"hello"});
+    return}
+  if(p.t==="offer"&&V.side==="B"){V.peer=p.sid;V.oid=p.oid;const pc=newPC();await pc.setRemoteDescription(p.sdp);pc.getTransceivers().forEach(t=>{try{t.direction="sendrecv"}catch(_){}});await attachLocal();
+    const a=await pc.createAnswer();if(V.pc!==pc)return;await pc.setLocalDescription(a);send({t:"answer",sdp:{type:pc.localDescription.type,sdp:pc.localDescription.sdp}});
+    for(const c of V.pending)try{await pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
+  if(p.t==="answer"&&V.side==="A"){if(!V.pc||p.oid!==V.oid||V.pc.signalingState!=="have-local-offer")return;await V.pc.setRemoteDescription(p.sdp);
+    for(const c of V.pending)try{await V.pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
+  if(p.t==="ice"){if(p.oid!==V.oid)return;if(V.pc&&V.pc.remoteDescription)try{await V.pc.addIceCandidate(p.c)}catch(_){}else V.pending.push(p.c)}}
+async function goLive(){V.live=true;const sv=$("vSelf");if(sv){sv.srcObject=V.out;sv.play().catch(()=>{})}if(V.pc)await attachLocal();else if(V.side==="B")send({t:"hello"});else if(V.peer)SIGQ=SIGQ.then(makeOffer).catch(()=>{});vidUpdate()}
 function nudge(){if(V.ch)V.ch.send({type:"broadcast",event:"state",payload:{}})}
+// front/back camera
+async function switchCam(){if(!V.raw)return;try{const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+  const cur=V.raw.getVideoTracks()[0],set=cur?cur.getSettings():{};let c;
+  if(devs.length>1&&devs.every(d=>d.deviceId)){const i=devs.findIndex(d=>d.deviceId===set.deviceId);c={deviceId:{exact:devs[(i+1)%devs.length].deviceId}}}
+  else c={facingMode:{exact:set.facingMode==="user"?"environment":"user"}};
+  if(cur)cur.stop();const s=await navigator.mediaDevices.getUserMedia({video:{...c,width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}}});const nt=s.getVideoTracks()[0];
+  if(cur)V.raw.removeTrack(cur);V.raw.addTrack(nt);V.rawVid.srcObject=new MediaStream([nt]);V.rawVid.play().catch(()=>{})}
+  catch(e){alert("Couldn't switch camera on this phone.")}}
 
 // ---------- who's on screen ----------
 function vidUpdate(){const box=vidEl();const on=SC&&SC.mode==="online"&&(V.live||(V.remote&&V.remote.getTracks().length));box.hidden=!on;if(!on)return;
@@ -705,7 +729,7 @@ function vidUpdate(){const box=vidEl();const on=SC&&SC.mode==="online"&&(V.live|
   if(rv&&V.remote&&rv.srcObject!==V.remote){rv.srcObject=V.remote;rv.play().catch(()=>{})}
   const showSelf=myTurn&&V.live;rv.hidden=showSelf;sv.hidden=!showSelf;
   $("vLabel").textContent=showSelf?"You (your opponent sees this)":(V.remote&&V.remote.getVideoTracks().length?"Your opponent":"Waiting for your opponent's camera…");
-  $("vStatus").textContent=V.status;$("vMute").hidden=!V.mic;$("vHd").textContent=V.q==="hd"?"Normal":"HD";$("vStop").hidden=!V.live}
+  $("vStatus").textContent=V.status;$("vMute").hidden=!V.mic;$("vHd").textContent=V.q==="hd"?"Normal":"HD";$("vStop").hidden=!V.live;$("vFlip").hidden=!V.live}
 
 // ---------- master caller (the phone's own voice) ----------
 let CALLER=true;try{CALLER=localStorage.getItem("11d-caller")!=="0"}catch(_){}
