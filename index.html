@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-rjBNxhnM9hY+fOn6WBJ0kVKALGBrjnXYsWVWUQb+U7k='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-LtbLt1Qk1WC2OQasGvWQbQ+olKdz5JJuh/Fr5fTCHr4='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -77,6 +77,7 @@ tr.up td{background:var(--ok-soft)}tr.down td{background:var(--bad-soft)}.tw{ove
 .typed{font:700 34px var(--display);text-align:center;min-height:42px}
 .vis{font-size:13px;color:var(--muted);max-height:120px;overflow:auto}
 svg.graph{width:100%;height:auto;display:block}
+body.scwide main{max-width:1320px}.ttpop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:50;padding:16px}.ttpop[hidden]{display:none}.ttpop .card{max-width:340px;text-align:center}#ttClock.late{background:#C0392B;color:#fff;border-color:#C0392B}#vidBox,#scOut{scroll-margin-top:118px}#v-scorer.lay3{display:grid;grid-template-columns:2fr 1.1fr;gap:14px;align-items:start}#v-scorer.lay3>*{grid-column:2}#v-scorer.lay3 #scOut{grid-column:1;grid-row:1/span 4}#v-scorer.lay3.novid{grid-template-columns:1fr}#v-scorer.lay3.novid>*{grid-column:1}.sc3{display:grid;grid-template-columns:1fr 1.15fr;gap:8px 20px;align-items:start}.sc3 .schead{grid-column:1/-1}.sc3 .score2{grid-template-columns:1fr}.sc3 .kbhelp{grid-column:1/-1;text-align:center}.lastsc{margin-top:2px}#v-scorer.oppturn .vstage{aspect-ratio:3/4}
 .vstage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
 .vstage video,.vstage canvas{width:100%;height:100%;object-fit:cover;display:block}
 .vlabel{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:3px 8px;border-radius:99px}
@@ -347,7 +348,29 @@ async function renderStaff(){
 const PN=id=>{const p=PLAYERS.find(x=>x.id===id);return p?p.display_name:"Player"};
 const PF=id=>{const p=PLAYERS.find(x=>x.id===id);return p?flag(p.country):""};
 const nameLink=id=>`<a class="pn" href="#" data-prof="${id}" style="color:inherit">${PF(id)} ${esc(PN(id))}</a>`;
-const KIND={league:"League",placement:"Placement",challenge:"Challenge",fun:"Fun"};
+function manageUser(id,players){const p=players.find(x=>x.id===id)||{};const box=$("mngBox");if(!box)return;const removed=p.status==="suspended"&&/Removed player|Erased player/.test(p.display_name);
+  box.innerHTML=`<div class="item" style="margin-top:10px"><h3>Manage ${esc(p.display_name)}</h3>
+   <div class="row" style="flex-wrap:wrap;gap:8px">
+    ${removed?`<button class="btn" data-ma="restore">Restore player</button>`:`<button class="btn" data-ma="code">New board code</button><button class="btn" data-ma="email">Send sign-in email</button><button class="btn" data-ma="reset">Reset profile</button><button class="btn danger" data-ma="remove">Remove player</button>`}
+    <button class="btn danger" data-ma="erase">Erase all data</button></div>
+   <label class="f" style="margin-top:8px">Reason (needed to remove)<input id="mngWhy" maxlength="300"></label>
+   <p class="note"><b>New board code</b>: a fresh 11D code for their setup photo. <b>Send sign-in email</b>: emails them a new sign-in code. <b>Reset profile</b>: name, photo and stats wiped; they join again and a Chalker re-checks them. <b>Remove</b>: can't play, shows as "Removed player", can be restored. <b>Erase</b>: only for a data-deletion request; personal details, photos and login are wiped for good and results show "Erased player".</p>
+   <p class="err" id="mngErr"></p></div>`;
+  box.querySelectorAll("[data-ma]").forEach(b=>b.onclick=async()=>{const a=b.dataset.ma;const e=$("mngErr");
+    if(["reset","remove","erase"].includes(a)&&b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent=a==="erase"?"Tap again: erase for good":"Tap again to confirm";return}
+    let r;if(a==="code")r=await db.rpc("v2_admin_new_code",{p_user:id});
+    else if(a==="reset")r=await db.rpc("v2_admin_reset",{p_user:id});
+    else if(a==="restore")r=await db.rpc("v2_admin_restore",{p_user:id});
+    else if(a==="remove"){if(($("mngWhy").value||"").trim().length<5){e.textContent="Give a reason first.";b.dataset.armed="";b.textContent="Remove player";return}r=await db.rpc("v2_admin_remove",{p_user:id,p_reason:$("mngWhy").value})}
+    else{const f=await db.functions.invoke("admin-user",{body:{action:a==="erase"?"erase":"signin_email",user:id}});let msg=f.error?((f.data&&f.data.error)||(f.error.context&&(await f.error.context.json().catch(()=>({}))).error)||f.error.message):null;r={error:msg?{message:msg}:null,data:f.data}}
+    if(r.error){e.textContent=r.error.message;return}
+    e.innerHTML=`<span class="okmsg">${a==="code"?"New code: <b>"+esc(r.data)+"</b>. Send it to them privately.":a==="reset"?"Reset. Their new board code is <b>"+esc(r.data)+"</b>.":a==="email"?"Sign-in email sent to "+esc(r.data.sent_to)+".":a==="erase"?"Erased. "+r.data.photos+" photo(s) removed.":"Done."}</span>`;
+    if(["restore","remove","erase"].includes(a)){await load();renderStaff()}})}
+function cancelBox(m){const a=m.player_a===ME.id,mine=a?m.cancel_a:m.cancel_b,theirs=a?m.cancel_b:m.cancel_a;
+  if(mine)return `<div class="note" style="margin-top:6px">You asked to cancel. Waiting for your opponent to agree. <button class="btn" data-cxl="${m.id}" data-w="1" style="padding:4px 8px;font-size:12px">Withdraw</button></div>`;
+  if(theirs)return `<div class="note" style="margin-top:6px"><b>Your opponent asked to cancel this match.</b> <button class="btn danger" data-cxl="${m.id}" style="padding:4px 8px;font-size:12px">Agree to cancel</button></div>`;
+  return `<div style="margin-top:6px"><button class="btn" data-cxl="${m.id}" style="padding:4px 8px;font-size:12px">Cancel match</button> <span class="note">${["league","placement"].includes(m.kind)?"Both players must agree. Chalkers are told.":"Before a dart is thrown, either player can cancel. After that, both must agree."}</span></div>`}
+const KIND={league:"League",placement:"Placement",challenge:"Challenge",fun:"Friendly"};
 const fmtD=t=>t?new Date(t).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"";
 const liveSeason=()=>SEASONS.find(s=>s.status==="live")||null;
 const nextSeason=()=>SEASONS.find(s=>s.status==="planned")||null;
@@ -363,9 +386,9 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
   const toConfirm=ms.filter(m=>m.status==="submitted"&&m.submitted_by!==ME.id);
   const waiting=ms.filter(m=>m.status==="submitted"&&m.submitted_by===ME.id);
   const inC=CHALL.filter(c=>c.to_id===ME.id&&c.status==="open"&&new Date(c.expires_at)>now);
-  const outC=CHALL.filter(c=>c.from_id===ME.id&&["open"].includes(c.status));
+  const outC=CHALL.filter(c=>c.from_id===ME.id&&["open"].includes(c.status)&&c.kind!=="fun");const outF=CHALL.filter(c=>c.from_id===ME.id&&c.status==="open"&&c.kind==="fun"&&new Date(c.expires_at)>now);
   const card=m=>`<div class="item"><b>${KIND[m.kind]}${m.week?" · week "+m.week:""}${m.coach_me?' · <span class="pill">Coach me</span>':""}</b> v ${nameLink(opp(m,ME.id))}
-     <div class="note">First to ${m.first_to}${m.kind==="league"?" (4-4 is a draw)":""} · play by ${fmtD(m.due_at)}</div>
+     <div class="note">First to ${m.first_to}${m.kind==="league"?" (4-4 is a draw)":""}${m.start_score&&m.start_score!==501?" · "+m.start_score:""} · play by ${fmtD(m.due_at)}</div>${cancelBox(m)}
      <div class="row" style="margin-top:8px"><button class="btn primary" data-score="${m.id}" data-mode="local">Score on one phone</button><button class="btn primary" data-score="${m.id}" data-mode="online">Score online</button><button class="btn" data-app="${m.id}">Enter result from an app</button></div><div data-appform="${m.id}"></div></div>`;
   const res=m=>{const [a,b]=myLegs(m,ME.id),sa=myStats(m,ME.id),so=myStats(m,opp(m,ME.id));return `<b>${a}-${b}</b> v ${nameLink(opp(m,ME.id))} · your avg ${(+sa.tda||0).toFixed(2)}, theirs ${(+so.tda||0).toFixed(2)}`};
   out.innerHTML=`
@@ -373,8 +396,13 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
      <p class="note">Online: you and your opponent both open this match on your own phones and tap <b>Score online</b>. No codes needed. Video call on Discord with your camera on the board.</p></div>
    <div class="card"><h2>Check and accept</h2>${toConfirm.length?`<div class="list">${toConfirm.map(m=>`<div class="item">${KIND[m.kind]}: ${res(m)}<div class="row" style="margin-top:8px"><button class="btn primary" data-acc="${m.id}">Accept</button><button class="btn" data-dis="${m.id}">Dispute</button></div><div data-disform="${m.id}"></div></div>`).join("")}</div>`:'<p class="note">Nothing waiting. Results you need to check appear here. If you don\'t respond within 48 hours they are accepted automatically.</p>'}
      ${waiting.length?`<h3>Waiting for your opponent</h3>${waiting.map(m=>`<div class="note">${KIND[m.kind]}: ${res(m)}</div>`).join("")}`:""}</div>
+   <div class="card"><h2>Play a friendly</h2><p class="note">Just for fun: no limit, not in the tables. It shows on both profiles as a friendly. They have 2 days to accept.</p>
+     <div class="row"><label class="f">Player<select id="frTo"><option value="">Choose…</option>${PLAYERS.filter(p=>p.id!==ME.id&&["active","placement"].includes(p.status)).map(p=>`<option value="${p.id}">${flag(p.country)} ${esc(p.display_name)}</option>`).join("")}</select></label>
+     <label class="f">First to<select id="frFt"><option>1</option><option selected>3</option><option>5</option></select></label><label class="f">Game<select id="frSt"><option selected>501</option><option>301</option></select></label></div>
+     <div class="row"><label class="f">Message (optional)<input id="frMsg" maxlength="200"></label><button class="btn primary" id="frGo">Send invite</button></div><p class="err" id="frErr"></p>
+     ${outF.length?`<p class="note">Invites sent: ${outF.map(c=>esc(PN(c.to_id))).join(", ")}</p>`:""}</div>
    <div class="card"><h2>Challenges</h2>
-     ${inC.map(c=>`<div class="item">${nameLink(c.from_id)} challenged you${c.coach_me?' and asked you to <b>coach</b> them':""}. First to 3.${c.message?`<div class="note">"${esc(c.message)}"</div>`:""}<div class="row" style="margin-top:8px"><button class="btn primary" data-cacc="${c.id}">Accept</button><button class="btn" data-cdec="${c.id}">Decline</button></div></div>`).join("")||'<p class="note">No challenges waiting for you.</p>'}
+     ${inC.map(c=>`<div class="item">${c.kind==="fun"?`${nameLink(c.from_id)} invited you to a <b>friendly</b>: first to ${c.first_to}, ${c.start_score}.`:`${nameLink(c.from_id)} challenged you${c.coach_me?' and asked you to <b>coach</b> them':""}. First to 3.`}${c.message?`<div class="note">"${esc(c.message)}"</div>`:""}<div class="row" style="margin-top:8px"><button class="btn primary" data-cacc="${c.id}">Accept</button><button class="btn" data-cdec="${c.id}">Decline</button></div></div>`).join("")||'<p class="note">No challenges waiting for you.</p>'}
      ${outC.length?`<p class="note">Sent: ${outC.map(c=>esc(PN(c.to_id))).join(", ")} (expires after 7 days)</p>`:""}
      <h3>Challenge someone</h3>
      <div class="row"><label class="f">Player<select id="chTo"><option value="">Choose…</option>${PLAYERS.filter(p=>p.id!==ME.id&&!p.challenge_opt_out).map(p=>`<option value="${p.id}">${flag(p.country)} ${esc(p.display_name)}${p.claimed_avg?" ("+(+p.claimed_avg).toFixed(0)+")":""}</option>`).join("")}</select></label><label class="f">Message (optional)<input id="chMsg" maxlength="200"></label></div>
@@ -387,6 +415,10 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
   out.querySelectorAll("[data-dis]").forEach(b=>b.onclick=()=>{const f=out.querySelector(`[data-disform="${b.dataset.dis}"]`);f.innerHTML=`<label class="f">What's wrong?<input class="disNote"></label><div class="row" style="margin-top:6px"><button class="btn danger">Send dispute to the Chalkers</button></div><p class="err"></p>`;
     f.querySelector("button").onclick=async()=>{const {error}=await db.rpc("v2_respond_result",{p_match:+b.dataset.dis,p_accept:false,p_note:f.querySelector(".disNote").value});if(error)f.querySelector(".err").textContent=error.message;else load()}});
   out.querySelectorAll("[data-cacc],[data-cdec]").forEach(b=>b.onclick=async()=>{const id=+(b.dataset.cacc||b.dataset.cdec);const {error}=await db.rpc("v2_challenge_respond",{p_id:id,p_accept:!!b.dataset.cacc});if(error)alert(error.message);else load()});
+  $("frGo").onclick=async()=>{const to=$("frTo").value;if(!to){$("frErr").textContent="Choose a player.";return}
+    const {error}=await db.rpc("v2_friendly",{p_to:to,p_first_to:+$("frFt").value,p_start:+$("frSt").value,p_msg:$("frMsg").value});$("frErr").innerHTML=error?esc(error.message):'<span class="okmsg">Invite sent.</span>';if(!error)load()};
+  out.querySelectorAll("[data-cxl]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Tap again to confirm";return}
+    const {data,error}=await db.rpc(b.dataset.w?"v2_cancel_withdraw":"v2_cancel_match",{p_match:+b.dataset.cxl});if(error)alert(error.message);else{if(data==="requested")alert("Cancel requested. Your opponent needs to agree.");load()}});
   $("chGo").onclick=async()=>{const to=$("chTo").value;if(!to){$("chErr").textContent="Choose a player.";return}
     const {error}=await db.rpc("v2_challenge",{p_to:to,p_coach:$("chCoach").checked,p_msg:$("chMsg").value});$("chErr").innerHTML=error?esc(error.message):'<span class="okmsg">Challenge sent.</span>';if(!error)load()};
 }
@@ -415,7 +447,7 @@ async function pollLive(){if(!SC||SC.mode!=="online")return;const r=await db.fro
 async function saveSC(){if(SC.mode==="local"){try{localStorage.setItem("11d-sc-"+SC.m.id,JSON.stringify(SC.st))}catch(_){}return true}
   const {data,error}=await db.rpc("v2_live_save",{p_match:SC.m.id,p_version:SC.ver,p_state:SC.st});
   if(error){SC.msg=error.message;await pollLive();renderScorer();return false}SC.ver=data;return true}
-const legRem=(L,p)=>501-L.visits.filter(v=>v.p===p).reduce((a,v)=>a+v.s,0);
+const legRem=(L,p)=>((SC&&SC.m&&SC.m.start_score)||501)-L.visits.filter(v=>v.p===p).reduce((a,v)=>a+v.s,0);
 const turnOf=L=>{if(L.winner)return null;const n=L.visits.length;return n%2===0?L.starter:(L.starter==="A"?"B":"A")};
 const legsWon=(st,p)=>st.legs.filter(l=>l.winner===p).length;
 function matchOver(st){const a=legsWon(st,"A"),b=legsWon(st,"B"),w=st.first_to;return a>=w||b>=w||(st.draw&&a===w-1&&b===w-1)}
@@ -443,7 +475,7 @@ function renderScorer(){const box=$("scOut");if(!SC){box.innerHTML="";return}con
   const last=L.visits.slice(-6).map(v=>`${esc(PN(v.p==="A"?m.player_a:m.player_b))}: ${v.bust?"bust":v.s}${v.co?" ✓ out":""}`).reverse().join("<br>");
   if(st.done){const a=legsWon(st,"A"),b=legsWon(st,"B");const sa=calcStats(st,"A"),sb=calcStats(st,"B");
     box.innerHTML=`<div class="card"><h2>Match finished</h2><p style="font-size:22px"><b>${esc(PN(m.player_a))} ${a}-${b} ${esc(PN(m.player_b))}</b>${a===b?" (draw)":""}</p>
-     <div class="tw"><table><tr><th class="l"></th><th>Avg</th><th>First 9</th><th>180</th><th>High CO</th><th>CO %</th></tr>${[["A",sa],["B",sb]].map(([k,s])=>`<tr><td class="l">${esc(PN(k==="A"?m.player_a:m.player_b))}</td><td>${s.tda.toFixed(2)}</td><td>${s.f9.toFixed(2)}</td><td>${s.b180}</td><td>${s.hf||"–"}</td><td>${s.cop==null?"–":s.cop+"%"}</td></tr>`).join("")}</table></div>
+     <div class="tw"><table><tr><th class="l"></th><th>Avg</th><th>First 9</th><th>180</th><th>High CO</th><th>Best leg</th><th>CO %</th></tr>${[["A",sa],["B",sb]].map(([k,s])=>`<tr><td class="l">${esc(PN(k==="A"?m.player_a:m.player_b))}</td><td>${s.tda.toFixed(2)}</td><td>${s.f9.toFixed(2)}</td><td>${s.b180}</td><td>${s.hf||"–"}</td><td>${s.bl?s.bl+" darts":"–"}</td><td>${s.cop==null?"–":s.cop+"%"}</td></tr>`).join("")}</table></div>
      <div class="row" style="margin-top:10px"><button class="btn primary" id="scSubmit">Submit result</button><button class="btn" id="scUndo">Undo last score</button><button class="btn" id="scBack">Back</button></div><p class="err" id="scErr">${esc(SC.msg)}</p>
      <p class="note">Your opponent then checks and accepts it on their Play page.</p></div>`;
     $("scSubmit").onclick=async()=>{const {error}=await db.rpc("v2_submit_result",{p_match:m.id,p_la:a,p_lb:b,p_sa:sa,p_sb:sb,p_proofs:null});if(error&&!/already has a result/.test(error.message)){$("scErr").textContent=error.message;return}
@@ -523,18 +555,26 @@ function renderTraining(){const out=$("trOut");
 }
 
 // ---------- PROGRESS ----------
-function renderProgress(){const p=STATE.profile,id=ME.id;const done=mine().filter(m=>m.status==="confirmed");
+function renderProgress(){const p=STATE.profile,id=ME.id;const done=mine().filter(m=>m.status==="confirmed"&&(!p.stats_reset_at||new Date(m.confirmed_at||m.created_at)>new Date(p.stats_reset_at)));
   const plac=done.filter(m=>m.kind==="placement").length;const next=mine().filter(m=>m.status==="scheduled");
   const w=done.filter(m=>myLegs(m,id)[0]>myLegs(m,id)[1]).length,dr=done.filter(m=>myLegs(m,id)[0]===myLegs(m,id)[1]).length;
-  const pts=done.slice(-20).map(m=>({v:+myStats(m,id).tda||0,l:new Date(m.confirmed_at||m.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})})).filter(x=>x.v>0);
+  const lab=m=>new Date(m.confirmed_at||m.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})+(m.kind==="fun"?" F":"");
+  const pts=done.slice(-20).map(m=>({v:+myStats(m,id).tda||0,l:lab(m)})).filter(x=>x.v>0);
+  const bpts=done.slice(-20).map(m=>({v:+myStats(m,id).bl||0,l:lab(m)})).filter(x=>x.v>0);
+  let gm="avg";try{gm=localStorage.getItem("11d-gmode")||"avg"}catch(_){}
+  const bestLeg=bpts.length?Math.min(...bpts.map(x=>x.v)):null;
   $("progOut").innerHTML=`<div class="card"><h2>${flag(p.country)} ${esc(p.display_name)}</h2><p>${badges(p)}</p>
      ${p.status==="placement"?`<p><b>Placement:</b> ${plac} of 3 matches played.${plac>=3?" A Chalker will place you in a division soon.":""}</p>`:`<p><b>Division:</b> ${esc((DIVS.find(d=>d.id===p.division_id)||{}).name||"Not set")}</p>`}
      <div class="kv"><div><b>${done.length}</b><span>Played</span></div><div><b>${w}-${dr}-${done.length-w-dr}</b><span>W-D-L</span></div><div><b>${pts.length?(pts.reduce((a,b)=>a+b.v,0)/pts.length).toFixed(1):"–"}</b><span>Match avg</span></div><div><b>${TRAIN.length}</b><span>Training sessions</span></div></div></div>
    <div class="card"><h2>Coming up</h2>${next.length?next.map(m=>`<div class="note">${KIND[m.kind]}${m.week?" week "+m.week:""} v ${nameLink(opp(m,id))} · play by ${fmtD(m.due_at)}</div>`).join(""):'<p class="note">Nothing scheduled. League fixtures are revealed every Monday.</p>'}<div class="row" style="margin-top:8px"><button class="btn primary" data-go="play">Go to Play</button></div></div>
-   <div class="card"><h2>Match average</h2>${graph(pts,"3-dart average per match")}</div>
+   <div class="card"><div class="row" style="justify-content:space-between"><h2>Match graph</h2><div class="chips">${[["avg","3-dart avg"],["bl","Best leg"],["both","Both"]].map(([k,n])=>`<button class="chip" data-gm="${k}" aria-pressed="${gm===k}">${n}</button>`).join("")}</div></div>
+     ${bestLeg?`<p class="note">Best leg ever: <b>${bestLeg} darts</b></p>`:""}
+     ${gm!=="bl"?`<h3>3-dart average</h3>${graph(pts,"3-dart average per match")}`:""}${gm!=="avg"?`<h3>Best leg</h3>${graph(bpts,"fewest darts to win a leg in each match (lower is better)")}`:""}
+     <p class="note">F = friendly.</p></div>
    <div class="card"><h2>Results</h2>${done.slice().reverse().map(m=>{const [a,b]=myLegs(m,id);return `<div class="note">${new Date(m.confirmed_at||m.created_at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})} · ${KIND[m.kind]} · <span class="pill ${a>b?"ok":a<b?"bad":""}">${a>b?"W":a<b?"L":"D"}</span> <b>${a}-${b}</b> v ${nameLink(opp(m,id))} · avg ${(+myStats(m,id).tda||0).toFixed(2)}</div>`}).join("")||'<p class="note">No results yet.</p>'}</div>
    <div class="card"><h2>Training</h2><p class="note">${TRAIN.length?TRAIN.length+" sessions logged.":"No training yet."}</p><button class="btn" data-go="training">Open training</button></div>`;
   $("progOut").querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>show(b.dataset.go));
+  $("progOut").querySelectorAll("[data-gm]").forEach(b=>b.onclick=()=>{try{localStorage.setItem("11d-gmode",b.dataset.gm)}catch(_){}renderProgress()});
 }
 
 // ---------- CHALKERS ----------
@@ -551,14 +591,14 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
    <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · ${p.played} of 3 placement matches · placement avg ${p.avg??"–"} · said ${p.claimed??"–"}
        <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}</div>
    <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
-   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${p.status==="active"||p.status==="placement"?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p></div>
+   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
    ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">Make a webhook in your private Chalkers channel (Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL) and paste it here. Disputes are posted there, tagged with the division.</p>
      ${["discord_chalkers","discord_results","discord_general"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_chalkers:"Private Chalkers channel",discord_results:"Results channel",discord_general:"General channel"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}<p class="err" id="whErr"></p></div>`:""}`;
   const errOf=b=>b.closest(".item,.card").querySelector(".err");
   box.querySelectorAll("[data-start]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm: make fixtures";return}const {data,error}=await db.rpc("v2_admin_start_season",{p_season:+b.dataset.start});errOf(b).innerHTML=error?esc(error.message):`<span class="okmsg">${data} fixtures made.</span>`;if(!error){await load();renderStaff()}});
   const ns=$("nsGo");if(ns)ns.onclick=async()=>{const {error}=await db.rpc("v2_admin_create_season",{p_league:DIVS.find(d=>d.tier>0).league_id,p_name:$("nsName").value,p_start:$("nsStart").value||null,p_weeks:+$("nsWeeks").value});$("nsErr").innerHTML=error?esc(error.message):'<span class="okmsg">Season created.</span>';if(!error){await load();renderStaff()}};
   box.querySelectorAll("[data-place]").forEach(b=>b.onclick=async()=>{const sel=box.querySelector(`[data-psel="${b.dataset.place}"]`);const {error}=await db.rpc("v2_staff_place",{p_user:b.dataset.place,p_division:+sel.value});errOf(b).innerHTML=error?esc(error.message):'<span class="okmsg">Placed.</span>';if(!error){await load();renderStaff()}});
-  box.querySelectorAll("[data-mv]").forEach(s=>s.onchange=async()=>{if(!s.value)return;const {error}=await db.rpc("v2_staff_place",{p_user:s.dataset.mv,p_division:+s.value});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Moved.</span>';if(!error)load()});
+  box.querySelectorAll("[data-mng]").forEach(b=>b.onclick=()=>manageUser(b.dataset.mng,players));box.querySelectorAll("[data-mv]").forEach(s=>s.onchange=async()=>{if(!s.value)return;const {error}=await db.rpc("v2_admin_move",{p_user:s.dataset.mv,p_division:+s.value});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Moved.</span>';if(!error)load()});
   box.querySelectorAll("[data-role],[data-fno]").forEach(s=>s.onchange=async()=>{const id=s.dataset.role||s.dataset.fno;const role=box.querySelector(`[data-role="${id}"]`).value,fno=box.querySelector(`[data-fno="${id}"]`).value;
     const {error}=await db.rpc("v2_admin_set_role",{p_user:id,p_role:role,p_founder_no:fno?+fno:null});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Saved.</span>';if(!error)load()});
   box.querySelectorAll("[data-uph],[data-rep]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_staff_resolve",{p_match:+(b.dataset.uph||b.dataset.rep),p_uphold:!!b.dataset.uph});errOf(b).innerHTML=error?esc(error.message):'<span class="okmsg">Done.</span>';if(!error){await load();renderStaff()}});
@@ -761,6 +801,85 @@ renderScorer=function(){_renderScorerV();if(!SC)return;const box=$("scOut");cons
   // phones: while your opponent throws, show their camera and hide the keypad
   const pad=box.querySelector(".pad");if(pad&&SC.mode==="online"&&!isWide()&&(V.live||(V.remote&&V.remote.getVideoTracks().length))){pad.style.display=V.turn?"":"none";if(V.lastTurn!==V.turn){V.lastTurn=V.turn;const tgt=V.turn?box:document.getElementById("vidBox");if(tgt)setTimeout(()=>tgt.scrollIntoView({behavior:"smooth",block:"start"}),60)}}
   vidUpdate();callLast()};
+// ===================== scorer layout: laptop 3 columns, phone flip, keyboard, edit score, last score =====================
+const isWide3=()=>window.matchMedia("(min-width: 1000px)").matches;
+let KB="pad";try{KB=localStorage.getItem("11d-kb")||"pad"}catch(_){}
+function lastOf(k){const st=SC.st;for(let i=st.legs.length-1;i>=0;i--){const vs=st.legs[i].visits.filter(v=>v.p===k);if(vs.length){const v=vs[vs.length-1];return v.bust?"bust":v.s+(v.co?" ✓":"")}}return "–"}
+function editTarget(){const L=SC.st.legs[SC.st.legs.length-1];const v=L.visits[L.visits.length-1];if(!v||v.co)return null;return (SC.mode==="local"||v.p===SC.side)?v:null}
+async function applyEdit(s){const v=editTarget();if(!v){SC.msg="Nothing to edit in this leg.";SC.edit=false;SC.typed="";renderScorer();return}
+  if(s>180||IMPOSS.includes(s)){SC.msg=s+" isn't possible with 3 darts.";SC.typed="";renderScorer();return}
+  const L=SC.st.legs[SC.st.legs.length-1];const after=legRem(L,v.p)+(v.bust?0:v.s)-s;
+  if(after<=1){SC.msg="That score would finish or bust the leg. Use Undo instead.";SC.typed="";renderScorer();return}
+  v.s=s;delete v.bust;SC.edit=false;SC.typed="";SC.msg="Score changed.";if(await saveSC())renderScorer()}
+const _scoreVisitL=scoreVisit;scoreVisit=function(s){return SC&&SC.edit?applyEdit(s):_scoreVisitL(s)};
+
+const _renderScorerL=renderScorer;
+renderScorer=function(){const focused=document.activeElement&&document.activeElement.id==="kbIn";
+  _renderScorerL();const vs=$("v-scorer");if(!SC||!vs)return;const box=$("scOut"),card=box.querySelector(".card");if(!card)return;
+  const st=SC.st,L=st.legs[st.legs.length-1],p=turnOf(L),myTurn=SC.mode==="local"||p===SC.side,online=SC.mode==="online";
+  // last score under Legs / avg
+  card.querySelectorAll(".score2 .side").forEach((el,i)=>{if(!el.querySelector(".lastsc")){const d=document.createElement("div");d.className="note lastsc";d.innerHTML="Last: <b>"+esc(lastOf(i?"B":"A"))+"</b>";el.appendChild(d)}});
+  if(!st.done){
+    // edit + keyboard toggle buttons
+    const rowB=$("scUndo")&&$("scUndo").parentElement;
+    if(SC.edit&&!editTarget())SC.edit=false;
+    if(rowB&&!$("scEdit")&&editTarget()){const e=document.createElement("button");e.className="btn";e.id="scEdit";e.textContent=SC.edit?"Cancel edit":"Edit score";e.onclick=()=>{SC.edit=!SC.edit;SC.typed="";SC.msg="";renderScorer()};rowB.insertBefore(e,$("scBack"))}
+    const typed=card.querySelector(".typed");
+    if(SC.edit&&typed){const v=editTarget();typed.innerHTML=`<div class="note">New score for ${SC.mode==="local"?"the":"your"} last visit (was ${v?(v.bust?"bust":v.s):"–"})</div>${SC.typed||'<span class="note">Type it, then Enter</span>'}`;
+      const pad=card.querySelector(".pad");if(pad){pad.style.opacity="";pad.style.pointerEvents="";pad.style.display=""}}
+    const pad=card.querySelector(".pad");
+    if(pad&&!isWide3()){const t=document.createElement("button");t.className="btn";t.id="kbTog";t.style.cssText="padding:6px 10px;font-size:12px;margin:0 0 8px";t.textContent=KB==="native"?"🔢 Big keypad":"⌨️ Phone keyboard";
+      t.onclick=()=>{KB=KB==="native"?"pad":"native";try{localStorage.setItem("11d-kb",KB)}catch(_){}renderScorer();if(KB==="native")setTimeout(()=>{const i=$("kbIn");if(i)i.focus()},50)};pad.before(t);
+      if(KB==="native"){const can=myTurn||SC.edit;const w=document.createElement("div");w.className="row";w.style.cssText="gap:8px;margin-bottom:6px";
+        w.innerHTML=`<input id="kbIn" inputmode="numeric" pattern="[0-9]*" enterkeyhint="done" maxlength="3" autocomplete="off" placeholder="Score" style="flex:1;font:700 28px var(--display);text-align:center" ${can?"":"disabled"} value="${esc(SC.typed)}"><button class="btn primary" id="kbGo" ${can?"":"disabled"}>Enter</button>`;
+        pad.replaceWith(w);if(typed)typed.hidden=true;const inp=$("kbIn");
+        inp.oninput=()=>{inp.value=inp.value.replace(/\D/g,"").slice(0,3);SC.typed=inp.value};
+        const go=()=>{if(SC.typed!=="")scoreVisit(+SC.typed)};inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();go()}};$("kbGo").onclick=go;
+        if(focused&&can){inp.focus();inp.setSelectionRange(inp.value.length,inp.value.length)}}}
+    if(isWide3()){const k=document.createElement("p");k.className="note kbhelp";k.textContent="Keyboard: type the score + Enter · Backspace deletes · D = darts at double · E = edit last score · U = undo";card.appendChild(k)}
+  }
+  // laptop: scores left, keypad middle, camera right
+  const wide=isWide3();document.body.classList.toggle("scwide",wide&&CUR==="scorer");vs.classList.toggle("lay3",wide);
+  if(wide&&!st.done&&!card.querySelector(".colL")){const kids=[...card.children];const head=kids.shift();if(head)head.classList.add("schead");const L1=document.createElement("div");L1.className="colL";const M1=document.createElement("div");M1.className="colM";
+    kids.forEach(el=>{(el.classList.contains("score2")||el.classList.contains("vis")||(el.matches("p")&&!el.classList.contains("err")&&!el.classList.contains("kbhelp"))||(el.classList.contains("row")&&!el.querySelector("#scUndo"))?L1:M1).appendChild(el)});
+    card.append(L1,M1);card.classList.add("sc3")}
+  const noV=()=>{const vb=$("vidBox"),cs=$("camSetup");vs.classList.toggle("novid",!online||((!vb||vb.hidden)&&(!cs||cs.hidden)))};noV();
+  // phones: your turn = full keypad (hide video); their turn = big opponent camera
+  vs.classList.toggle("oppturn",online&&!wide&&!isWide()&&!myTurn&&!SC.edit);
+  if(online&&!isWide()&&(myTurn||SC.edit)){const vb=$("vidBox");if(vb)vb.hidden=true}
+  turnTimerTick()};
+const _vidUpdateL=vidUpdate;vidUpdate=function(){_vidUpdateL();const vs=$("v-scorer"),vb=$("vidBox"),cs=$("camSetup");if(vs&&SC)vs.classList.toggle("novid",SC.mode!=="online"||((!vb||vb.hidden)&&(!cs||cs.hidden)));if(SC&&SC.mode==="online"&&!isWide()&&V.turn){const vb=$("vidBox");if(vb)vb.hidden=true}};
+
+// laptop keyboard
+document.addEventListener("keydown",e=>{if(CUR!=="scorer"||!SC||SC.st.done)return;const t=e.target;if(t&&(t.tagName==="INPUT"||t.tagName==="TEXTAREA"||t.tagName==="SELECT"))return;if(e.ctrlKey||e.metaKey||e.altKey)return;
+  const L=SC.st.legs[SC.st.legs.length-1],p=turnOf(L),myTurn=SC.mode==="local"||p===SC.side,k=e.key;
+  if(SC.ask){if(["1","2","3"].includes(k)){e.preventDefault();finishLeg(+k,1)}return}
+  if(/^[0-9]$/.test(k)){if(!myTurn&&!SC.edit)return;e.preventDefault();if(SC.typed.length<3)SC.typed+=k;SC.msg="";renderScorer()}
+  else if(k==="Backspace"){e.preventDefault();SC.typed=SC.typed.slice(0,-1);renderScorer()}
+  else if(k==="Enter"){e.preventDefault();if(SC.typed!=="")scoreVisit(+SC.typed)}
+  else if(k==="u"||k==="U"){e.preventDefault();undo()}
+  else if((k==="e"||k==="E")&&(SC.edit||editTarget())){e.preventDefault();SC.edit=!SC.edit;SC.typed="";renderScorer()}
+  else if(k==="Escape"&&SC.edit){SC.edit=false;SC.typed="";renderScorer()}
+  else if(k==="d"||k==="D"){e.preventDefault();SC.dbl=((SC.dbl||0)+1)%4;renderScorer()}});
+let RSZ=0;window.addEventListener("resize",()=>{clearTimeout(RSZ);RSZ=setTimeout(()=>{if(CUR==="scorer"&&SC)renderScorer()},200)});
+const _showL=show;show=function(v){_showL(v);document.body.classList.toggle("scwide",v==="scorer"&&isWide3())};
+
+// 60-second throw timer: counts down on your turn; at 0 a pop-up and a beep
+const TT={key:null,start:0,warned:false};
+function beep(){try{const A=window.AudioContext||window.webkitAudioContext;const a=new A();[0,0.35].forEach(t=>{const o=a.createOscillator(),g=a.createGain();o.frequency.value=880;g.gain.value=0.25;o.connect(g);g.connect(a.destination);o.start(a.currentTime+t);o.stop(a.currentTime+t+0.25)});setTimeout(()=>a.close(),1200)}catch(_){}try{navigator.vibrate&&navigator.vibrate([300,150,300])}catch(_){}}
+function turnWarn(){let o=$("ttPop");if(!o){o=document.createElement("div");o.id="ttPop";o.className="ttpop";document.body.appendChild(o)}
+  o.innerHTML=`<div class="card"><h2>⏱ 60 seconds are up</h2><p>Throw your darts and enter your score.</p><button class="btn primary" id="ttOk">OK</button></div>`;o.hidden=false;$("ttOk").onclick=()=>{o.hidden=true};beep()}
+function turnTimerTick(){const el=$("ttClock");if(!SC||SC.st.done||CUR!=="scorer"){if(el)el.remove();return}
+  const st=SC.st,L=st.legs[st.legs.length-1],p=turnOf(L);if(!p){if(el)el.remove();return}
+  const mine=SC.mode==="local"||p===SC.side;const key=SC.m.id+":"+st.legs.length+":"+L.visits.length+":"+p;
+  if(key!==TT.key){TT.key=key;TT.start=Date.now();TT.warned=false;const pop=$("ttPop");if(pop)pop.hidden=true}
+  const head=document.querySelector("#scOut .card .row");if(!head)return;let c=$("ttClock");
+  if(!mine||SC.ask){if(c)c.remove();return}
+  const left=Math.max(0,60-Math.floor((Date.now()-TT.start)/1000));
+  if(!c){c=document.createElement("span");c.id="ttClock";c.className="pill";head.insertBefore(c,head.children[1]||null)}
+  c.textContent="⏱ "+left+"s";c.classList.toggle("late",left<=10);
+  if(left===0&&!TT.warned){TT.warned=true;turnWarn()}}
+setInterval(turnTimerTick,1000);
 load();
 </script>
 </body>
