@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-RhBg/g3TCHZqTR0vAwxfkZKr/pcPngiY5E2SrenIjuQ='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-NeA5qlzn39DCBQEb4n2PJgWfEQvHD4aHYpoPisAKDOg='; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -77,6 +77,12 @@ tr.up td{background:var(--ok-soft)}tr.down td{background:var(--bad-soft)}.tw{ove
 .typed{font:700 34px var(--display);text-align:center;min-height:42px}
 .vis{font-size:13px;color:var(--muted);max-height:120px;overflow:auto}
 svg.graph{width:100%;height:auto;display:block}
+.vstage{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
+.vstage video,.vstage canvas{width:100%;height:100%;object-fit:cover;display:block}
+.vlabel{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.55);color:#fff;font-size:12px;padding:3px 8px;border-radius:99px}
+.frame .ring{position:absolute;inset:6% 18%;border:3px dashed rgba(255,255,255,.85);border-radius:50%;pointer-events:none}
+.frame #camPrev{width:100%;height:100%}
+.camb{padding:6px 10px;font-size:14px;filter:grayscale(1);opacity:.75}.camb.live{background:#1E9E55;border-color:#1E9E55;filter:none;opacity:1}
 footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font-size:12px;text-align:center}
 @media (max-width:380px){.brand h1{font-size:24px}nav button{font-size:12px}}
 </style>
@@ -621,6 +627,109 @@ renderStaffTop=async function(){await _renderStaffTopOld();const box=$("stTop");
       const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([JSON.stringify(data,null,1)],{type:"application/json"}));a.download=`11darts-backup-${new Date().toISOString().slice(0,10)}.json`;document.body.appendChild(a);a.click();a.remove();$("bkErr").innerHTML='<span class="okmsg">Backup downloaded.</span>'};}
 };
 
+// ===================== live video, voice and caller (online matches) =====================
+const VQ={low:{w:480,h:360,br:350000,fps:20,n:"Low"},med:{w:640,h:480,br:700000,fps:24,n:"Medium"},hd:{w:1280,h:720,br:2000000,fps:30,n:"HD (Wi-Fi)"}};
+let V={match:null,side:null,ch:null,pc:null,ice:null,raw:null,canvas:null,out:null,raf:0,zoom:1,q:"med",live:false,setup:false,mic:false,muted:false,remote:null,pending:[],status:"",turn:false};
+const isWide=()=>window.matchMedia("(min-width: 768px)").matches;
+function vidEl(){let b=$("vidBox");if(!b){b=document.createElement("div");b.id="vidBox";b.className="card";b.hidden=true;
+  b.innerHTML=`<div class="vstage"><video id="vRemote" playsinline autoplay></video><video id="vSelf" playsinline autoplay muted></video><div class="vlabel" id="vLabel"></div></div><div class="row" style="margin-top:8px;justify-content:space-between"><span class="note" id="vStatus"></span><span class="row"><button class="btn" id="vMute" style="padding:6px 10px;font-size:12px">Mute</button><button class="btn" id="vHd" style="padding:6px 10px;font-size:12px">HD</button><button class="btn" id="vStop" style="padding:6px 10px;font-size:12px">Camera off</button></span></div>`;
+  $("v-scorer").insertBefore(b,$("scOut"));$("vMute").onclick=toggleMute;$("vHd").onclick=()=>setQuality(V.q==="hd"?"med":"hd");$("vStop").onclick=()=>stopCamera(true)}return b}
+
+// ---------- camera set-up: permission, zoom, confirm ----------
+async function cameraButton(){if(V.live||V.setup){V.setup=true;renderCamSetup();return}
+  V.setup=true;renderCamSetup();V.status="Asking for permission…";renderCamSetup();
+  try{V.raw=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}},audio:true});V.mic=true}
+  catch(e){try{V.raw=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"}},audio:false});V.mic=false}catch(e2){V.setup=false;V.status="";alert("Camera permission was refused or no camera was found. You can still score without video.");renderScorer();return}}
+  startCanvas();V.status="";renderCamSetup()}
+function startCanvas(){const q=VQ[V.q];V.canvas=V.canvas||document.createElement("canvas");V.canvas.width=q.w;V.canvas.height=q.h;const ctx=V.canvas.getContext("2d");
+  const vid=document.createElement("video");vid.muted=true;vid.playsInline=true;vid.srcObject=V.raw;vid.play().catch(()=>{});V.rawVid=vid;
+  cancelAnimationFrame(V.raf);const draw=()=>{const vw=vid.videoWidth,vh=vid.videoHeight;if(vw){const z=V.zoom,cw=V.canvas.width,ch=V.canvas.height,ar=cw/ch;
+      let sw=vw/z,sh=sw/ar;if(sh>vh/z){sh=vh/z;sw=sh*ar}ctx.drawImage(vid,(vw-sw)/2,(vh-sh)/2,sw,sh,0,0,cw,ch)}V.raf=requestAnimationFrame(draw)};draw();
+  if(!V.out){V.out=V.canvas.captureStream(q.fps)}}
+function renderCamSetup(){let o=$("camSetup");if(!o){o=document.createElement("div");o.id="camSetup";o.className="card";$("v-scorer").insertBefore(o,$("scOut"))}
+  o.hidden=!V.setup;if(!V.setup)return;
+  o.innerHTML=`<h2>Set up your camera</h2><p class="note">Point the camera at your board. Zoom until the whole board fits inside the circle, then confirm.${typeof DEPLOYMENT!=="undefined"&&DEPLOYMENT==="v1"?" Make sure nothing sensitive is in the background.":""}</p>
+   <div class="vstage frame"><div id="camPrev"></div><div class="ring"></div></div>
+   <label class="f" style="margin-top:8px">Zoom <input id="camZoom" type="range" min="1" max="3" step="0.05" value="${V.zoom}"></label>
+   <div class="row" style="margin-top:6px"><label class="f">Quality<select id="camQ">${Object.entries(VQ).map(([k,q])=>`<option value="${k}" ${k===V.q?"selected":""}>${q.n}</option>`).join("")}</select></label></div>
+   <p class="note">${V.mic?"🎤 Microphone allowed. You can mute at any time.":"🎤 Microphone not allowed: video only."} ${V.status}</p>
+   <div class="row"><button class="btn primary" id="camGo" ${V.raw?"":"disabled"}>${V.live?"Done":"Confirm and go live"}</button><button class="btn" id="camCancel">Cancel</button></div>`;
+  if(V.canvas){V.canvas.className="prev";$("camPrev").appendChild(V.canvas)}
+  $("camZoom").oninput=e=>{V.zoom=+e.target.value};$("camQ").onchange=e=>setQuality(e.target.value);
+  $("camGo").onclick=()=>{V.setup=false;goLive();renderCamSetup();renderScorer()};$("camCancel").onclick=()=>{V.setup=false;if(!V.live)stopCamera(false);renderCamSetup();renderScorer()}}
+async function setQuality(k){V.q=k;const q=VQ[k];if(V.canvas){V.canvas.width=q.w;V.canvas.height=q.h}
+  const t=V.raw&&V.raw.getVideoTracks()[0];if(t)try{await t.applyConstraints({width:{ideal:q.w},height:{ideal:q.h}})}catch(_){}
+  applyBitrate();const b=$("vHd");if(b)b.textContent=k==="hd"?"Normal":"HD"}
+function stopCamera(rerender){cancelAnimationFrame(V.raf);if(V.raw)V.raw.getTracks().forEach(t=>t.stop());if(V.out)V.out.getTracks().forEach(t=>t.stop());V.raw=null;V.out=null;V.canvas=null;V.live=false;V.setup=false;
+  if(V.pc)V.pc.getTransceivers().forEach(t=>{try{t.sender.replaceTrack(null)}catch(_){}});if(rerender)renderScorer()}
+function toggleMute(){V.muted=!V.muted;if(V.raw)V.raw.getAudioTracks().forEach(t=>t.enabled=!V.muted);$("vMute").textContent=V.muted?"Unmute":"Mute"}
+
+// ---------- connection: Supabase Realtime for signalling, WebRTC for media ----------
+async function videoJoin(m,side){if(V.match===m.id)return;videoLeave();V.match=m.id;V.side=side;
+  try{const r=await db.functions.invoke("turn",{body:{}});V.ice=(r.data&&r.data.iceServers)||[{urls:"stun:stun.l.google.com:19302"}]}catch(_){V.ice=[{urls:"stun:stun.l.google.com:19302"}]}
+  V.ch=db.channel("match-"+m.id,{config:{broadcast:{self:false}}});
+  V.ch.on("broadcast",{event:"sig"},({payload})=>onSig(payload)).on("broadcast",{event:"state"},()=>pollLive());
+  V.ch.subscribe(st=>{if(st==="SUBSCRIBED")send({t:"hello"})})}
+function videoLeave(){if(V.ch){try{db.removeChannel(V.ch)}catch(_){}}V.ch=null;if(V.pc){try{V.pc.close()}catch(_){}}V.pc=null;V.remote=null;V.match=null;stopCamera(false);const b=$("vidBox");if(b)b.hidden=true}
+function send(p){if(V.ch)V.ch.send({type:"broadcast",event:"sig",payload:{...p,from:V.side}})}
+function newPC(){if(V.pc){try{V.pc.close()}catch(_){}}const pc=new RTCPeerConnection({iceServers:V.ice});V.pc=pc;V.pending=[];V.remote=new MediaStream();
+  pc.ontrack=e=>{V.remote.addTrack(e.track);const rv=$("vRemote");if(rv){rv.srcObject=V.remote;rv.play().catch(()=>{})}vidUpdate()};
+  pc.onicecandidate=e=>{if(e.candidate)send({t:"ice",c:e.candidate})};
+  pc.onconnectionstatechange=()=>{const s=pc.connectionState;V.status=s==="connected"?"Video connected":s==="failed"?"Video couldn't connect. Tap the camera button to retry.":s==="connecting"?"Connecting video…":"";vidUpdate()};
+  return pc}
+async function attachLocal(){if(!V.pc)return;const tr=V.pc.getTransceivers();const vT=V.out&&V.out.getVideoTracks()[0],aT=V.raw&&V.mic?V.raw.getAudioTracks()[0]:null;
+  for(const t of tr){const kind=t.receiver.track&&t.receiver.track.kind;if(kind==="video")await t.sender.replaceTrack(V.live?vT:null);if(kind==="audio")await t.sender.replaceTrack(V.live?aT:null)}applyBitrate()}
+async function applyBitrate(){if(!V.pc)return;for(const s of V.pc.getSenders()){if(!s.track||s.track.kind!=="video")continue;try{const p=s.getParameters();p.encodings=p.encodings&&p.encodings.length?p.encodings:[{}];p.encodings[0].maxBitrate=VQ[V.q].br;await s.setParameters(p)}catch(_){}}}
+async function makeOffer(){const pc=newPC();pc.addTransceiver("video",{direction:"sendrecv"});pc.addTransceiver("audio",{direction:"sendrecv"});await attachLocal();
+  const o=await pc.createOffer();await pc.setLocalDescription(o);send({t:"offer",sdp:pc.localDescription})}
+async function onSig(p){if(p.from===V.side)return;
+  if(p.t==="hello"){if(V.side==="A")await makeOffer();else send({t:"hello"});return}
+  if(p.t==="offer"){const pc=newPC();await pc.setRemoteDescription(p.sdp);pc.getTransceivers().forEach(t=>t.direction="sendrecv");await attachLocal();
+    const a=await pc.createAnswer();await pc.setLocalDescription(a);send({t:"answer",sdp:pc.localDescription});for(const c of V.pending)try{await pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
+  if(p.t==="answer"&&V.pc){await V.pc.setRemoteDescription(p.sdp);for(const c of V.pending)try{await V.pc.addIceCandidate(c)}catch(_){}V.pending=[];return}
+  if(p.t==="ice"){if(V.pc&&V.pc.remoteDescription)try{await V.pc.addIceCandidate(p.c)}catch(_){}else V.pending.push(p.c)}}
+async function goLive(){V.live=true;const sv=$("vSelf");if(sv){sv.srcObject=V.out;sv.play().catch(()=>{})}if(V.pc)await attachLocal();else if(V.side==="A")await makeOffer();else send({t:"hello"});vidUpdate()}
+function nudge(){if(V.ch)V.ch.send({type:"broadcast",event:"state",payload:{}})}
+
+// ---------- who's on screen ----------
+function vidUpdate(){const box=vidEl();const on=SC&&SC.mode==="online"&&(V.live||(V.remote&&V.remote.getTracks().length));box.hidden=!on;if(!on)return;
+  const myTurn=V.turn;const rv=$("vRemote"),sv=$("vSelf");
+  if(sv&&V.out&&sv.srcObject!==V.out){sv.srcObject=V.out;sv.play().catch(()=>{})}
+  if(rv&&V.remote&&rv.srcObject!==V.remote){rv.srcObject=V.remote;rv.play().catch(()=>{})}
+  const showSelf=myTurn&&V.live;rv.hidden=showSelf;sv.hidden=!showSelf;
+  $("vLabel").textContent=showSelf?"You (your opponent sees this)":(V.remote&&V.remote.getVideoTracks().length?"Your opponent":"Waiting for your opponent's camera…");
+  $("vStatus").textContent=V.status;$("vMute").hidden=!V.mic;$("vHd").textContent=V.q==="hd"?"Normal":"HD";$("vStop").hidden=!V.live}
+
+// ---------- master caller (the phone's own voice) ----------
+let CALLER=true;try{CALLER=localStorage.getItem("11d-caller")!=="0"}catch(_){}
+let SAID=null;
+const ONES=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"],TENS=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function words(n){if(n===0)return "no score";if(n<20)return ONES[n];if(n<100)return TENS[Math.floor(n/10)]+(n%10?"-"+ONES[n%10]:"");return ONES[Math.floor(n/100)]+" hundred"+(n%100?" and "+words(n%100):"")}
+function say(t){if(!CALLER||!("speechSynthesis" in window))return;try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=0.95;u.pitch=0.9;const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(_){}}
+function callLast(){if(!SC)return;const st=SC.st;let L=st.legs[st.legs.length-1];let last=L.visits[L.visits.length-1],legNo=st.legs.length;
+  if(!last&&st.legs.length>1){L=st.legs[st.legs.length-2];last=L.visits[L.visits.length-1];legNo--}
+  const key=SC.m.id+":"+legNo+":"+(last?L.visits.length:0);if(SAID===null){SAID=key;return}if(!last||key===SAID)return;SAID=key;
+  let t=last.bust?"no score":last.co?(st.done?"game shot, and the match!":"game shot, and the leg!"):(last.s===180?"one hundred and eighty!":words(last.s));
+  const cur=st.legs[st.legs.length-1],nx=turnOf(cur);if(!st.done&&nx&&!last.co){const r=legRem(cur,nx);if(r<=170&&!BOGEY.includes(r))t+=". "+PN(nx==="A"?SC.m.player_a:SC.m.player_b)+", you require "+words(r)}
+  say(t)}
+
+// ---------- hook into the scorer ----------
+const _openScorerV=openScorer;
+openScorer=async function(id,mode){SAID=null;await _openScorerV(id,mode);if(mode==="online"&&SC)videoJoin(SC.m,SC.side);else videoLeave()};
+const _saveSCV=saveSC;saveSC=async function(){const ok=await _saveSCV();if(ok&&SC&&SC.mode==="online")nudge();return ok};
+const _stopPollV=stopPoll;stopPoll=function(){_stopPollV();if(CUR!=="scorer")videoLeave()};
+const _renderScorerV=renderScorer;
+renderScorer=function(){_renderScorerV();if(!SC)return;const box=$("scOut");const st=SC.st,L=st.legs[st.legs.length-1],p=turnOf(L);
+  V.turn=SC.mode==="local"||p===SC.side;
+  const head=box.querySelector(".card .row");
+  if(head&&!head.querySelector("#camBtn")){const span=document.createElement("span");span.className="row";
+    span.innerHTML=`<button class="btn" id="callBtn" style="padding:6px 10px;font-size:12px" title="Caller">${CALLER?"🔊 Caller":"🔇 Caller"}</button>${SC.mode==="online"?`<button class="btn camb ${V.live?"live":""}" id="camBtn" title="Camera">📷</button>`:""}`;
+    head.appendChild(span);
+    $("callBtn").onclick=()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER)say("Caller on");renderScorer()};
+    const cb=$("camBtn");if(cb)cb.onclick=cameraButton}
+  // phones: while your opponent throws, show their camera and hide the keypad
+  const pad=box.querySelector(".pad");if(pad&&SC.mode==="online"&&!isWide()&&(V.live||(V.remote&&V.remote.getVideoTracks().length))){pad.style.display=V.turn?"":"none";if(V.lastTurn!==V.turn){V.lastTurn=V.turn;const tgt=V.turn?box:document.getElementById("vidBox");if(tgt)setTimeout(()=>tgt.scrollIntoView({behavior:"smooth",block:"start"}),60)}}
+  vidUpdate();callLast()};
 load();
 </script>
 </body>
