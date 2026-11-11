@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-uxlocohkXWAWCdZlpe32alUzAnF+IkRK6eyF69+v268=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-t3HZJN7Be0xm32zTuerycEnVIEx53HCHrDLH1JKvIpw=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -483,7 +483,7 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
   const inC=CHALL.filter(c=>c.to_id===ME.id&&c.status==="open"&&new Date(c.expires_at)>now);
   const outC=CHALL.filter(c=>c.from_id===ME.id&&["open"].includes(c.status)&&c.kind!=="fun");const outF=CHALL.filter(c=>c.from_id===ME.id&&c.status==="open"&&c.kind==="fun"&&new Date(c.expires_at)>now);
   const card=m=>`<div class="item"><b>${KIND[m.kind]}${m.week?" · week "+m.week:""}${m.coach_me?' · <span class="pill">Coach me</span>':""}</b> v ${nameLink(opp(m,ME.id))}
-     <div class="note">First to ${m.first_to}${m.kind==="league"?" (4-4 is a draw)":""}${m.start_score&&m.start_score!==501?" · "+m.start_score:""} · play by ${fmtD(m.due_at)}</div>${cancelBox(m)}
+     <div class="note">${fmtLabel(m).replace(/^./,c=>c.toUpperCase())}${m.kind==="league"?" (4-4 is a draw)":""}${m.start_score&&m.start_score!==501?" · "+m.start_score:""} · play by ${fmtD(m.due_at)}</div>${cancelBox(m)}
      <div class="row" style="margin-top:8px"><button class="btn primary" data-score="${m.id}" data-mode="local">Score on one phone</button><button class="btn primary" data-score="${m.id}" data-mode="online">Score online</button><button class="btn" data-app="${m.id}">Enter result from an app</button></div><div data-appform="${m.id}"></div></div>`;
   const res=m=>{const [a,b]=myLegs(m,ME.id),sa=myStats(m,ME.id),so=myStats(m,opp(m,ME.id));return `<b>${a}-${b}</b> v ${nameLink(opp(m,ME.id))} · your avg ${(+sa.tda||0).toFixed(2)}, theirs ${(+so.tda||0).toFixed(2)}`};
   out.innerHTML=`
@@ -497,7 +497,7 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
      <div class="row"><label class="f">Message (optional)<input id="frMsg" maxlength="200"></label><button class="btn primary" id="frGo">Send invite</button></div><p class="err" id="frErr"></p>
      ${outF.length?`<p class="note">Invites sent: ${outF.map(c=>esc(PN(c.to_id))).join(", ")}</p>`:""}</div>
    <div class="card"><h2>Challenges</h2>
-     ${inC.map(c=>`<div class="item">${c.kind==="fun"?`${nameLink(c.from_id)} invited you to a <b>friendly</b>: first to ${c.first_to}, ${c.start_score}.`:`${nameLink(c.from_id)} challenged you${c.coach_me?' and asked you to <b>coach</b> them':""}. First to 3.`}${c.message?`<div class="note">"${esc(c.message)}"</div>`:""}<div class="row" style="margin-top:8px"><button class="btn primary" data-cacc="${c.id}">Accept</button><button class="btn" data-cdec="${c.id}">Decline</button></div></div>`).join("")||'<p class="note">No challenges waiting for you.</p>'}
+     ${inC.map(c=>`<div class="item">${c.kind==="fun"?`${nameLink(c.from_id)} invited you to a <b>friendly</b>: ${fmtLabel(c)}, ${c.start_score}.`:`${nameLink(c.from_id)} challenged you${c.coach_me?' and asked you to <b>coach</b> them':""}. ${fmtLabel(c).replace(/^./,x=>x.toUpperCase())}, ${c.start_score||501}.`}${c.message?`<div class="note">"${esc(c.message)}"</div>`:""}<div class="row" style="margin-top:8px"><button class="btn primary" data-cacc="${c.id}">Accept</button><button class="btn" data-cdec="${c.id}">Decline</button></div></div>`).join("")||'<p class="note">No challenges waiting for you.</p>'}
      ${outC.length?`<p class="note">Sent: ${outC.map(c=>esc(PN(c.to_id))).join(", ")} (expires after 7 days)</p>`:""}
      <h3>Challenge someone</h3>
      <div class="row"><label class="f">Player<select id="chTo"><option value="">Choose…</option>${PLAYERS.filter(p=>p.id!==ME.id&&!p.challenge_opt_out).map(p=>`<option value="${p.id}">${flag(p.country)} ${esc(p.display_name)}${p.claimed_avg?" ("+(+p.claimed_avg).toFixed(0)+")":""}</option>`).join("")}</select></label><label class="f">Message (optional)<input id="chMsg" maxlength="200"></label></div>
@@ -538,7 +538,7 @@ function appForm(id){const m=MATCHES.find(x=>x.id===id);const f=document.querySe
 // ---------- SCORER (one phone or online) ----------
 let SC=null,POLL=null;const BOGEY=[169,168,166,165,163,162,159],IMPOSS=[179,178,176,175,173,172,169,166,163];
 function stopPoll(){if(POLL){clearInterval(POLL);POLL=null}}
-function newState(m){return {first_to:m.first_to,draw:m.kind==="league",legs:[{starter:"A",visits:[],winner:null}],done:false}}
+function newState(m){return {first_to:m.first_to,set_legs:m.set_legs||null,draw:m.kind==="league"&&!m.set_legs,legs:[{starter:"A",visits:[],winner:null}],done:false}}
 async function openScorer(id,mode){const m=MATCHES.find(x=>x.id===id);if(!m)return;
   const side=m.player_a===ME.id?"A":"B";let st=null,ver=0;
   const r=await db.from("live_state").select("*").eq("match_id",id).maybeSingle();if(r.data){st=r.data.state;ver=r.data.version}
@@ -552,7 +552,9 @@ async function saveSC(){if(SC.mode==="local"){try{localStorage.setItem("11d-sc-"
   if(error){SC.msg=error.message;await pollLive();renderScorer();return false}SC.ver=data;return true}
 const legRem=(L,p)=>((SC&&SC.m&&SC.m.start_score)||501)-L.visits.filter(v=>v.p===p).reduce((a,v)=>a+v.s,0);
 const turnOf=L=>{if(L.winner)return null;const n=L.visits.length;return n%2===0?L.starter:(L.starter==="A"?"B":"A")};
-const legsWon=(st,p)=>st.legs.filter(l=>l.winner===p).length;
+const setScore=st=>{let a=0,b=0,sa=0,sb=0;for(const l of st.legs){if(l.winner==="A")a++;else if(l.winner==="B")b++;if(a>=st.set_legs){sa++;a=0;b=0}else if(b>=st.set_legs){sb++;a=0;b=0}}return {sa,sb,a,b}};
+const legsWon=(st,p)=>st.set_legs?setScore(st)[p==="A"?"sa":"sb"]:st.legs.filter(l=>l.winner===p).length;
+const fmtLabel=m=>{const ft=m.first_to||3,t=m.fmt==="best"?`best of ${2*ft-1}`:`first to ${ft}`;return m.set_legs?`${t} sets (each set first to ${m.set_legs} legs)`:`${t} legs`};
 function matchOver(st){const a=legsWon(st,"A"),b=legsWon(st,"B"),w=st.first_to;return a>=w||b>=w||(st.draw&&a===w-1&&b===w-1)}
 function calcStats(st,p){let sc=0,d=0,f9s=0,f9d=0,m180=0,t140=0,t100=0,hf=0,bl=0,co=0,dbl=0;
   st.legs.forEach(L=>{let k=0,ld=0;L.visits.forEach(v=>{if(v.p!==p)return;const dd=v.co?v.co:3;sc+=v.s;d+=dd;ld+=dd;if(k<3){f9s+=v.s;f9d+=dd}k++;
@@ -574,10 +576,10 @@ async function undo(){const st=SC.st;let L=st.legs[st.legs.length-1];
   const last=L.visits[L.visits.length-1];if(!last)return;if(SC.mode==="online"&&last.p!==SC.side){SC.msg="You can only undo your own score.";renderScorer();return}
   L.visits.pop();L.winner=null;st.done=false;if(await saveSC())renderScorer()}
 function renderScorer(){const box=$("scOut");if(!SC){box.innerHTML="";return}const {m,st}=SC;const L=st.legs[st.legs.length-1],p=turnOf(L);
-  const side=k=>{const id=k==="A"?m.player_a:m.player_b;const s=calcStats(st,k);return `<div class="side ${p===k?"on":""}"><div class="nm">${PF(id)} ${esc(PN(id))}</div><div class="rem">${legRem(L,k)}</div><div class="note">Legs <b>${legsWon(st,k)}</b> · avg ${s.tda.toFixed(1)}</div></div>`};
+  const side=k=>{const id=k==="A"?m.player_a:m.player_b;const s=calcStats(st,k);return `<div class="side ${p===k?"on":""}"><div class="nm">${PF(id)} ${esc(PN(id))}</div><div class="rem">${legRem(L,k)}</div><div class="note">${st.set_legs?`Sets <b>${legsWon(st,k)}</b> · legs <b>${setScore(st)[k==="A"?"a":"b"]}</b>`:`Legs <b>${legsWon(st,k)}</b>`} · avg ${s.tda.toFixed(1)}</div></div>`};
   const last=L.visits.slice(-6).map(v=>`${esc(PN(v.p==="A"?m.player_a:m.player_b))}: ${v.bust?"bust":v.s}${v.co?" ✓ out":""}`).reverse().join("<br>");
   if(st.done){const a=legsWon(st,"A"),b=legsWon(st,"B");const sa=calcStats(st,"A"),sb=calcStats(st,"B");
-    box.innerHTML=`<div class="card"><h2>Match finished</h2><p style="font-size:22px"><b>${esc(PN(m.player_a))} ${a}-${b} ${esc(PN(m.player_b))}</b>${a===b?" (draw)":""}</p>
+    box.innerHTML=`<div class="card"><h2>Match finished</h2><p style="font-size:22px"><b>${esc(PN(m.player_a))} ${a}-${b} ${esc(PN(m.player_b))}</b>${st.set_legs?" sets":""}${a===b?" (draw)":""}</p>
      <div class="tw"><table><tr><th class="l"></th><th>Avg</th><th>First 9</th><th>180</th><th>High CO</th><th>Best leg</th><th>CO %</th></tr>${[["A",sa],["B",sb]].map(([k,s])=>`<tr><td class="l">${esc(PN(k==="A"?m.player_a:m.player_b))}</td><td>${s.tda.toFixed(2)}</td><td>${s.f9.toFixed(2)}</td><td>${s.b180}</td><td>${s.hf||"–"}</td><td>${s.bl?s.bl+" darts":"–"}</td><td>${s.cop==null?"–":s.cop+"%"}</td></tr>`).join("")}</table></div>
      <div class="row" style="margin-top:10px"><button class="btn primary" id="scSubmit">Submit result</button><button class="btn" id="scUndo">Undo last score</button><button class="btn" id="scBack">Back</button></div><p class="err" id="scErr">${esc(SC.msg)}</p>
      <p class="note">Your opponent then checks and accepts it on their Play page.</p></div>`;
@@ -585,7 +587,7 @@ function renderScorer(){const box=$("scOut");if(!SC){box.innerHTML="";return}con
       try{localStorage.removeItem("11d-sc-"+m.id)}catch(_){}stopPoll();SC=null;await load();show("play")};
     $("scUndo").onclick=undo;$("scBack").onclick=()=>{stopPoll();show("play")};return}
   const myTurn=SC.mode==="local"||p===SC.side;
-  box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><b>${KIND[m.kind]} · first to ${m.first_to} · leg ${st.legs.length}</b><span class="pill">${SC.mode==="online"?"Online":"One phone"}</span></div>
+  box.innerHTML=`<div class="card"><div class="row" style="justify-content:space-between"><b>${KIND[m.kind]||"Match"} · ${fmtLabel(m)} · leg ${st.legs.length}</b><span class="pill">${SC.mode==="online"?"Online":"One phone"}</span></div>
     <div class="score2" style="margin-top:10px">${side("A")}${side("B")}</div>
     <p style="text-align:center;margin:10px 0 0"><b>${p?esc(PN(p==="A"?m.player_a:m.player_b))+" to throw":""}</b>${!myTurn?" · waiting for their score…":""}</p>
     ${SC.ask?`<div class="item" style="margin-top:10px"><b>Checkout! How many darts did the finish take?</b><div class="chips" style="margin-top:6px">${[1,2,3].map(n=>`<button class="chip" data-co="${n}">${n}</button>`).join("")}</div><p class="note">Darts thrown at a double this visit:</p><div class="chips">${[1,2,3].map(n=>`<button class="chip" data-codbl="${n}" aria-pressed="${n===1}">${n}</button>`).join("")}</div></div>`:`
@@ -2454,7 +2456,7 @@ function msRender(){if(!MS||!SC)return msClose();const v=$("v-scorer");v.classLi
   const tile=(k,ic,t,s,pressed)=>`<button type="button" data-${k} aria-pressed="${pressed}"><span>${ic} ${t}</span><small>${s}</small></button>`;
   c.innerHTML=`<h2>Match set-up</h2>
    <div class="ms-vs"><b>${nameLink(A)}</b><span class="note">v</span><b>${nameLink(Bp)}</b></div>
-   <div class="ms-sum"><span class="pill">${esc(kind)}</span><span class="pill">First to ${m.first_to} legs</span><span class="pill">${m.start_score||501}</span><span class="pill">Double out</span>${m.kind==="league"?'<span class="pill">Draw allowed</span>':""}</div>
+   <div class="ms-sum"><span class="pill">${esc(kind)}</span><span class="pill">${esc(fmtLabel(m).replace(/^./,c=>c.toUpperCase()))}</span><span class="pill">${m.start_score||501}</span><span class="pill">Double out</span>${m.kind==="league"?'<span class="pill">Draw allowed</span>':""}</div>
    <p class="note">The match format is set when the match is made, so both players play the same thing.</p>
    <h3>1. Who throws first?</h3><p class="note">Do a bull-off${online?" on camera":""} if you like, then pick the winner.</p>
    <div class="ms-tiles">${tile("mst-a","🎯",esc(PN(A)),"throws first",MS.starter==="A")}${tile("mst-b","🎯",esc(PN(Bp)),"throws first",MS.starter==="B")}</div>
@@ -2564,6 +2566,55 @@ function ctrySearch(){const sel=$("jCountry");if(!sel||$("jcQ"))return;
   list.onkeydown=e=>{const bs=[...list.querySelectorAll("[data-cc]")],i=bs.indexOf(document.activeElement);if(e.key==="ArrowDown"&&bs[i+1]){e.preventDefault();bs[i+1].focus()}else if(e.key==="ArrowUp"){e.preventDefault();(bs[i-1]||q).focus()}};
   sel.addEventListener("change",()=>{if(document.activeElement!==q){q.value=sel.value?(CNAME[sel.value]||""):"";}show()});
   if(sel.value)q.value=CNAME[sel.value]||"";show()}
+
+// ---------- 13. match format: first to or best of, any number of legs, or sets (friendlies, challenges, guest games, the computer) ----------
+(function(){const st=document.createElement("style");st.textContent=`
+.fmtp{display:grid;gap:8px;padding:10px 12px;border-radius:14px;background:var(--sunk);margin:8px 0;flex:1 1 100%}
+.fmtp .chips button{min-width:96px}.fmtp .fsum{font-weight:700;margin:0}`;document.head.appendChild(st)})();
+function fmtOpts(fmt,sets){const n=[];if(fmt==="best"){for(let i=1;i<=(sets?13:21);i+=2)n.push(i)}else{for(let i=1;i<=(sets?7:11);i++)n.push(i)}return n}
+function fmtRead(sel){const f=sel.dataset.fmt||"first",sl=sel.dataset.sl?+sel.dataset.sl:null;return {fmt:f,first_to:+sel.value||3,set_legs:sl}}
+// turns a plain "First to" list into: First to / Best of, how many, and an optional "Play sets"
+function fmtPicker(sel){if(!sel||sel.dataset.fp)return;sel.dataset.fp="1";sel.dataset.fmt=sel.dataset.fmt||"first";
+  const lab=sel.closest("label")||sel;lab.hidden=true;
+  const box=document.createElement("div");box.className="fmtp";(lab.closest(".row")||lab).after(box);
+  const ft0=+(sel.dataset.ft||sel.value)||3;let shown=sel.dataset.fmt==="best"?2*ft0-1:ft0;
+  const draw=()=>{const f=sel.dataset.fmt,sets=!!sel.dataset.sl,opts=fmtOpts(f,sets);if(!opts.includes(shown))shown=opts.reduce((b,n)=>Math.abs(n-shown)<Math.abs(b-shown)?n:b,opts[0]);
+    const ft=f==="best"?(shown+1)/2:shown;[...sel.options].forEach(o=>o.remove());const o=document.createElement("option");o.value=String(ft);o.textContent=String(ft);sel.appendChild(o);sel.value=String(ft);sel.dispatchEvent(new Event("change",{bubbles:true}));
+    const unit=sets?"sets":"legs";const sum=fmtLabel({first_to:ft,fmt:f,set_legs:sets?+sel.dataset.sl:null});
+    box.innerHTML=`<div class="chips" role="group" aria-label="Match format"><button type="button" class="chip" data-ff="first" aria-pressed="${f==="first"}">First to</button><button type="button" class="chip" data-ff="best" aria-pressed="${f==="best"}">Best of</button></div>
+      <div class="row"><label class="f">How many ${unit}<select data-fn>${opts.map(n=>`<option value="${n}" ${n===shown?"selected":""}>${n}</option>`).join("")}</select></label>
+      ${sets?`<label class="f">Each set is first to<select data-fsl>${[1,2,3,4,5,6].map(n=>`<option value="${n}" ${n===+sel.dataset.sl?"selected":""}>${n} leg${n>1?"s":""}</option>`).join("")}</select></label>`:""}</div>
+      <label class="check"><input type="checkbox" data-fs ${sets?"checked":""}> Play sets (like the World Championship)</label>
+      <p class="fsum" aria-live="polite">${esc(sum.replace(/^./,c=>c.toUpperCase()))}</p>`;
+    box.querySelectorAll("[data-ff]").forEach(b=>b.onclick=()=>{const was=sel.dataset.fmt;if(was===b.dataset.ff)return;sel.dataset.fmt=b.dataset.ff;shown=b.dataset.ff==="best"?shown*2-1:Math.max(1,Math.round((shown+1)/2));draw()});
+    box.querySelector("[data-fn]").onchange=e=>{shown=+e.target.value;draw()};
+    const sl=box.querySelector("[data-fsl]");if(sl)sl.onchange=e=>{sel.dataset.sl=e.target.value;draw()};
+    box.querySelector("[data-fs]").onchange=e=>{if(e.target.checked){sel.dataset.sl="3";shown=sel.dataset.fmt==="best"?5:3}else{delete sel.dataset.sl;shown=sel.dataset.fmt==="best"?5:3}draw()}};
+  draw()}
+function add701(id){const s=$(id);if(s&&![...s.options].some(o=>o.value==="701"||o.textContent==="701")){const o=document.createElement("option");o.textContent="701";o.value="701";s.appendChild(o)}}
+(function(){const _p=renderPlay;renderPlay=function(){const r=_p.apply(this,arguments);try{
+  // friendly
+  const ft=$("frFt");if(ft&&!ft.dataset.fp){fmtPicker(ft);add701("frSt");
+    $("frGo").onclick=async()=>{const to=$("frTo").value;if(!to){$("frErr").textContent="Choose a player.";return}const f=fmtRead(ft);
+      const {error}=await db.rpc("v2_friendly2",{p_to:to,p_first_to:f.first_to,p_start:+$("frSt").value,p_msg:$("frMsg").value,p_fmt:f.fmt,p_set_legs:f.set_legs});
+      $("frErr").innerHTML=error?esc(error.message):'<span class="okmsg">Invite sent.</span>';if(!error)load()}}
+  // challenge
+  const ct=$("chTo");if(ct&&!$("chFt")){const row=ct.closest(".row");const w=document.createElement("div");w.className="row";
+    w.innerHTML=`<label class="f">First to<select id="chFt"><option selected>3</option></select></label><label class="f">Game<select id="chSt"><option selected>501</option><option>301</option><option>701</option></select></label>`;row.after(w);fmtPicker($("chFt"));
+    const n=[...$("playOut").querySelectorAll("p.note")].find(x=>/^Challenges are first to 3/.test(x.textContent));if(n)n.textContent="Challenges are just for fun: pick the format together. You can send 2 every 4 weeks, and anyone can decline without giving a reason.";
+    $("chGo").onclick=async()=>{const to=$("chTo").value;if(!to){$("chErr").textContent="Choose a player.";return}const f=fmtRead($("chFt"));
+      const {error}=await db.rpc("v2_challenge2",{p_to:to,p_coach:$("chCoach").checked,p_msg:$("chMsg").value,p_first_to:f.first_to,p_start:+$("chSt").value,p_fmt:f.fmt,p_set_legs:f.set_legs});
+      $("chErr").innerHTML=error?esc(error.message):'<span class="okmsg">Challenge sent.</span>';if(!error)load()}}
+  // guest game on this phone
+  const g=$("gFt");if(g&&!g.dataset.fp){fmtPicker(g);add701("gSt")}
+  }catch(e){console.warn(e)}return r}})();
+(function(){const _t=renderTraining;renderTraining=function(){const r=_t.apply(this,arguments);try{const b=$("bFt");if(b&&!b.dataset.fp){if(TS.fmt)b.dataset.fmt=TS.fmt;if(TS.sl)b.dataset.sl=TS.sl;if(TS.ft)b.dataset.ft=TS.ft;fmtPicker(b);add701("bSt");
+    b.addEventListener("change",()=>{TS.fmt=b.dataset.fmt;TS.sl=b.dataset.sl||null;TS.ft=+b.value})}}catch(e){console.warn(e)}return r}})();
+// local games (guest, computer): remember the format when Start is tapped and apply it to the new match
+let FMT_PENDING=null;
+document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#gGo,#bGo");if(!t)return;const s=$(t.id==="gGo"?"gFt":"bFt");if(s)FMT_PENDING=fmtRead(s)},true);
+(function(){const _r=renderScorer;renderScorer=function(){try{if(FMT_PENDING&&SC&&SC.m&&SC.m.id<0&&!SC.m.__fmt){const f=FMT_PENDING;FMT_PENDING=null;SC.m.__fmt=1;SC.m.fmt=f.fmt;SC.m.set_legs=f.set_legs;SC.m.first_to=f.first_to;
+    if(!SC.st.legs.some(l=>l.visits.length)){SC.st.first_to=f.first_to;SC.st.set_legs=f.set_legs;SC.st.draw=false}}}catch(_){}return _r.apply(this,arguments)}})();
 
 load();
 </script>
