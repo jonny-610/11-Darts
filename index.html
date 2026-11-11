@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-6o9emCSudW518sNJ+h8WC526QYih6i9g4LAGs87jqFU=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-2lHKtEq7+b5D+T7zs0QJK/XcFQdccw1paPfCSr10fzg=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -2631,6 +2631,60 @@ function ovJump(re){const v=$("v-staff");if(!v)return;const h=[...v.querySelecto
     const lab=(t.querySelector("span")||{}).textContent||"";const m=OV_GO.find(([a])=>a.test(lab));if(!m||t.dataset.ov)return;t.dataset.ov="1";t.classList.add("ovgo");
     t.setAttribute("role","button");t.tabIndex=0;t.setAttribute("aria-label",lab+": "+((t.querySelector("b")||{}).textContent||"")+". Go to that section");
     t.onclick=()=>ovJump(m[1]);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();ovJump(m[1])}}})}catch(e){console.warn(e)}return r}})();
+
+// ---------- 15. end of a match: full match stats, and "Rematch?" for friendlies ----------
+(function(){const st=document.createElement("style");st.textContent=`
+.mst{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}.mst th,.mst td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:center}
+.mst th{font:700 13px var(--display);text-transform:uppercase;letter-spacing:.04em}.mst td.l{text-align:left;color:var(--muted);font-size:14px}.mst td.win{font-weight:800;color:var(--accent)}
+.rmbox{margin-top:14px;padding:14px;border-radius:16px;background:var(--soft);display:grid;gap:8px}.rmbox h3{margin:0}
+.rmbox .btn.primary{min-height:56px;font-size:18px}`;document.head.appendChild(st)})();
+function matchStatsHTML(st,m){const sa=calcStats(st,"A"),sb=calcStats(st,"B"),na=esc(PN(m.player_a)),nb=esc(PN(m.player_b));
+  const legs=k=>st.legs.filter(l=>l.winner===k).length;
+  const rows=[["Legs won",legs("A"),legs("B"),1],...(st.set_legs?[["Sets won",legsWon(st,"A"),legsWon(st,"B"),1]]:[]),["3-dart average",sa.tda.toFixed(2),sb.tda.toFixed(2),1],["First 9 average",sa.f9.toFixed(2),sb.f9.toFixed(2),1],
+    ["180s",sa.b180,sb.b180,1],["140+",sa.b140,sb.b140,1],["100+",sa.b100,sb.b100,1],["Highest checkout",sa.hf||"–",sb.hf||"–",1],["Best leg (darts)",sa.bl||"–",sb.bl||"–",-1],
+    ["Checkouts",`${sa.co} / ${sa.dbl}`,`${sb.co} / ${sb.dbl}`,0],["Checkout %",sa.cop==null?"–":sa.cop+"%",sb.cop==null?"–":sb.cop+"%",1]];
+  const better=(a,b,dir)=>{const x=parseFloat(a),y=parseFloat(b);if(!dir||isNaN(x)||isNaN(y)||x===y)return [0,0];return dir>0?[x>y,y>x]:[x<y,y<x]};
+  return `<table class="mst" aria-label="Match stats"><tr><th></th><th>${na}</th><th>${nb}</th></tr>${rows.map(([l,a,b,d])=>{const [wa,wb]=better(a,b,d);return `<tr><td class="l">${l}</td><td class="${wa?"win":""}">${a}</td><td class="${wb?"win":""}">${b}</td></tr>`}).join("")}</table>`}
+let RM={t:0,cid:null,mid:null};
+function rmStop(){clearInterval(RM.t);RM={t:0,cid:null,mid:null}}
+(function(){const _sh=show;show=function(v){if(v!=="scorer")rmStop();return _sh.apply(this,arguments)}})();
+(function(){const _r=renderScorer;renderScorer=function(){const r=_r.apply(this,arguments);try{if(!SC||!SC.st||!SC.st.done)return r;const box=$("scOut");const card=box&&box.querySelector(".card");if(!card)return r;
+  const tw=card.querySelector(".tw");if(tw&&!card.querySelector(".mst"))tw.outerHTML=matchStatsHTML(SC.st,SC.m);
+  if(SC.m.kind==="fun"&&!$("rmBox"))rmBox(card)}catch(e){console.warn(e)}return r}})();
+function rmLoser(st){const a=legsWon(st,"A"),b=legsWon(st,"B");return a<b?"A":b<a?"B":null}
+function rmBox(card){const m=SC.m,st=SC.st,d=document.createElement("div");d.id="rmBox";d.className="rmbox";
+  const opp=m.player_a===ME.id?m.player_b:m.player_a,on=esc(PN(opp));
+  d.innerHTML=`<h3>🔁 Rematch?</h3><p class="note" id="rmMsg">${m.id<0?"Same format, straight away. This one gets saved first.":SC.mode==="local"?"Same format, straight away on this phone. This result gets sent first.":`Same format. This result gets sent first, then ${on} is asked straight away.`}</p>
+    <div class="row"><button class="btn primary" id="rmGo">${m.id<0?"Save and play again":"Yes, rematch!"}</button></div><div id="rmAsk"></div>`;
+  const back=$("scBack");card.appendChild(d);if(back)d.after(back.parentElement);
+  $("rmGo").onclick=()=>rmStart();
+  if(m.id>0&&SC.mode==="online")rmWatch()}
+async function rmSubmit(){const st=SC.st,m=SC.m,a=legsWon(st,"A"),b=legsWon(st,"B");
+  const {error}=await db.rpc("v2_submit_result",{p_match:m.id,p_la:a,p_lb:b,p_sa:calcStats(st,"A"),p_sb:calcStats(st,"B"),p_proofs:null});
+  if(error&&!/already has a result/i.test(error.message))throw error;try{localStorage.removeItem("11d-sc-"+m.id)}catch(_){}}
+async function rmStart(){const b=$("rmGo"),msg=$("rmMsg");b.disabled=true;const m=SC.m,st=SC.st;
+  try{
+    if(m.guest||m.bot){const sa=calcStats(st,"A"),sb=calcStats(st,"B"),a=legsWon(st,"A"),c=legsWon(st,"B"),fmt={fmt:m.fmt||"first",first_to:m.first_to,set_legs:m.set_legs||null},loser=rmLoser(st);
+      const det=m.bot?{level:m.bot,legs:[a,c],won:a>c,first_to:m.first_to,start:m.start_score,me:sa,them:sb}:{opp:m.guest,legs:[a,c],first_to:m.first_to,start:m.start_score,me:sa,them:sb};
+      const {error}=await db.rpc("v2_log_training",{p_drill:m.bot?"bot":"friendly_guest",p_score:sa.tda||0,p_detail:det});if(error)throw error;
+      if(m.bot){FMT_PENDING=fmt;startBot(m.bot,m.first_to,m.start_score,loser==="B"?"bot":"me");return}
+      const m2={...m,id:-Date.now(),__fmt:1};MATCHES.push(m2);await openScorer(m2.id,"local");const i=MATCHES.indexOf(m2);if(i>=0)MATCHES.splice(i,1);
+      if(SC&&loser){SC.st.legs[0].starter=loser;if(MS)MS.starter=loser;msRender&&MS&&msRender()}return}
+    await rmSubmit();
+    const {data,error}=await db.rpc("v2_rematch",{p_match:m.id,p_now:SC.mode==="local"});if(error)throw error;
+    if(data&&data.match_id){const mode=SC.mode;rmStop();await load();openScorer(data.match_id,mode);return}
+    RM.cid=data.challenge_id;msg.innerHTML=`<b>Asked ${esc(PN(m.player_a===ME.id?m.player_b:m.player_a))}.</b> Waiting for them to say yes… (the offer lasts 2 hours)`;b.textContent="Waiting…";rmWatch()}
+  catch(e){msg.textContent=e.message||String(e);b.disabled=false}}
+// both players' finished screens check every few seconds: did they say yes, or did they ask me?
+function rmWatch(){if(RM.t)return;const mid=SC.m.id;RM.t=setInterval(async()=>{if(!SC||SC.m.id!==mid||!SC.st.done){rmStop();return}
+  const r=await db.from("challenges").select("*").eq("rematch_of",mid);const cs=r.data||[];
+  const mine=cs.find(c=>c.from_id===ME.id),theirs=cs.find(c=>c.to_id===ME.id&&c.status==="open");
+  if(mine&&mine.status==="accepted"&&mine.match_id){rmStop();await load();openScorer(mine.match_id,"online");return}
+  if(mine&&["declined","expired","cancelled"].includes(mine.status)){$("rmMsg").textContent="Not this time. Maybe next time!";rmStop();return}
+  const ask=$("rmAsk");if(theirs&&ask&&!ask.dataset.c){ask.dataset.c=String(theirs.id);
+    ask.innerHTML=`<div class="item"><b>${esc(PN(theirs.from_id))} wants a rematch!</b><div class="row" style="margin-top:8px"><button class="btn primary" id="rmYes">Yes, let's go</button><button class="btn" id="rmNo">No thanks</button></div></div>`;
+    $("rmYes").onclick=async()=>{const {data,error}=await db.rpc("v2_rematch",{p_match:mid,p_now:false});if(error){ask.textContent=error.message;return}if(data&&data.match_id){rmStop();await load();openScorer(data.match_id,"online")}};
+    $("rmNo").onclick=async()=>{await db.rpc("v2_challenge_respond",{p_id:theirs.id,p_accept:false});ask.innerHTML='<p class="note">No problem.</p>'}}},3000)}
 
 load();
 </script>
