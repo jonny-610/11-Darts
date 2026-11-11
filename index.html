@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-2lHKtEq7+b5D+T7zs0QJK/XcFQdccw1paPfCSr10fzg=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-coczfHtnkKbIWRO0lyJ6BRVCEempVKJXV0U/ij2W404=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -1658,7 +1658,7 @@ function ladderDart(n){const c=TS.cur,mod=TS.mod||"S";if(n===25&&mod==="T")retur
   TS.mod="S";renderTraining()}
 async function saveTraining(){let score,detail;
   if(TRMODE==="scoring100"){const bull=TS.target==="Bull",n=bull?25:+TS.target.slice(1);const val=c=>bull?{M:0,"25":25,B:50}[c]:{M:0,S:n,D:2*n,T:3*n}[c];const pts=TS.d.reduce((t,c)=>t+val(c),0);
-    score=pts/TS.d.length*3;const counts={};TS.d.forEach(c=>counts[c]=(counts[c]||0)+1);detail={target:TS.target,points:pts,darts:TS.d.length,counts}}
+    score=pts/TS.d.length*3;const counts={};TS.d.forEach(c=>counts[c]=(counts[c]||0)+1);detail={target:TS.target,aim:TS.aim||null,points:pts,darts:TS.d.length,counts}}
   else if(TRMODE==="ladder"){if(!TS.att){$("trErr").textContent="Finish at least one attempt first.";return}score=TS.best;detail={start:TS.start,darts:TS.n,att:TS.att,ok:TS.ok,best:TS.best,dbl:TS.dbl}}
   else if(TRMODE==="co170"){score=TS.r.filter(Boolean).length*10;detail={attempts:TS.r}}
   const {error}=await db.rpc("v2_log_training",{p_drill:TRMODE,p_score:+(+score).toFixed(2),p_detail:detail});
@@ -2121,27 +2121,33 @@ setInterval(()=>{if(document.visibilityState==="visible")notesLoad().catch(()=>{
 const TR_COUNTS=[30,60,99,100,150,300];
 let TRN=(()=>{try{const v=+localStorage.getItem("trDarts");return v>=3&&v<=999?v:100}catch(_){return 100}})();
 function trSetN(n){n=Math.round(+n);if(!(n>=3&&n<=999))return false;TRN=n;try{localStorage.setItem("trDarts",String(n))}catch(_){}return true}
-try{TDRILLS.scoring100.n="Scoring practice";TDRILLS.scoring100.d="Pick how many darts (30 to 300, or any number) and a target. Tap what each dart hits. Your result is your 3-dart average."}catch(_){}
+try{TDRILLS.scoring100.n="Scoring practice";TDRILLS.scoring100.d="Pick how many darts, a number (20 down to 1, or the bull) and the bed you're aiming at. Tap what each dart hits. Your result is your 3-dart average."}catch(_){}
+(function(){const st=document.createElement("style");st.textContent=`.trnums{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.trnums .chip{min-height:52px;font-size:18px;font-weight:700;border-radius:14px;padding:0}.trnums .chip.bull{grid-column:span 2}
+.trbeds{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.trbeds .chip{min-height:56px;font-size:16px;font-weight:700;border-radius:14px}`;document.head.appendChild(st)})();
+const TR_BED={S:"Single",D:"Double",T:"Treble","25":"Outer bull (25)",B:"Bull (50)"};
 const _trRender=renderTraining;
 renderTraining=function(){
   if(typeof TRMODE==="undefined"||TRMODE!=="scoring100")return _trRender.apply(this,arguments);
   const out=$("trOut");if(!out)return;const D=TDRILLS.scoring100;let body;
-  if(!TS.target){
+  if(!TS.target){const num=TS.pick;
     body=`<h3>1. How many darts?</h3><div class="chips">${TR_COUNTS.map(n=>`<button class="chip" data-tc="${n}" aria-pressed="${TRN===n}">${n}${n===99?" (33 visits)":""}</button>`).join("")}</div>
       <label class="f" style="max-width:240px;margin-top:8px">Or type any number (3 to 999)<input id="trCount" type="number" inputmode="numeric" min="3" max="999" value="${TRN}"></label>
-      <h3>2. Pick your target</h3><div class="chips">${["T20","T19","T18","Bull"].map(t=>`<button class="chip" data-tg="${t}">${t==="Bull"?"Bull":"Treble "+t.slice(1)}</button>`).join("")}</div>`}
-  else{const total=TS.total,bull=TS.target==="Bull",n=bull?25:+TS.target.slice(1);const val=c=>bull?{M:0,"25":25,B:50}[c]:{M:0,S:n,D:2*n,T:3*n}[c];
-    const k=TS.d.length,pts=TS.d.reduce((t,c)=>t+val(c),0),cnt=c=>TS.d.filter(x=>x===c).length,top=bull?"B":"T",done=k>=total;
-    body=`<div class="kv"><div><b>${k}/${total}</b><span>Darts</span></div><div><b>${pts}</b><span>Points</span></div><div><b>${k?(pts/k*3).toFixed(1):"–"}</b><span>3-dart avg</span></div><div><b>${k?Math.round(cnt(top)/k*100):0}%</b><span>${bull?"Bulls":"Trebles"}</span></div></div>
+      <h3>2. Pick your target</h3><div class="trnums" role="group" aria-label="Target number">${[...Array.from({length:20},(_,i)=>20-i),25].map(n=>`<button class="chip${n===25?" bull":""}" data-tn2="${n}" aria-pressed="${num===n}">${n===25?"Bull":n}</button>`).join("")}</div>
+      ${num?`<h3>3. Which bed?</h3><div class="trbeds" role="group" aria-label="Bed">${(num===25?["25","B"]:["S","D","T"]).map(k=>`<button class="chip" data-bed="${k}">${num===25?TR_BED[k]:TR_BED[k]+" "+num}</button>`).join("")}</div>`:`<p class="note">Then choose single, double or treble.</p>`}`}
+  else{const total=TS.total,bull=TS.target==="Bull",n=bull?25:+TS.target.slice(1),aim=TS.aim||(bull?"B":TS.target[0]);const val=c=>bull?{M:0,"25":25,B:50}[c]:{M:0,S:n,D:2*n,T:3*n}[c];
+    const k=TS.d.length,pts=TS.d.reduce((t,c)=>t+val(c),0),cnt=c=>TS.d.filter(x=>x===c).length,done=k>=total,aimName=bull?TR_BED[aim]:TR_BED[aim]+" "+n;
+    body=`<p class="note" style="margin:0 0 8px">Aiming at <b>${aimName}</b></p>
+      <div class="kv"><div><b>${k}/${total}</b><span>Darts</span></div><div><b>${pts}</b><span>Points</span></div><div><b>${k?(pts/k*3).toFixed(1):"–"}</b><span>3-dart avg</span></div><div><b>${k?Math.round(cnt(aim)/k*100):0}%</b><span>Hit ${bull?(aim==="B"?"bull":"25"):TR_BED[aim].toLowerCase()}</span></div></div>
       <p style="text-align:center;margin:10px 0 4px"><b>Dart ${Math.min(k+1,total)} of ${total}</b>${k%3===0||done?"":` · visit dart ${k%3+1} of 3`}</p>
-      ${done?`<p class="okmsg"><b>All ${total} darts thrown.</b></p>`:`<div class="bigpad">${(bull?[["M","Miss"],["25","25"],["B","Bull"]]:[["M","Miss"],["S","Single "+n],["D","Double "+n],["T","Treble "+n]]).map(([c,l])=>`<button data-sd="${c}" class="${c==="M"?"miss":""}">${l}</button>`).join("")}</div>`}
+      ${done?`<p class="okmsg"><b>All ${total} darts thrown.</b></p>`:`<div class="bigpad">${(bull?[["M","Miss"],["25","25"],["B","Bull"]]:[["M","Miss"],["S","Single "+n],["D","Double "+n],["T","Treble "+n]]).map(([c,l])=>`<button data-sd="${c}" class="${c==="M"?"miss":""}" ${c===aim?'style="outline:3px solid var(--accent);outline-offset:-3px"':""}>${l}</button>`).join("")}</div>`}
       <div class="row" style="margin-top:8px"><button class="btn" data-su="1" ${k?"":"disabled"}>↶ Undo dart</button>${done?'<button class="btn primary" id="trSave">Save result</button>':k>=3?'<button class="btn" id="trSaveEarly">Stop and save now</button>':""}</div>`}
   out.innerHTML=`<div class="card"><h2>${D.i} ${D.n}${TS.target?` · ${TS.total} darts`:""}</h2><p class="note">${D.d}</p>${body}<p class="err" id="trErr"></p><div class="row" style="margin-top:10px"><button class="btn" id="trBack">← Back to training</button></div></div>`;
   $("trBack").onclick=()=>{if(TS.d&&TS.d.length&&TS.d.length<TS.total&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
   out.querySelectorAll("[data-tc]").forEach(b=>b.onclick=()=>{trSetN(b.dataset.tc);renderTraining()});
   const ci=$("trCount");if(ci)ci.onchange=()=>{$("trErr").textContent="";if(!trSetN(ci.value)){$("trErr").textContent="Pick a number from 3 to 999.";return}
     out.querySelectorAll("[data-tc]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.tc===TRN)))}; // no redraw, so the next tap isn't lost
-  out.querySelectorAll("[data-tg]").forEach(b=>b.onclick=()=>{const c=$("trCount");if(c&&+c.value!==TRN&&!trSetN(c.value)){$("trErr").textContent="Pick a number from 3 to 999.";return}TS={target:b.dataset.tg,d:[],total:TRN};renderTraining()});
+  out.querySelectorAll("[data-tn2]").forEach(b=>b.onclick=()=>{const c=$("trCount");if(c&&+c.value!==TRN&&!trSetN(c.value)){$("trErr").textContent="Pick a number from 3 to 999.";return}TS.pick=+b.dataset.tn2;renderTraining();const bd=out.querySelector(".trbeds");if(bd)bd.scrollIntoView({behavior:"smooth",block:"center"})});
+  out.querySelectorAll("[data-bed]").forEach(b=>b.onclick=()=>{const n=TS.pick,k=b.dataset.bed;TS={target:n===25?"Bull":k+n,aim:k,d:[],total:TRN};renderTraining()});
   out.querySelectorAll("[data-sd]").forEach(b=>b.onclick=()=>{if(TS.d.length<TS.total)TS.d.push(b.dataset.sd);renderTraining()});
   out.querySelectorAll("[data-su]").forEach(b=>b.onclick=()=>{TS.d.pop();renderTraining()});
   if($("trSave"))$("trSave").onclick=()=>saveTraining();
@@ -2685,6 +2691,21 @@ function rmWatch(){if(RM.t)return;const mid=SC.m.id;RM.t=setInterval(async()=>{i
     ask.innerHTML=`<div class="item"><b>${esc(PN(theirs.from_id))} wants a rematch!</b><div class="row" style="margin-top:8px"><button class="btn primary" id="rmYes">Yes, let's go</button><button class="btn" id="rmNo">No thanks</button></div></div>`;
     $("rmYes").onclick=async()=>{const {data,error}=await db.rpc("v2_rematch",{p_match:mid,p_now:false});if(error){ask.textContent=error.message;return}if(data&&data.match_id){rmStop();await load();openScorer(data.match_id,"online")}};
     $("rmNo").onclick=async()=>{await db.rpc("v2_challenge_respond",{p_id:theirs.id,p_accept:false});ask.innerHTML='<p class="note">No problem.</p>'}}},3000)}
+
+// ---------- 16. checkout ladder: start on any number from 2 to 170; "Checkout 170" drill removed ----------
+try{delete TDRILLS.co170}catch(_){}
+try{TDRILLS.ladder.d="Pick any start from 2 to 170. Check out and you go up 1. Miss and you stay. Tops out at 170."}catch(_){}
+(function(){const _r=renderTraining;renderTraining=function(){const r=_r.apply(this,arguments);try{
+  if(TRMODE!=="ladder"||TS.start||!TS.sel)return r;const out=$("trOut");const chips=out.querySelector("[data-ls]");if(!chips||$("lStart"))return r;
+  const box=chips.parentElement;box.innerHTML=[41,61,81,101,121,170].map(s=>`<button class="chip" data-ls="${s}" aria-pressed="${TS.sel.s===s}">${s}</button>`).join("");
+  const w=document.createElement("div");w.innerHTML=`<label class="f" style="max-width:260px;margin-top:8px">Or type any number (2 to 170)<input id="lStart" type="number" inputmode="numeric" min="2" max="170" value="${TS.sel.s}"></label><p class="note" id="lStartNote" aria-live="polite"></p>`;box.after(w);
+  const mark=()=>box.querySelectorAll("[data-ls]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.ls===TS.sel.s)));
+  box.querySelectorAll("[data-ls]").forEach(b=>b.onclick=()=>{TS.sel.s=+b.dataset.ls;$("lStart").value=TS.sel.s;$("lStartNote").textContent="";mark()});
+  const inp=$("lStart"),note=$("lStartNote");
+  inp.oninput=()=>{const v=Math.round(+inp.value);if(!v){note.textContent="";return}
+    if(v<2||v>170){note.textContent=v===1?"1 can't be checked out (you need a double), so the lowest start is 2.":"Pick a number from 2 to 170.";return}
+    const n=ladderNext(v);TS.sel.s=n;note.textContent=n!==v?`${v} can't be checked out in 3 darts, so you'll start on ${n}.`:"";mark()};
+  }catch(e){console.warn(e)}return r}})();
 
 load();
 </script>
