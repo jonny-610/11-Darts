@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-qt30VfNlLf98De5zXdxPWAt1gn0CAOLFnrt1XjFJjLQ=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-YHbwnQttDsDFLJbflpW12bAO9i09+7bQfI8R/YZjMCM=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -121,6 +121,66 @@ footer{max-width:720px;margin:0 auto;padding:0 16px 30px;color:var(--muted);font
 .bcqr svg{display:block;width:100%;height:auto}
 .cpstat{font-size:1.15em;font-weight:600;margin:12px 0}
 #camPhone{padding:16px}
+</style>
+<style id="redesign">/* ===== 11 Darts redesign (Nov 2026): tab bar at the bottom, bigger buttons, softer cards. Colours are all variables, so they can be changed in one place. ===== */
+:root{--bg:#F5F3FA;--surface:#FFFFFF;--sunk:#F1EEF8;--ink:#17122A;--muted:#5B5372;--line:#E2DCEF;--head:#1E1638;--head-ink:#FFFFFF;--accent:#6D4AE0;--accent-ink:#FFFFFF;--soft:#ECE6FD;--hero2:#6D4AE0;--ok:#16794A;--ok-soft:#D5F3E2;--bad:#B3261E;--bad-soft:#FADAD6;--gold:#A87700;--shadow:0 1px 2px rgba(23,18,42,.06),0 6px 20px rgba(23,18,42,.06)}
+@media (prefers-color-scheme:dark){:root{--bg:#0E0B18;--surface:#1A1528;--sunk:#141020;--ink:#F2EFFA;--muted:#ABA3C2;--line:#2D2642;--head:#0E0B18;--head-ink:#F2EFFA;--accent:#A88BFF;--accent-ink:#160F2B;--soft:#2A2244;--hero2:#4B33A8;--ok:#74D69A;--ok-soft:#163423;--bad:#FF8B80;--bad-soft:#3D1B18;--gold:#E7BE4E;--shadow:none}}
+
+/* top bar: slimmer, just the logo, name and the round buttons */
+header{box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.hin{padding:10px 16px}
+.logo{width:42px;height:42px}
+.brand h1{font-size:26px}
+
+/* tabs: a bar along the bottom of the screen with an icon and a word, easy to reach with a thumb */
+nav#tabs{position:fixed;left:0;right:0;bottom:0;max-width:none;margin:0;z-index:40;display:flex;gap:2px;padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px));background:var(--surface);border-top:1px solid var(--line);box-shadow:0 -4px 18px rgba(0,0,0,.08);overflow:visible}
+nav#tabs[hidden]{display:none!important}
+nav#tabs button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;min-height:58px;border:0;border-radius:14px;background:none;color:var(--muted);opacity:1;font:600 12px/1.1 var(--body);letter-spacing:0;text-transform:none;position:relative}
+nav#tabs button::before{font-size:22px;line-height:1;content:"•"}
+nav#tabs button[data-v="home"]::before{content:"🏠"}
+nav#tabs button[data-v="play"]::before{content:"🎯"}
+nav#tabs button[data-v="tables"]::before{content:"🏆"}
+nav#tabs button[data-v="training"]::before{content:"💪"}
+nav#tabs button[data-v="progress"]::before{content:"📈"}
+nav#tabs button[data-v="me"]::before{content:"👤"}
+nav#tabs button[data-v="staff"]::before{content:"🎙️"}
+nav#tabs button[aria-selected="true"]{color:var(--accent);background:var(--soft);border:0}
+nav#tabs button .pill,nav#tabs button .nbadge,nav#tabs button span{position:absolute;top:2px;right:calc(50% - 26px);margin:0}
+main{padding-bottom:110px}
+footer{padding-bottom:110px}
+
+/* cards: rounder, no hard border, a soft shadow */
+.card{border:0;border-radius:20px;padding:18px;box-shadow:var(--shadow)}
+@media (prefers-color-scheme:dark){.card{border:1px solid var(--line)}}
+h2{font-size:24px;font-weight:800;letter-spacing:.02em}
+h3{font-size:18px}
+.hero{background:linear-gradient(140deg,var(--head) 10%,var(--hero2));border-radius:24px}
+.hero .btn.primary{background:#FFFFFF;color:var(--head);border-color:#FFFFFF}
+
+/* buttons and boxes: bigger, rounder, easy to hit */
+.btn{min-height:50px;border-radius:14px;padding:12px 18px;font-size:15px;border-width:2px}
+.btn.primary{box-shadow:0 4px 14px color-mix(in srgb,var(--accent) 35%,transparent)}
+.chip{min-height:44px;border-radius:99px;border-width:2px;padding:8px 14px}
+input,select,textarea{border-radius:14px;border-width:2px;min-height:50px;padding:12px}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none}
+.item{border:0;border-radius:16px;background:var(--sunk)}
+.prow{border:0;border-radius:14px;padding:12px}
+.divs a{border-radius:16px;padding:16px 8px}
+.kv div{border-radius:14px}
+.pill{border-width:1.5px}
+.lb{border:0!important;border-radius:16px!important;background:var(--sunk)!important}
+
+/* scoring: big numbers, big keys */
+.side{border-radius:18px;border-width:3px}
+.side .rem{font-size:62px}
+.pad{gap:10px}.pad button{border-radius:16px;border:0;background:var(--sunk);min-height:64px;font-size:30px}
+.pad button.go{background:var(--accent);color:var(--accent-ink)}
+.dpad button,.bigpad button{border-radius:16px}
+.ms-tiles button{border-radius:16px}
+
+/* high contrast (Aa menu) keeps strong borders */
+html.hc .card,html.hc .item,html.hc .prow,html.hc .lb,html.hc .pad button,html.hc nav#tabs{border:2px solid var(--line)!important}
+html.hc nav#tabs button[aria-selected="true"]{outline:2px solid var(--accent)}
 </style>
 </head>
 <body>
@@ -1884,6 +1944,591 @@ function camPhoneStop(msg){clearInterval(C.dog);cpSend({t:"bye"});if(C.ch)try{db
   try{C.lock&&C.lock.release()}catch(_){}cpStat(msg);const f=$("cpFlip"),s=$("cpStop");if(f)f.hidden=true;if(s)s.hidden=true}
 // a camera-only visit skips the normal app completely
 if(BCAM){load=async function(){};camPhone(BCAM[1])}
+
+// ===================== fixes 11 Nov: tap the logo to go home; join photo that always uploads =====================
+// Self-contained: works on the 9 Nov and 10 Nov builds. Goes just before the final "load();".
+(function(){
+  const st=document.createElement("style");
+  st.textContent=`.hin .logo,.hin .brand{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.hin .homebtn:focus-visible{outline:3px solid #fff;outline-offset:3px;border-radius:8px}
+.jph{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.jph .btn{min-height:48px}
+.jphmsg{font-size:17px;line-height:1.4;margin:8px 0;padding:10px 12px;border-radius:10px;display:none}
+.jphmsg.on{display:block}
+.jphmsg.wait{background:rgba(127,127,127,.15)}
+.jphmsg.ok{background:#e5f4e4;color:#14532d;border:2px solid #2e7d32}
+.jphmsg.bad{background:#fbebeb;color:#7f1d1d;border:2px solid #c0392b}
+.jphmsg img{display:block;max-width:160px;max-height:160px;margin-top:8px;border-radius:8px}`;
+  document.head.appendChild(st);
+})();
+
+// ---------- 1. the logo is a home button ----------
+(function(){
+  const go=()=>{try{show("home")}catch(_){location.hash="";window.scrollTo(0,0)}};
+  document.querySelectorAll(".hin .logo,.hin .brand").forEach((el,i)=>{
+    el.classList.add("homebtn");
+    if(i===0){el.setAttribute("role","link");el.setAttribute("tabindex","0");el.setAttribute("aria-label","11 Darts home");el.setAttribute("alt","11 Darts home")}
+    else el.setAttribute("aria-hidden","true");
+    el.addEventListener("click",go);
+    el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}});
+  });
+})();
+
+// ---------- 2. photos: a sturdier way to shrink them ----------
+// Big photos (50 MP+) and HEIF photos can fail to open the old way on Android. Try three ways before giving up.
+const PH_MAX=1600;
+function phCanvas(src,w,h){const k=Math.min(1,PH_MAX/Math.max(w,h));const c=document.createElement("canvas");
+  c.width=Math.max(1,Math.round(w*k));c.height=Math.max(1,Math.round(h*k));c.getContext("2d").drawImage(src,0,0,c.width,c.height);
+  return new Promise((res,rej)=>c.toBlob(b=>b&&b.size?res(b):rej(new Error("blob")),"image/jpeg",.82))}
+function phViaImg(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);
+  img.onload=()=>{phCanvas(img,img.naturalWidth||img.width,img.naturalHeight||img.height).then(res,rej).finally(()=>URL.revokeObjectURL(u))};
+  img.onerror=()=>{URL.revokeObjectURL(u);rej(new Error("img"))};img.src=u})}
+async function phViaBitmap(file){if(!window.createImageBitmap)throw new Error("nobitmap");
+  // decode straight to a smaller size (uses far less memory on big photos); the canvas step then caps the longest side
+  let bm;try{bm=await createImageBitmap(file,{resizeWidth:PH_MAX,resizeQuality:"high",imageOrientation:"from-image"})}catch(_){bm=null}
+  if(!bm)bm=await createImageBitmap(file);
+  try{return await phCanvas(bm,bm.width,bm.height)}finally{bm.close&&bm.close()}}
+const _phOldShrink=shrink;
+shrink=async function(file){
+  if(!file||!file.size)throw new Error("That photo is empty. If it's stored online (Google Photos or iCloud), open it on the phone first, or take a new photo.");
+  try{return await phViaImg(file)}catch(_){}
+  try{return await phViaBitmap(file)}catch(_){}
+  try{return await _phOldShrink(file)}catch(_){}
+  throw new Error("This phone couldn't open that photo.")};
+
+// ---------- 3. join form: clear messages, a "take photo" button, Send waits for the upload ----------
+const PH_OK_TYPES=["image/jpeg","image/png","image/webp","image/heic","image/heif"];
+let phBusy=false;
+function phMsg(kind,html){const m=$("jphMsg");if(!m)return;m.className="jphmsg on "+kind;m.innerHTML=html;
+  const old=$("jPhotoMsg");if(old)old.textContent=""}
+async function phUpload(file){if(!file)return;phBusy=true;photoPath=null;const go=$("jGo");if(go){go.disabled=true;go.dataset.t=go.dataset.t||go.textContent;go.textContent="Uploading photo…"}
+  phMsg("wait","⏳ Uploading your photo…");
+  try{
+    let blob=null,type="image/jpeg",ext="jpg";
+    try{blob=await shrink(file)}catch(e){
+      // last resort: send the original if the store accepts it
+      const t=(file.type||"").toLowerCase();
+      if(file.size&&file.size<=10*1024*1024&&PH_OK_TYPES.includes(t)){blob=file;type=t;ext=t.split("/")[1].replace("jpeg","jpg")}
+      else throw e}
+    const path=`${ME.id}/${Date.now()}.${ext}`;
+    const {error}=await db.storage.from("setup").upload(path,blob,{contentType:type,upsert:false});
+    if(error)throw error;
+    photoPath=path;
+    const prev=type==="image/jpeg"||type==="image/png"||type==="image/webp"?`<img alt="Your board photo" src="${URL.createObjectURL(blob)}">`:"";
+    phMsg("ok",`<b>✅ Photo uploaded.</b> You can now tap <b>Send for approval</b>.${prev}`);
+  }catch(e){
+    photoPath=null;const raw=String((e&&e.message)||e||"");
+    const why=/mime|type/i.test(raw)?"That kind of file isn't accepted.":/size|large|exceed/i.test(raw)?"That photo is too big.":/empty|online|couldn't open/i.test(raw)?raw:"It didn't upload.";
+    phMsg("bad",`<b>❌ ${esc(why)}</b><br>Easy fix: open the photo in your gallery, take a <b>screenshot</b> of it, then choose the screenshot here. Or tap <b>Take a photo now</b>.`);
+  }finally{phBusy=false;if(go){go.disabled=false;go.textContent=go.dataset.t||"Send for approval"}}}
+const _phRenderJoin=renderJoin;
+renderJoin=function(){_phRenderJoin.apply(this,arguments);
+  const inp=$("jPhoto");if(!inp||inp.dataset.fx)return;inp.dataset.fx="1";
+  inp.dataset.cam="1"; // the general "Take a photo" helper skips inputs marked like this: this form has its own buttons
+  // a second, camera-first picker for people who'd rather just take the photo now
+  const cam=document.createElement("input");cam.type="file";cam.accept="image/*";cam.setAttribute("capture","environment");cam.id="jPhotoCam";cam.hidden=true;cam.dataset.cam="1";
+  inp.hidden=true;inp.insertAdjacentElement("afterend",cam);
+  const row=document.createElement("div");row.className="jph";
+  row.innerHTML=`<button type="button" class="btn primary" id="jphTake">📷 Take a photo now</button><button type="button" class="btn" id="jphPick">🖼️ Choose a photo</button>`;
+  cam.insertAdjacentElement("afterend",row);
+  const msg=document.createElement("div");msg.id="jphMsg";msg.className="jphmsg";msg.setAttribute("role","status");msg.setAttribute("aria-live","polite");
+  row.insertAdjacentElement("afterend",msg);
+  $("jphTake").onclick=()=>cam.click();$("jphPick").onclick=()=>inp.click();
+  inp.onchange=()=>phUpload(inp.files&&inp.files[0]);cam.onchange=()=>phUpload(cam.files&&cam.files[0]);
+  const go=$("jGo");if(go){const orig=go.onclick;go.onclick=function(e){
+    if(phBusy){$("jErr").textContent="Wait a moment: your photo is still uploading.";return}
+    if(!photoPath){$("jErr").textContent="Add the photo of your board first: tap Take a photo now or Choose a photo, and wait for the green tick.";return}
+    return orig&&orig.call(this,e)}}};
+
+// ---------- 4. notifications: popup on sign-in, red count on the Profile tab, list on the Profile page ----------
+// Filled by the database (table "notifications", migration v2_notifications): cancellations, cancel requests,
+// forfeits, matches on hold or back on, results to confirm, disputes, extra time, challenges.
+(function(){const st=document.createElement("style");st.textContent=`
+.nbadge{display:inline-block;min-width:20px;height:20px;line-height:20px;padding:0 6px;margin-left:6px;border-radius:99px;background:#c0392b;color:#fff;font-size:12px;font-weight:800;text-align:center;vertical-align:middle}
+.npop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:60;padding:16px}
+.npop[hidden]{display:none}
+.npop .card{max-width:520px;width:100%;max-height:86vh;overflow:auto;box-sizing:border-box}
+.nbell{position:relative;font-size:17px;padding:0}
+.nbell .nbadge{position:absolute;top:-9px;right:-11px;left:auto;margin:0;min-width:18px;height:18px;line-height:15px;font-size:11px;padding:0 4px;border:2px solid var(--head,#4A3878)}
+.hin .brand h1{white-space:nowrap}
+@media (max-width:420px){.hin .brand h1{font-size:21px}.hin .hbtns{gap:6px}.hin .hbtn{width:40px;height:40px}}
+.nlist{list-style:none;padding:0;margin:8px 0}
+.nlist li{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line,rgba(127,127,127,.3));font-size:17px;line-height:1.4}
+.nlist li:last-child{border-bottom:0}
+.nlist .ni{font-size:22px;line-height:1.2;flex:none;width:28px;text-align:center}
+.nlist .nt{display:block;font-size:13px;opacity:.65;margin-top:2px}
+.nlist li.unread .nb{font-weight:700}
+.nlist li.unread::before{content:"";flex:none;width:10px;height:10px;border-radius:50%;background:#c0392b;margin-top:8px}`;document.head.appendChild(st)})();
+let NOTES=[],notesFor=null,notesPopped=false;
+const N_ICON={cancelled:"❌",cancel_request:"❓",forfeit:"⏱",back_on:"✅",on_hold:"⏸️",confirm:"📝",disputed:"⚖️",extended:"📅",
+  challenge:"🎯",challenge_accepted:"✅",challenge_declined:"👋",challenge_expired:"⌛",challenge_cancelled:"❌",new_match:"🎯"};
+function nAgo(t){const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);
+  if(s<90)return "just now";if(s<3600)return Math.round(s/60)+" minutes ago";if(s<86400){const h=Math.round(s/3600);return h+(h===1?" hour ago":" hours ago")}
+  const d=Math.round(s/86400);return d===1?"yesterday":d<7?d+" days ago":new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}
+function nItems(list){return list.map(n=>`<li class="${n.read_at?"":"unread"}"><span class="ni" aria-hidden="true">${N_ICON[n.kind]||"🔔"}</span><span><span class="nb">${esc(n.body)}</span><span class="nt">${nAgo(n.created_at)}</span></span></li>`).join("")}
+function nUnread(){return NOTES.filter(n=>!n.read_at)}
+function notesBell(){let h=$("nBell");if(h)return h;const box=document.querySelector(".hin .hbtns")||document.querySelector(".hin");if(!box)return null;
+  h=document.createElement("button");h.className="hbtn nbell";h.id="nBell";h.type="button";h.hidden=true;h.innerHTML='<span aria-hidden="true">🔔</span>';
+  h.onclick=()=>{show("me");setTimeout(()=>{const c=$("notesCard");if(c)c.scrollIntoView({block:"start"})},60)};
+  if(box.classList.contains("hbtns"))box.insertBefore(h,box.firstChild);else box.appendChild(h);return h}
+function notesBadge(){const c=nUnread().length,lbl=c?c+" new "+(c===1?"notification":"notifications"):"Notifications";
+  // header bell: always on screen, even when the tab bar is scrolled
+  const h=notesBell();if(h){h.hidden=!ME;h.setAttribute("aria-label",lbl);let s=h.querySelector(".nbadge");
+    if(!c){if(s)s.remove()}else{if(!s){s=document.createElement("span");s.className="nbadge";h.appendChild(s)}s.textContent=c>9?"9+":String(c)}}
+  // Profile tab
+  const b=document.querySelector('#tabs button[data-v="me"]');if(!b)return;let t=b.querySelector(".nbadge");
+  if(!c){if(t)t.remove();b.removeAttribute("aria-label");return}
+  if(!t){t=document.createElement("span");t.className="nbadge";b.appendChild(t)}t.textContent=c>9?"9+":String(c);
+  b.setAttribute("aria-label",(b.firstChild&&b.firstChild.textContent||"Profile").trim()+", "+lbl)}
+async function notesMarkRead(ids){const un=new Set(ids||nUnread().map(n=>n.id));if(!un.size)return;
+  NOTES.forEach(n=>{if(un.has(n.id)&&!n.read_at)n.read_at=new Date().toISOString()});notesBadge();notesCard();
+  try{await db.rpc("v2_notes_read",{p_ids:ids||null})}catch(_){}}
+function notesCard(){const sec=$("v-me");if(!sec)return;let c=$("notesCard");
+  if(!ME||!NOTES.length){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.className="card";c.id="notesCard";sec.insertBefore(c,sec.firstElementChild)}
+  const un=nUnread().length;
+  c.innerHTML=`<h2>🔔 Notifications${un?` <span class="nbadge">${un}</span>`:""}</h2>
+    <ul class="nlist">${nItems(NOTES.slice(0,20))}</ul>
+    <div class="row">${un?`<button class="btn" id="nAllRead">Mark all as read</button>`:""}<button class="btn" id="nToPlay">Go to Play</button></div>`;
+  const a=$("nAllRead");if(a)a.onclick=()=>notesMarkRead();$("nToPlay").onclick=()=>{notesMarkRead();show("play")}}
+function notesPop(un){let o=$("nPop");if(!o){o=document.createElement("div");o.id="nPop";o.className="npop";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-labelledby","nPopH");document.body.appendChild(o)}
+  const more=un.length-5;
+  o.innerHTML=`<div class="card"><h2 id="nPopH">🔔 While you were away</h2><ul class="nlist">${nItems(un.slice(0,5))}</ul>
+    ${more>0?`<p class="note">…and ${more} more on your Profile page.</p>`:""}
+    <div class="row"><button class="btn primary" id="nPopPlay">Go to Play</button><button class="btn" id="nPopOk">OK, got it</button></div></div>`;
+  o.hidden=false;const ids=un.map(n=>n.id);
+  const close=go=>{o.hidden=true;notesMarkRead(ids);if(go)show("play")};
+  $("nPopPlay").onclick=()=>close(true);$("nPopOk").onclick=()=>close(false);o.onclick=e=>{if(e.target===o)close(false)};
+  o.onkeydown=e=>{if(e.key==="Escape")close(false)};setTimeout(()=>{const b=$("nPopOk");if(b)b.focus()},50)}
+async function notesLoad(){
+  if(!ME){NOTES=[];notesFor=null;notesPopped=false;notesBadge();notesCard();return}
+  if(notesFor!==ME.id){notesFor=ME.id;notesPopped=false;NOTES=[]}
+  const {data,error}=await db.from("notifications").select("id,kind,body,match_id,created_at,read_at").order("created_at",{ascending:false}).limit(40);
+  if(error)return;NOTES=data||[];notesBadge();notesCard();
+  // pop up once per visit, never over a live match
+  const un=nUnread();if(!notesPopped&&un.length&&!(typeof CUR!=="undefined"&&CUR==="scorer")){notesPopped=true;notesPop(un)}}
+const _nLoad=load;
+load=async function(){const r=await _nLoad.apply(this,arguments);try{await notesLoad()}catch(_){}return r};
+const _nRenderMe=renderMe;
+renderMe=function(){const r=_nRenderMe.apply(this,arguments);try{notesCard();notesBadge()}catch(_){}return r};
+// check again when the player comes back to the app, and every 2 minutes while it's open
+document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible")notesLoad().catch(()=>{})});
+setInterval(()=>{if(document.visibilityState==="visible")notesLoad().catch(()=>{})},120000);
+
+// ---------- 5. training: choose how many darts for scoring practice ----------
+const TR_COUNTS=[30,60,99,100,150,300];
+let TRN=(()=>{try{const v=+localStorage.getItem("trDarts");return v>=3&&v<=999?v:100}catch(_){return 100}})();
+function trSetN(n){n=Math.round(+n);if(!(n>=3&&n<=999))return false;TRN=n;try{localStorage.setItem("trDarts",String(n))}catch(_){}return true}
+try{TDRILLS.scoring100.n="Scoring practice";TDRILLS.scoring100.d="Pick how many darts (30 to 300, or any number) and a target. Tap what each dart hits. Your result is your 3-dart average."}catch(_){}
+const _trRender=renderTraining;
+renderTraining=function(){
+  if(typeof TRMODE==="undefined"||TRMODE!=="scoring100")return _trRender.apply(this,arguments);
+  const out=$("trOut");if(!out)return;const D=TDRILLS.scoring100;let body;
+  if(!TS.target){
+    body=`<h3>1. How many darts?</h3><div class="chips">${TR_COUNTS.map(n=>`<button class="chip" data-tc="${n}" aria-pressed="${TRN===n}">${n}${n===99?" (33 visits)":""}</button>`).join("")}</div>
+      <label class="f" style="max-width:240px;margin-top:8px">Or type any number (3 to 999)<input id="trCount" type="number" inputmode="numeric" min="3" max="999" value="${TRN}"></label>
+      <h3>2. Pick your target</h3><div class="chips">${["T20","T19","T18","Bull"].map(t=>`<button class="chip" data-tg="${t}">${t==="Bull"?"Bull":"Treble "+t.slice(1)}</button>`).join("")}</div>`}
+  else{const total=TS.total,bull=TS.target==="Bull",n=bull?25:+TS.target.slice(1);const val=c=>bull?{M:0,"25":25,B:50}[c]:{M:0,S:n,D:2*n,T:3*n}[c];
+    const k=TS.d.length,pts=TS.d.reduce((t,c)=>t+val(c),0),cnt=c=>TS.d.filter(x=>x===c).length,top=bull?"B":"T",done=k>=total;
+    body=`<div class="kv"><div><b>${k}/${total}</b><span>Darts</span></div><div><b>${pts}</b><span>Points</span></div><div><b>${k?(pts/k*3).toFixed(1):"–"}</b><span>3-dart avg</span></div><div><b>${k?Math.round(cnt(top)/k*100):0}%</b><span>${bull?"Bulls":"Trebles"}</span></div></div>
+      <p style="text-align:center;margin:10px 0 4px"><b>Dart ${Math.min(k+1,total)} of ${total}</b>${k%3===0||done?"":` · visit dart ${k%3+1} of 3`}</p>
+      ${done?`<p class="okmsg"><b>All ${total} darts thrown.</b></p>`:`<div class="bigpad">${(bull?[["M","Miss"],["25","25"],["B","Bull"]]:[["M","Miss"],["S","Single "+n],["D","Double "+n],["T","Treble "+n]]).map(([c,l])=>`<button data-sd="${c}" class="${c==="M"?"miss":""}">${l}</button>`).join("")}</div>`}
+      <div class="row" style="margin-top:8px"><button class="btn" data-su="1" ${k?"":"disabled"}>↶ Undo dart</button>${done?'<button class="btn primary" id="trSave">Save result</button>':k>=3?'<button class="btn" id="trSaveEarly">Stop and save now</button>':""}</div>`}
+  out.innerHTML=`<div class="card"><h2>${D.i} ${D.n}${TS.target?` · ${TS.total} darts`:""}</h2><p class="note">${D.d}</p>${body}<p class="err" id="trErr"></p><div class="row" style="margin-top:10px"><button class="btn" id="trBack">← Back to training</button></div></div>`;
+  $("trBack").onclick=()=>{if(TS.d&&TS.d.length&&TS.d.length<TS.total&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
+  out.querySelectorAll("[data-tc]").forEach(b=>b.onclick=()=>{trSetN(b.dataset.tc);renderTraining()});
+  const ci=$("trCount");if(ci)ci.onchange=()=>{$("trErr").textContent="";if(!trSetN(ci.value)){$("trErr").textContent="Pick a number from 3 to 999.";return}
+    out.querySelectorAll("[data-tc]").forEach(b=>b.setAttribute("aria-pressed",String(+b.dataset.tc===TRN)))}; // no redraw, so the next tap isn't lost
+  out.querySelectorAll("[data-tg]").forEach(b=>b.onclick=()=>{const c=$("trCount");if(c&&+c.value!==TRN&&!trSetN(c.value)){$("trErr").textContent="Pick a number from 3 to 999.";return}TS={target:b.dataset.tg,d:[],total:TRN};renderTraining()});
+  out.querySelectorAll("[data-sd]").forEach(b=>b.onclick=()=>{if(TS.d.length<TS.total)TS.d.push(b.dataset.sd);renderTraining()});
+  out.querySelectorAll("[data-su]").forEach(b=>b.onclick=()=>{TS.d.pop();renderTraining()});
+  if($("trSave"))$("trSave").onclick=()=>saveTraining();
+  if($("trSaveEarly"))$("trSaveEarly").onclick=()=>saveTraining()};
+
+// ---------- 6. staying signed in ----------
+// Most "it keeps signing me out" reports come from tapping the email link inside a mail app: it opens in a
+// throwaway browser that forgets everything. So: steer people to the 6-digit code, remember their email,
+// ask the browser to keep our data, offer "add to home screen", and offer Google sign-in when it's switched on.
+const IN_APP=/(FBAN|FBAV|Instagram|; wv\)|GSA\/|YahooMobile|Snapchat|Line\/|Twitter|LinkedInApp)/i.test(navigator.userAgent||"");
+const STANDALONE=(()=>{try{return matchMedia("(display-mode: standalone)").matches||navigator.standalone===true}catch(_){return false}})();
+let INSTALL_EVT=null;window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();INSTALL_EVT=e;try{renderInstall()}catch(_){}});
+(function(){const st=document.createElement("style");st.textContent=`.siwarn{background:#fff1bf;color:#111;border:2px solid #e0b400;border-radius:12px;padding:10px 12px;margin:0 0 12px;font-size:16px;line-height:1.4}
+.btn.google{width:100%;background:#fff;color:#1f1f1f;border:2px solid #747775;margin-top:8px}
+#installCard .row{margin-top:8px}`;document.head.appendChild(st)})();
+(function(){const si=$("signin");if(!si)return;
+  if(IN_APP){const w=document.createElement("div");w.className="siwarn";w.innerHTML="⚠️ <b>You're inside another app's browser.</b> It may forget that you've signed in. Tap the <b>⋮</b> or <b>Share</b> menu and choose <b>Open in Chrome</b> (or Safari), then sign in there.";si.insertBefore(w,si.children[1]||null)}
+  // remember the email address on this phone
+  const em=$("email");try{const v=localStorage.getItem("lastEmail");if(em&&v&&!em.value)em.value=v}catch(_){}
+  const eb=$("emailBtn");if(eb&&em)eb.addEventListener("click",()=>{try{localStorage.setItem("lastEmail",em.value.trim())}catch(_){}},true);
+  // after "Email me a code": tell them to type the code here rather than tap the link
+  const ok=$("signinOk");if(ok)new MutationObserver(()=>{if(/Type the 6-digit code/.test(ok.textContent)&&!/stay signed in/.test(ok.textContent))ok.textContent="Email sent. Type the 6-digit code from the email in the box below. Typing the code (not tapping the link) keeps you signed in on this phone. Check spam if it isn't there in 2 minutes."}).observe(ok,{childList:true,characterData:true,subtree:true});
+  // Google sign-in: only shown when it's switched on in Supabase
+  fetch(SB_URL+"/auth/v1/settings",{headers:{apikey:SB_KEY}}).then(r=>r.json()).then(s=>{if(!(s&&s.external&&s.external.google)||$("googleBtn"))return;
+    const g=document.createElement("button");g.className="btn google";g.id="googleBtn";g.innerHTML="<b>G</b>&nbsp; Sign in with Google";
+    g.onclick=async()=>{const {error}=await db.auth.signInWithOAuth({provider:"google",options:{redirectTo:location.origin+location.pathname,queryParams:{prompt:"select_account"}}});if(error)$("signinErr").textContent=error.message};
+    const d=$("discordBtn");if(d)d.insertAdjacentElement("afterend",g)}).catch(()=>{})})();
+// once signed in: ask the browser not to clear our data, and suggest adding the app to the home screen
+function renderInstall(){const sec=$("v-me");if(!sec)return;let c=$("installCard");
+  let dismissed=false;try{dismissed=localStorage.getItem("installDismissed")==="1"}catch(_){}
+  if(!ME||STANDALONE||dismissed){if(c)c.remove();return}
+  const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent||"");
+  if(!INSTALL_EVT&&!ios){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.className="card";c.id="installCard";const n=$("notesCard");if(n)n.after(c);else sec.insertBefore(c,sec.firstElementChild)}
+  c.innerHTML=`<h2>📲 Add 11 Darts to your home screen</h2><p>It opens like an app, full screen, and keeps you signed in.</p>
+    ${INSTALL_EVT?`<div class="row"><button class="btn primary" id="instGo">Add to home screen</button><button class="btn" id="instNo">Not now</button></div>`
+      :`<p>On iPhone: tap <b>Share</b> (the square with an arrow) at the bottom of Safari, then <b>Add to Home Screen</b>.</p><div class="row"><button class="btn" id="instNo">Got it</button></div>`}`;
+  const go=$("instGo");if(go)go.onclick=async()=>{const e=INSTALL_EVT;INSTALL_EVT=null;try{e.prompt();await e.userChoice}catch(_){}renderInstall()};
+  $("instNo").onclick=()=>{try{localStorage.setItem("installDismissed","1")}catch(_){}c.remove()}}
+const _siLoad=load;
+load=async function(){const r=await _siLoad.apply(this,arguments);
+  if(ME){try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persist()}catch(_){}try{if(ME.email)localStorage.setItem("lastEmail",ME.email)}catch(_){}}
+  try{renderInstall()}catch(_){}return r};
+
+// ---------- 7. feedback button (no Discord needed, works signed out too) ----------
+function fbOpen(){let o=$("fbPop");if(!o){o=document.createElement("div");o.id="fbPop";o.className="npop";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-labelledby","fbH");document.body.appendChild(o)}
+  o.innerHTML=`<div class="card"><h2 id="fbH">💬 Send feedback</h2><p class="note">Something broken, confusing, or an idea? Tell the Chalkers. You don't need Discord.</p>
+    <label class="f">Your message<textarea id="fbText" rows="5" maxlength="1500" placeholder="e.g. The photo wouldn't upload on my Samsung."></textarea></label>
+    ${ME?"":`<label class="f" style="margin-top:8px">Your email (only if you'd like a reply)<input id="fbMail" type="email" inputmode="email" autocomplete="email"></label>`}
+    <p class="err" id="fbErr"></p><div class="row"><button class="btn primary" id="fbSend">Send</button><button class="btn" id="fbClose">Close</button></div></div>`;
+  o.hidden=false;const close=()=>{o.hidden=true};$("fbClose").onclick=close;o.onclick=e=>{if(e.target===o)close()};o.onkeydown=e=>{if(e.key==="Escape")close()};
+  $("fbSend").onclick=async()=>{const t=$("fbText").value.trim(),m=$("fbMail")?$("fbMail").value.trim():"";$("fbErr").textContent="";
+    if(t.length<5){$("fbErr").textContent="Please write a bit more so we know what you mean.";return}
+    $("fbSend").disabled=true;const {error}=await db.rpc("v2_feedback",{p_body:t,p_page:typeof CUR!=="undefined"?CUR:null,p_contact:m||null});$("fbSend").disabled=false;
+    if(error){$("fbErr").textContent=error.message;return}
+    o.querySelector(".card").innerHTML=`<h2>✅ Thank you</h2><p>Your feedback has gone to the Chalkers.${m?" We'll reply by email if we need to.":""}</p><div class="row"><button class="btn primary" id="fbDone">Close</button></div>`;$("fbDone").onclick=close;$("fbDone").focus()};
+  setTimeout(()=>{const t=$("fbText");if(t)t.focus()},50)}
+(function(){const nav=document.querySelector("footer .flinks");if(nav&&!$("fbLink")){const a=document.createElement("a");a.href="#feedback";a.id="fbLink";a.textContent="💬 Send feedback";a.onclick=e=>{e.preventDefault();fbOpen()};nav.appendChild(a)}})();
+// Chalkers page: the feedback inbox
+async function stFeedback(){const top=$("stTop");if(!top)return;let c=$("stFeedback");if(!c){c=document.createElement("div");c.className="card";c.id="stFeedback";top.appendChild(c)}
+  const {data,error}=await db.rpc("v2_staff_feedback",{p_all:false});if(error){c.innerHTML=`<h2>💬 Player feedback</h2><p class="note">${esc(error.message)}</p>`;return}
+  const l=data||[];c.innerHTML=`<h2>💬 Player feedback${l.length?` <span class="nbadge">${l.length}</span>`:""}</h2>${l.length?l.map(f=>`<div class="item" style="border-top:1px solid var(--line,#ddd);padding:8px 0"><div class="note">${esc(f.name)} · ${nAgo(f.created_at)}${f.page?" · on "+esc(f.page):""}${f.contact?` · <a href="mailto:${esc(f.contact)}">${esc(f.contact)}</a>`:""}</div><p style="margin:4px 0;white-space:pre-wrap">${esc(f.body)}</p><button class="btn" data-fbd="${f.id}">Done</button></div>`).join(""):'<p class="note">Nothing new. Players can send feedback from the link at the bottom of every page.</p>'}`;
+  c.querySelectorAll("[data-fbd]").forEach(b=>b.onclick=async()=>{b.disabled=true;await db.rpc("v2_staff_feedback_done",{p_id:+b.dataset.fbd});stFeedback()})}
+const _fbStaff=renderStaff;renderStaff=async function(){const r=await _fbStaff.apply(this,arguments);try{await stFeedback()}catch(_){}return r};
+
+// ---------- 8. email copies of notifications: on/off switch on the Profile page ----------
+let EMAIL_ON=null;
+async function emailPref(){if(!ME){EMAIL_ON=null;return}try{const {data,error}=await db.rpc("v2_my_email_notes");if(!error)EMAIL_ON=data!==false}catch(_){}}
+function emailCard(){const sec=$("v-me");if(!sec)return;let c=$("emailCard");
+  if(!ME||EMAIL_ON===null){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.className="card";c.id="emailCard";const after=$("installCard")||$("notesCard");if(after)after.after(c);else sec.insertBefore(c,sec.firstElementChild)}
+  c.innerHTML=`<h2>✉️ Emails</h2><label class="check"><input type="checkbox" id="emOn" ${EMAIL_ON?"checked":""}> Email me about my matches</label>
+    <p class="note">We email you when someone challenges you, accepts your challenge, asks to cancel or cancels a match, or enters a result you need to confirm. Nothing else, and never adverts.</p><p class="note" id="emMsg"></p>`;
+  $("emOn").onchange=async e=>{const v=e.target.checked;const {error}=await db.rpc("v2_set_email_notes",{p_on:v});if(error){$("emMsg").textContent=error.message;e.target.checked=!v;return}EMAIL_ON=v;$("emMsg").textContent=v?"Saved: emails on.":"Saved: emails off."}}
+const _emLoad=load;load=async function(){const r=await _emLoad.apply(this,arguments);try{await emailPref();emailCard()}catch(_){}return r};
+const _emRenderMe=renderMe;renderMe=function(){const r=_emRenderMe.apply(this,arguments);try{renderInstall();emailCard()}catch(_){}return r};
+
+// ---------- 9. 11 Darts Cup (twice a month, everyone in), no-show byes, players can ask to run a tournament ----------
+// Database: tournaments.everyone / auto / organiser; cron v2-tournaments runs private.tourn_tick every 2 minutes
+// (creates the cups on the 1st and 3rd Friday at 19:30 UK, starts them, gives no-show byes, moves rounds on).
+const CUP_RULES="Everyone is in. Straight knockout, seeded by average. Best of 5, final best of 7. Not online within 15 minutes of your match being called? Your opponent gets a bye and moves on. Can't make it? No need to tell anyone.";
+function myTournMatch(t){if(!ME)return null;return MATCHES.find(m=>m.tournament_id===t.id&&m.status==="scheduled"&&[m.player_a,m.player_b].includes(ME.id))}
+const _cupRenderTourn=renderTourn;
+renderTourn=function(){const t=TOURNS.find(x=>x.id===TID);
+  // organisers get the run-it buttons for their own tournament
+  const org=!!(t&&ME&&t.organiser===ME.id&&STATE&&STATE.profile&&!["chalker","admin"].includes(STATE.profile.role));const role=org?STATE.profile.role:null;
+  if(org)STATE.profile.role="chalker";
+  try{_cupRenderTourn.apply(this,arguments)}finally{if(org)STATE.profile.role=role}
+  const out=$("tOut");if(!out||!t)return;const card=out.querySelector(".card");if(!card)return;
+  card.querySelectorAll("span.note").forEach(x=>{if(x.textContent==="(19:30 UK time)")x.textContent="("+new Date(t.starts_at).toLocaleTimeString("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit"})+" UK time)"});
+  if(t.organiser&&t.organiser!==ME?.id){const h=card.querySelector("h2");if(h&&!card.querySelector(".torg")){const p=document.createElement("p");p.className="note torg";p.innerHTML="Run by "+nameLink(t.organiser);h.after(p)}}
+  if(org&&t.status==="requested"&&!card.querySelector(".treq")){const p=document.createElement("p");p.className="okmsg treq";p.textContent="Your request is with the admins. You'll get a notification when they reply.";card.appendChild(p)}
+  if(t.everyone){
+    card.querySelectorAll("p.note").forEach(p=>{if(/^One night\. Random draw/.test(p.textContent))p.textContent=CUP_RULES});
+    card.querySelectorAll("[data-tent]").forEach(b=>{const s=document.createElement("p");s.className="okmsg";s.innerHTML="✅ <b>You're in.</b> Everyone plays. Open 11 Darts before 19:30 so your first match isn't a bye.";b.replaceWith(s)});
+    const note=[...card.querySelectorAll("p")].find(p=>/entered/.test(p.textContent));if(note&&t.status==="open"){const n=tEntrants(t.id).length;note.innerHTML=`<b>${n}</b> players are in.`}}
+  // your match: claim a bye if the opponent hasn't shown
+  const m=myTournMatch(t);if(m&&["knockout","groups"].includes(t.status)&&!$("tNoShow")){
+    const rel=new Date(m.released_at||m.created_at).getTime(),ready=rel+10*6e4,opp=m.player_a===ME.id?m.player_b:m.player_a;
+    const c=document.createElement("div");c.className="card";c.id="tNoShow";
+    const wait=Date.now()<ready;const at=new Date(ready).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
+    c.innerHTML=`<h2>🎯 Your match</h2><p>${KIND.tournament}: you v ${nameLink(opp)} (${esc(m.stage||"")}).</p>
+      <div class="row"><button class="btn primary" data-score="${m.id}" data-mode="online">Score online</button></div>
+      <p class="note" style="margin-top:10px">Opponent not here? ${wait?`If they haven't been online by <b>${at}</b>, you can take a bye. It happens by itself after 15 minutes too.`:"You can take a bye now if they haven't been online since the match was called."}</p>
+      <button class="btn" id="tNsGo" ${wait?"disabled":""}>My opponent hasn't shown up</button><p class="err" id="tNsErr"></p>`;
+    card.after(c);c.querySelector("[data-score]").onclick=()=>openScorer(m.id,"online");
+    $("tNsGo").onclick=async()=>{const b=$("tNsGo");if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Tap again to take the bye";return}b.disabled=true;
+      const {error}=await db.rpc("v2_tourn_noshow",{p_match:m.id});if(error){$("tNsErr").textContent=error.message;b.disabled=false;b.dataset.armed="";b.textContent="My opponent hasn't shown up";return}
+      $("tNsErr").innerHTML='<span class="okmsg">Bye given. You\'re through. The next round starts once this round is finished.</span>';load()}}};
+// Play page: cup label instead of Leave, and "Run your own tournament"
+function tReqOpen(){let o=$("trqPop");if(!o){o=document.createElement("div");o.id="trqPop";o.className="npop";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-labelledby","trqH");document.body.appendChild(o)}
+  const d=new Date(Date.now()+7*864e5).toISOString().slice(0,10),min=new Date(Date.now()+2*864e5).toISOString().slice(0,10);
+  o.innerHTML=`<div class="card"><h2 id="trqH">🏆 Ask to run a tournament</h2><p class="note">An admin checks it first. Once it's approved, players can enter and you run the draw and rounds from its page.</p>
+    <label class="f">Name<input id="trqName" maxlength="60" placeholder="e.g. Sunday Shootout"></label>
+    <div class="row" style="margin-top:8px"><label class="f">Date<input id="trqDate" type="date" min="${min}" value="${d}"></label><label class="f">Start time (UK)<input id="trqTime" type="time" value="19:30"></label></div>
+    <label class="f" style="margin-top:8px">Anything else? (format, prize, who it's for)<textarea id="trqNote" rows="3" maxlength="500"></textarea></label>
+    <p class="err" id="trqErr"></p><div class="row"><button class="btn primary" id="trqGo">Send request</button><button class="btn" id="trqNo">Close</button></div></div>`;
+  o.hidden=false;const close=()=>{o.hidden=true};$("trqNo").onclick=close;o.onclick=e=>{if(e.target===o)close()};o.onkeydown=e=>{if(e.key==="Escape")close()};
+  $("trqGo").onclick=async()=>{const n=$("trqName").value.trim(),dt=$("trqDate").value,tm=$("trqTime").value||"19:30";$("trqErr").textContent="";
+    if(n.length<3){$("trqErr").textContent="Give it a name of at least 3 characters.";return}if(!dt){$("trqErr").textContent="Pick a date.";return}
+    // turn the UK date and time into an exact moment
+    const g=new Date(dt+"T"+tm+":00Z");const [h,mi]=new Intl.DateTimeFormat("en-GB",{timeZone:"Europe/London",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(g).split(":").map(Number);
+    const [th,tmi]=tm.split(":").map(Number);const at=new Date(g.getTime()-((h*60+mi)-(th*60+tmi))*6e4).toISOString();
+    $("trqGo").disabled=true;const {error}=await db.rpc("v2_tourn_request",{p_name:n,p_starts_at:at,p_note:$("trqNote").value});$("trqGo").disabled=false;
+    if(error){$("trqErr").textContent=error.message;return}
+    o.querySelector(".card").innerHTML=`<h2>✅ Request sent</h2><p>The admins will look at <b>${esc(n)}</b> and you'll get a notification when they reply.</p><div class="row"><button class="btn primary" id="trqDone">Close</button></div>`;$("trqDone").onclick=()=>{close();load()}};
+  setTimeout(()=>{const x=$("trqName");if(x)x.focus()},50)}
+const _cupRenderPlay=renderPlay;
+renderPlay=function(){const r=_cupRenderPlay.apply(this,arguments);const out=$("playOut");if(!out||!ME||!isMember())return r;
+  out.querySelectorAll("#tCard [data-tent]").forEach(b=>{const t=TOURNS.find(x=>x.id===+b.dataset.tent);if(t&&t.everyone){const s=document.createElement("span");s.className="pill ok";s.textContent="✅ You're in";b.replaceWith(s)}});
+  const tc=$("tCard");if(tc&&!$("tReqBox")){const mine=TOURNS.filter(t=>t.organiser===ME.id&&["requested","open","groups","knockout"].includes(t.status));
+    const d=document.createElement("div");d.id="tReqBox";d.style.marginTop="12px";
+    d.innerHTML=`<h3>Run your own tournament</h3>${mine.length?`<p class="note">${mine.map(t=>`<b>${esc(t.name)}</b>: ${T_ST[t.status]||t.status}`).join("<br>")}</p>`:""}<button class="btn" id="tReqGo">🏆 Ask to run a tournament</button>`;
+    tc.appendChild(d);$("tReqGo").onclick=tReqOpen;
+    const empty=tc.querySelector("p.note");if(empty&&/Admins and Chalkers set them up/.test(empty.textContent))empty.textContent="No tournaments yet. The 11 Darts Cup runs on the 1st and 3rd Friday of every month, and everyone's in."}
+  return r};
+
+// ---------- 10. Jon's notes 11 Nov: footer icons, no coffee box, Progress inside Profile, drop-down sections,
+//                phone keyboard gone, admins can close reports or remove a player's data ----------
+(function(){const st=document.createElement("style");st.textContent=`
+#bottomLinks{max-width:760px;margin:6px auto 0;padding:0 16px}
+.ficons{display:flex;justify-content:center;gap:22px;flex-wrap:wrap;margin:10px 0 2px}
+.ficons a,.ficons button{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:inherit;font:600 12px var(--body);background:none;border:0;cursor:pointer;padding:0;min-width:64px}
+.ficons .fi{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;font-size:22px;background:rgba(127,127,127,.16);border:2px solid var(--line,rgba(127,127,127,.35))}
+.ficons a:hover .fi,.ficons a:focus-visible .fi{border-color:var(--accent,#8b6cff)}
+.ficons .dc .fi{background:#5865F2;color:#fff;border-color:#5865F2}.ficons .rd .fi{background:#FF4500;color:#fff;border-color:#FF4500}.ficons .dn .fi{background:#ffdd00;color:#111;border-color:#e0b400}
+.fadm{text-align:center;font-size:12px;margin:4px 0 0}
+.foldh{cursor:pointer;display:flex;align-items:center;justify-content:space-between;gap:10px;user-select:none;-webkit-tap-highlight-color:transparent;min-height:40px}
+.foldh::after{content:"▾";font-size:18px;line-height:1;transition:transform .15s;flex:none;opacity:.8}
+.foldh[aria-expanded="false"]::after{transform:rotate(-90deg)}
+.foldh:focus-visible{outline:3px solid var(--accent,#8b6cff);outline-offset:3px;border-radius:6px}
+.foldbody[hidden]{display:none!important}
+.card>.foldhead{margin:0}
+#meProg{display:grid;gap:14px}`;document.head.appendChild(st)})();
+
+// --- footer icons replace the big coffee box (Home, Play, Tables, Training, Profile all share this) ---
+renderBottom=function(){let b=$("bottomLinks");if(!b){b=document.createElement("section");b.id="bottomLinks";const f=document.querySelector("footer");f.parentElement.insertBefore(b,f)}
+  const d=CFG.discord_invite,r=CFG.reddit_url,u=CFG.donate_url,adm=!!(STATE&&STATE.profile&&STATE.profile.role==="admin");
+  const ico=(cls,href,icon,label,aria)=>`<a class="${cls}" href="${esc(href)}" target="_blank" rel="noopener noreferrer" aria-label="${aria}"><span class="fi" aria-hidden="true">${icon}</span>${label}</a>`;
+  const items=[d&&ico("dc",d,"💬","Discord","Join us on Discord"),r&&ico("rd",r,"👽","Reddit","11 Darts on Reddit"),u&&ico("dn",u,"☕","Donate","Donate: buy us a coffee and keep 11 Darts free")].filter(Boolean);
+  const missing=[!d&&"Discord",!r&&"Reddit",!u&&"Donate"].filter(Boolean);
+  b.innerHTML=(items.length?`<nav class="ficons" aria-label="Community and donations">${items.join("")}</nav>`:"")+(adm&&missing.length?`<p class="note fadm"><b>Admin:</b> add the ${missing.join(", ")} link${missing.length>1?"s":""} in Chalkers → Admin tools to show ${missing.length>1?"their icons":"its icon"}.</p>`:"")};
+try{renderBottom()}catch(_){}
+
+// --- Progress lives inside Profile now ---
+(function(){const t=document.querySelector('#tabs button[data-v="progress"]');if(t)t.hidden=true})();
+const _mpShow=show;show=function(v){return _mpShow(v==="progress"?"me":v)};
+const _mpRenderMe=renderMe;
+renderMe=function(){const r=_mpRenderMe.apply(this,arguments);
+  try{const st=STATE&&STATE.profile&&STATE.profile.status;const sec=$("v-me"),mine=$("mine"),po=$("progOut");
+    if(ME&&sec&&mine&&po&&!["new","pending","banned"].includes(st)){
+      let box=$("meProg");if(!box){box=document.createElement("div");box.id="meProg"}
+      if(box.parentElement!==sec||box.nextElementSibling!==mine)mine.before(box);
+      if(po.parentElement!==box)box.appendChild(po);
+      renderProgress();
+      // the progress card already shows name, badges and division, so the settings card starts at "My settings"
+      const kids=[...mine.children];const ms=kids.findIndex(e=>e.tagName==="H3"&&/My settings/i.test(e.textContent));
+      kids.forEach((e,i)=>{if(i<ms)e.hidden=true});
+      foldAll()}
+    else{const box=$("meProg");if(box)box.remove();const pv=$("v-progress");if(po&&pv&&po.parentElement!==pv)pv.appendChild(po)}}catch(e){console.warn(e)}
+  return r};
+
+// --- drop-down sections (closed until tapped; the phone remembers which you opened) ---
+let FOLD_OPEN=new Set();try{FOLD_OPEN=new Set(JSON.parse(localStorage.getItem("11d-fold")||"[]"))}catch(_){}
+const FOLD_PLAY=[/^Play a friendly/i,/^Not on 11 Darts/i,/^Challenge someone/i];
+const FOLD_ME=[/^My settings/i,/^Display name/i,/^Your emblem/i,/^Caller and access/i,/^Match graph/i,/^Results/i,/^Training$/i,/^Calling cards/i,/Emails$/i,/^Add 11 Darts to your home screen/i];
+function foldSave(){try{localStorage.setItem("11d-fold",JSON.stringify([...FOLD_OPEN]))}catch(_){}}
+function foldOne(h){if(h.dataset.fold)return;const key=h.textContent.replace(/\s+\d+\s*of\s*\d+.*$/,"").trim();
+  // the header is the heading itself, or the row it sits in (e.g. Match graph + its buttons)
+  let head=h;if(h.tagName==="H2")while(head.parentElement&&!head.parentElement.classList.contains("card")&&head.parentElement.id!=="mine")head=head.parentElement;
+  const stop=h.tagName==="H2"?["H2"]:["H2","H3"];const body=document.createElement("div");body.className="foldbody";
+  let n=head.nextSibling;
+  while(n&&!(n.nodeType===1&&stop.includes(n.tagName))){const nx=n.nextSibling;body.appendChild(n);n=nx}
+  head.after(body);if(head!==h)head.classList.add("foldhead");
+  h.dataset.fold="1";h.classList.add("foldh");h.setAttribute("role","button");h.tabIndex=0;
+  const extras=head!==h?[...head.children].filter(c=>c!==h&&!c.contains(h)&&!/pill/.test(c.className)):[];
+  const set=open=>{h.setAttribute("aria-expanded",String(open));body.hidden=!open;extras.forEach(c=>c.hidden=!open)};set(FOLD_OPEN.has(key));
+  const tog=()=>{const open=h.getAttribute("aria-expanded")!=="true";set(open);if(open)FOLD_OPEN.add(key);else FOLD_OPEN.delete(key);foldSave()};
+  h.addEventListener("click",e=>{if(e.target.closest("button,a,input,select")&&e.target!==h)return;tog()});
+  h.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();tog()}})}
+function foldIn(root,pats){if(!root)return;root.querySelectorAll("h2,h3").forEach(h=>{if(h.closest(".npop,#nPop"))return;const t=h.textContent.trim();if(pats.some(p=>p.test(t)))foldOne(h)})}
+function foldAll(){foldIn($("playOut"),FOLD_PLAY);foldIn($("v-me"),FOLD_ME)}
+const _fdRenderPlay=renderPlay;renderPlay=function(){const r=_fdRenderPlay.apply(this,arguments);try{foldIn($("playOut"),FOLD_PLAY)}catch(_){}return r};
+// cards that are added later (emails, install) get folded too
+new MutationObserver(()=>{clearTimeout(foldAll.t);foldAll.t=setTimeout(()=>{try{foldAll()}catch(_){}},30)}).observe($("main"),{childList:true,subtree:true});
+
+// --- no phone keyboard in the scorer: always the big keypad ---
+try{KB="pad";localStorage.setItem("11d-kb","pad")}catch(_){}
+const _kbRenderScorer=renderScorer;renderScorer=function(){if(typeof KB!=="undefined"&&KB!=="pad")KB="pad";const r=_kbRenderScorer.apply(this,arguments);const t=$("kbTog");if(t)t.remove();return r};
+
+// --- Chalkers: open reports can be closed; admins can remove a reported player and all their data ---
+async function stReports(){const sb=$("stSafety");if(!sb)return;const h=[...sb.querySelectorAll("h3")].find(x=>/^Reports/.test(x.textContent));if(!h)return;
+  const s=await db.rpc("v2_staff_safety");if(s.error)return;const all=s.data.reports||[],open=all.filter(r=>(r.status||"open")==="open"),adm=!!(STATE&&STATE.profile&&STATE.profile.role==="admin");
+  h.textContent=`Open reports (${open.length})`;let list=h.nextElementSibling;if(!list||!list.classList.contains("list")){list=document.createElement("div");list.className="list";h.after(list)}
+  list.innerHTML=open.map(r=>`<div class="item" data-rid="${r.id}">${r.times_reported>1?`<span class="pill bad">🚩 Reported ${r.times_reported} times</span> `:""}<b>${esc(r.reporter||"?")}</b> about <b>${esc(r.about||"general")}</b> <span class="note">${new Date(r.at).toLocaleString("en-GB")}</span>
+    <p>${esc(r.details||"")}</p>${(r.evidence||[]).map(p=>`<img class="photo" data-ev="${esc(p)}" alt="Evidence">`).join("")}
+    <label class="f" style="margin-top:6px">What did you do? (optional)<input class="rpOut" maxlength="200" placeholder="e.g. Spoke to both players, no further action"></label>
+    <div class="row" style="margin-top:6px"><button class="btn" data-rclose="${r.id}">Close report</button>${adm&&r.about_id&&r.about_status!=="banned"?`<button class="btn danger" data-rerase="${r.about_id}">Remove ${esc(r.about||"player")} and all their data</button>`:""}</div><p class="err"></p></div>`).join("")||'<p class="note">No open reports.</p>';
+  if(all.length>open.length){const n=document.createElement("p");n.className="note";n.textContent=`${all.length-open.length} closed report${all.length-open.length>1?"s":""} kept in the record.`;list.appendChild(n)}
+  for(const img of list.querySelectorAll("img[data-ev]")){try{photoFail(img);const u=await signed(img.dataset.ev);if(u)img.src=u}catch(_){}}
+  const arm=(b,txt)=>{if(b.dataset.armed==="1")return true;b.dataset.armed="1";b.textContent=txt;return false};
+  list.querySelectorAll("[data-rclose]").forEach(b=>b.onclick=async()=>{if(!arm(b,"Tap again to close it"))return;const it=b.closest(".item");b.disabled=true;
+    const {error}=await db.rpc("v2_staff_report_close",{p_id:+b.dataset.rclose,p_outcome:it.querySelector(".rpOut").value});
+    if(error){it.querySelector(".err").textContent=error.message;b.disabled=false;return}stReports()});
+  list.querySelectorAll("[data-rerase]").forEach(b=>b.onclick=async()=>{if(!arm(b,"Tap again: this removes their account, matches and photos for good"))return;const it=b.closest(".item");b.disabled=true;
+    const {error}=await db.rpc("v2_admin_erase",{p_user:b.dataset.rerase});
+    if(error){it.querySelector(".err").textContent=error.message;b.disabled=false;return}
+    await db.rpc("v2_staff_report_close",{p_id:+it.dataset.rid,p_outcome:"Player and their data removed"}).catch(()=>{});stReports()})}
+const _rpStaff=renderStaff;renderStaff=async function(){const r=await _rpStaff.apply(this,arguments);try{await stReports()}catch(_){}return r};
+
+// ---------- 11. Jon's notes 11 Nov (evening): holding pen, quieter Find a player, tidy drop-downs, top-3 leaderboards,
+//                match set-up before you play, board camera on another phone, Bob's 27 ----------
+(function(){const st=document.createElement("style");st.textContent=`
+.foldrow{display:flex!important;align-items:center;justify-content:flex-start!important;gap:10px;flex-wrap:wrap;cursor:pointer}
+.foldrow>*{margin-left:0!important}
+.foldrow>.foldh{flex:none}.foldrow>.foldh::after{display:none}
+.foldrow::after{content:"▾";font-size:18px;line-height:1;margin-left:auto;opacity:.8;transition:transform .15s}
+.foldrow[data-open="false"]::after{transform:rotate(-90deg)}
+.lb .foldh{min-height:36px}.lbme{border-top:1px dashed var(--line,rgba(127,127,127,.35));margin-top:4px;padding-top:4px}
+.ms-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:8px 0}
+.ms-tiles button{display:flex;flex-direction:column;align-items:flex-start;gap:4px;text-align:left;padding:14px;border-radius:14px;border:2px solid var(--line,rgba(127,127,127,.35));background:rgba(127,127,127,.08);color:inherit;font:600 16px var(--body);cursor:pointer;min-height:64px}
+.ms-tiles button small{font-weight:400;font-size:13px;opacity:.8}
+.ms-tiles button[aria-pressed="true"]{border-color:var(--accent,#8b6cff);background:rgba(139,108,255,.16)}
+.ms-tiles button:focus-visible{outline:3px solid var(--accent,#8b6cff);outline-offset:2px}
+.ms-vs{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;text-align:center;margin:6px 0 4px}
+.ms-vs b{font-size:18px}.ms-sum{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-bottom:6px}
+#v-scorer.msetup #scOut,#v-scorer.msetup #vidBox{display:none!important}
+#v-scorer.msetup #camSetup:not([hidden]){display:block}
+.b27{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:10px 0}
+.b27 button{min-height:72px;font:700 22px var(--head,inherit);border-radius:14px;border:2px solid var(--line,rgba(127,127,127,.35));background:rgba(127,127,127,.1);color:inherit;cursor:pointer}
+.b27 button.miss{background:rgba(220,60,60,.14)}
+.b27h{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0}.b27h span{font-size:12px;padding:2px 6px;border-radius:8px;background:rgba(127,127,127,.14)}
+.b27h span.z{background:rgba(220,60,60,.2)}.b27h span.now{outline:2px solid var(--accent,#8b6cff)}`;document.head.appendChild(st)})();
+
+// --- drop-down arrows always sit on the right, and "5 of 18" sits next to its title ---
+(function(){const _f1=foldOne;foldOne=function(h){const done=!!h.dataset.fold;_f1(h);if(done)return;
+  const head=h.classList.contains("foldh")?(h.parentElement&&h.parentElement.classList.contains("foldhead")?h.parentElement:null):null;if(!head)return;
+  head.classList.add("foldrow");const pill=[...head.children].find(c=>/pill/.test(c.className));if(pill&&pill!==h.nextElementSibling)h.after(pill);
+  const sync=()=>head.dataset.open=h.getAttribute("aria-expanded");sync();new MutationObserver(sync).observe(h,{attributes:true,attributeFilter:["aria-expanded"]});
+  head.addEventListener("click",e=>{if(e.target===head||(e.target.closest&&e.target.closest(".pill")))h.click()})}})();
+
+// --- Find a player: empty until you type ---
+(function(){const _r=render;render=function(){_r.apply(this,arguments);const i=$("pSearch"),l=$("pList");if(!i||!l)return;
+  const q=(i.value||"").trim();if(!q){l.innerHTML='<p class="note">Type a name or a country to find a player.</p>'}
+  else if(!l.querySelector(".prow"))l.innerHTML='<p class="note">Nobody found. Check the spelling.</p>'};
+  const i=$("pSearch");if(i){i.oninput=()=>render();i.setAttribute("aria-label","Find a player by name or country")}})();
+
+// --- Tables: each leaderboard is a drop-down showing the top 3 (plus your own place if you're lower down) ---
+(function(){const _t=renderTables;renderTables=function(){const r=_t.apply(this,arguments);try{
+  const out=$("tabOut");out.querySelectorAll(".lb").forEach(lb=>{const rows=[...lb.querySelectorAll(":scope>.lbr")];
+    let mine=-1;rows.forEach((row,i)=>{if(i<3)return;const a=row.querySelector("[data-prof]");if(ME&&a&&a.dataset.prof===ME.id&&mine<0&&!/Latest/.test(lb.textContent.slice(0,20)))mine=i;row.hidden=true});
+    if(mine>=0){rows[mine].hidden=false;rows[mine].classList.add("lbme")}
+    const h=lb.querySelector("h3");if(h)foldOne(h)});
+  penTables()}catch(e){console.warn(e)}return r}})();
+
+// --- Holding pen: people who join mid-season play each other here, then move into a division next season ---
+const isPen=d=>d&&d.tier<0;
+const penDiv=()=>DIVS.find(isPen);
+(function(){const _l=load;load=async function(){const r=await _l.apply(this,arguments);try{DIVS.sort((a,b)=>(a.tier<0?99:a.tier)-(b.tier<0?99:b.tier))}catch(_){}return r}})();
+(function(){const _b=badges;badges=function(p){const s=_b(p);const pd=penDiv();return pd&&p&&p.division_id===pd.id&&p.status==="active"?s+' <span class="pill">Holding pen</span>':s}})();
+function penTables(){const pd=penDiv();if(!pd||TDIV!==pd.id)return;const card=[...$("tabOut").querySelectorAll(".card")].find(c=>/League tables/.test(c.textContent));if(!card)return;
+  card.querySelectorAll("tr.down").forEach(t=>t.classList.remove("down"));
+  const notes=card.querySelectorAll(":scope>p.note");const last=notes[notes.length-1];
+  if(last)last.innerHTML="<b>Holding pen.</b> For players who join after the season has started. Everyone here plays everyone else once (first to 5). Finish top and you're first to move into a division when the next season starts."}
+(function(){const _p=renderPlay;renderPlay=function(){const r=_p.apply(this,arguments);try{const pd=penDiv();if(pd)$("playOut").querySelectorAll("[data-score]").forEach(b=>{
+  const m=MATCHES.find(x=>x.id===+b.dataset.score);if(!m||m.division_id!==pd.id)return;const bh=b.closest(".item")&&b.closest(".item").querySelector("b");if(bh&&!bh.dataset.pen){bh.dataset.pen="1";bh.innerHTML=bh.innerHTML.replace(/^League/,"Holding pen")}})}catch(_){}return r}})();
+(function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{penStaff()}catch(e){console.warn(e)}return r}})();
+async function penStaff(){const box=$("stTop");const pd=penDiv();if(!box||!pd)return;const live=liveSeason();
+  // division lists: the pen goes last, shows a plain count, and is picked for new players while a season is running
+  box.querySelectorAll("[data-div]").forEach(a=>{if(+a.dataset.div!==pd.id)return;const sm=a.querySelector("small");if(sm)sm.textContent=PLAYERS.filter(p=>p.division_id===pd.id&&p.status==="active").length+" players · joined mid-season";a.parentElement.appendChild(a)});
+  box.querySelectorAll("select[data-psel]").forEach(s=>{const o=[...s.options].find(x=>+x.value===pd.id);if(!o)return;o.textContent="Holding pen (joined mid-season)";s.appendChild(o);
+    if(live){s.value=String(pd.id);if(!s.parentElement.parentElement.querySelector(".pennote")){const n=document.createElement("p");n.className="note pennote";n.textContent=live.name+" is running, so new players go in the holding pen. They play each other, then move into a division next season.";s.closest(".row").after(n)}}else s.value=[...s.options][0].value});
+  // the pen card
+  let c=$("penCard");if(!c){c=document.createElement("div");c.className="card";c.id="penCard";const after=[...box.querySelectorAll(".card")].find(x=>/^Ready to place/.test((x.querySelector("h2")||{}).textContent||""));(after||box.lastElementChild).after(c)}
+  const t=leagueTable(pd.id,live);const real=DIVS.filter(d=>d.tier>0&&!(d.leagues&&d.leagues.is_placement));
+  c.innerHTML=`<h2>Holding pen</h2><p class="note">Players who joined mid-season. They play each other (first to 5) and the table decides who moves up first. When the season ends, move them into divisions here. Moving someone cancels their unplayed holding-pen matches.</p>
+   ${t.length?t.map((r,i)=>`<div class="item"><b>${i+1}.</b> ${nameLink(r.id)} · ${r.P} played · ${r.Pts} pts · legs ${r.LF}-${r.LA}
+     <div class="row" style="margin-top:6px"><label class="f">Move to<select data-pmv="${r.id}">${real.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join("")}</select></label><button class="btn" data-pgo="${r.id}">Move</button></div><p class="err"></p></div>`).join(""):'<p class="note">Nobody in the holding pen.</p>'}`;
+  c.querySelectorAll("[data-pgo]").forEach(b=>b.onclick=async()=>{const sel=c.querySelector(`[data-pmv="${b.dataset.pgo}"]`);b.disabled=true;
+    const {error}=await db.rpc("v2_staff_place",{p_user:b.dataset.pgo,p_division:+sel.value});const e=b.closest(".item").querySelector(".err");
+    if(error){e.textContent=error.message;b.disabled=false;return}e.innerHTML='<span class="okmsg">Moved.</span>';await load();renderStaff()})}
+
+// --- Match set-up: before the first dart, check the match, choose your camera, keypad and caller, then start ---
+let MS=null;
+(function(){const _o=openScorer;openScorer=async function(id,mode){const r=await _o.apply(this,arguments);try{
+  if(SC&&SC.m&&SC.m.id===id&&!SC.st.legs.some(l=>l.visits.length)&&!SC.st.done){MS={cam:V.live?"this":B.on?"other":null,starter:SC.st.legs[0].starter||"A"};msRender()}else msClose()}catch(e){console.warn(e)}return r}})();
+(function(){const _sh=show;show=function(v){if(v!=="scorer"&&MS)msClose();return _sh.apply(this,arguments)}})();
+function msClose(){MS=null;const v=$("v-scorer");if(v)v.classList.remove("msetup");const c=$("msCard");if(c)c.remove()}
+function msRender(){if(!MS||!SC)return msClose();const v=$("v-scorer");v.classList.add("msetup");let c=$("msCard");if(!c){c=document.createElement("div");c.id="msCard";c.className="card";v.prepend(c)}
+  const m=SC.m,online=SC.mode==="online",A=m.player_a,Bp=m.player_b,kind=(typeof KIND!=="undefined"&&KIND[m.kind])||"Match";
+  const camState=V.live?"✅ Your camera is live.":B.on?"✅ Board camera connected from your other phone.":B.state==="waiting"||B.state==="connecting"?"Waiting for your other phone…":V.setup?"Set your camera up below, then tap Confirm.":"";
+  const tile=(k,ic,t,s,pressed)=>`<button type="button" data-${k} aria-pressed="${pressed}"><span>${ic} ${t}</span><small>${s}</small></button>`;
+  c.innerHTML=`<h2>Match set-up</h2>
+   <div class="ms-vs"><b>${nameLink(A)}</b><span class="note">v</span><b>${nameLink(Bp)}</b></div>
+   <div class="ms-sum"><span class="pill">${esc(kind)}</span><span class="pill">First to ${m.first_to} legs</span><span class="pill">${m.start_score||501}</span><span class="pill">Double out</span>${m.kind==="league"?'<span class="pill">Draw allowed</span>':""}</div>
+   <p class="note">The match format is set when the match is made, so both players play the same thing.</p>
+   <h3>1. Who throws first?</h3><p class="note">Do a bull-off${online?" on camera":""} if you like, then pick the winner.</p>
+   <div class="ms-tiles">${tile("mst-a","🎯",esc(PN(A)),"throws first",MS.starter==="A")}${tile("mst-b","🎯",esc(PN(Bp)),"throws first",MS.starter==="B")}</div>
+   ${online?`<h3>2. Camera</h3><p class="note">Your opponent sees your board. Pick where the camera is.</p>
+   <div class="ms-tiles">${tile("msc-this","📱","This phone","Stand this phone facing the board",MS.cam==="this")}${tile("msc-other","📲","Another phone","Scan a code with a second phone",MS.cam==="other")}${tile("msc-none","🚫","No camera","Score without video",MS.cam==="none")}</div>
+   ${camState?`<p class="note" aria-live="polite"><b>${camState}</b></p>`:""}`:""}
+   <h3>${online?3:2}. How you enter scores</h3>
+   <div class="ms-tiles">${tile("msk-total","🔢","Total keypad","Type the 3-dart total",DPAD!=="darts")}${tile("msk-darts","🎯","Darts keypad","Tap each dart: single, double, treble",DPAD==="darts")}</div>
+   <div class="ms-tiles">${tile("ms-call","🔊","Caller "+(CALLER?"on":"off"),CALLER?"Scores are read out":"Tap to hear scores read out",CALLER)}</div>
+   <div class="row" style="margin-top:10px"><button class="btn primary" id="msGo" style="min-height:52px;font-size:18px">Start the match</button><button class="btn" id="msBack">← Back</button></div><p class="err" id="msErr"></p>`;
+  const on=(sel,f)=>c.querySelectorAll(sel).forEach(b=>b.onclick=f);
+  on("[data-mst-a]",()=>{MS.starter="A";msRender()});on("[data-mst-b]",()=>{MS.starter="B";msRender()});
+  on("[data-msk-total]",()=>{DPAD="total";try{localStorage.setItem("11d-pad",DPAD)}catch(_){}msRender()});
+  on("[data-msk-darts]",()=>{DPAD="darts";try{localStorage.setItem("11d-pad",DPAD)}catch(_){}msRender()});
+  on("[data-ms-call]",()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER&&typeof say==="function")say("Caller on");msRender()});
+  on("[data-msc-this]",async()=>{MS.cam="this";if(B.state!=="off"||B.on)await bcStop(true);if(!V.raw||!V.raw.getVideoTracks().length)await camThisPhone();else{V.setup=true;renderCamSetup()}msRender()});
+  on("[data-msc-other]",async()=>{MS.cam="other";await camOtherPhone();msRender()});
+  on("[data-msc-none]",()=>{MS.cam="none";stopCamera(false);renderCamSetup();msRender()});
+  $("msBack").onclick=()=>{msClose();show("play");stopPoll()};
+  $("msGo").onclick=async()=>{const st=SC.st;if(!st.legs.some(l=>l.visits.length)&&st.legs[0].starter!==MS.starter){st.legs[0].starter=MS.starter;await saveSC()}
+    if(V.setup&&V.raw&&(V.raw.getVideoTracks().length||B.on)){V.setup=false;goLive();renderCamSetup()}
+    msClose();renderScorer();window.scrollTo({top:0})};
+  if(online){const cs=$("camSetup");if(cs&&cs.previousElementSibling!==c)c.after(cs)}}
+// keep the set-up card up to date as the camera connects
+(function(){const _rc=renderCamSetup;renderCamSetup=function(){_rc.apply(this,arguments);try{camOtherTidy();if(MS){const cs=$("camSetup"),c=$("msCard");if(cs&&c&&c.nextElementSibling!==cs)c.after(cs);clearTimeout(msRender.t);msRender.t=setTimeout(()=>{const a=document.activeElement;if(MS&&!(a&&a.closest&&a.closest("#msCard")))msRender()},60)}}catch(e){console.warn(e)}}})();
+
+// --- camera on this phone, or on another phone (this phone's own camera switches off until the other phone is linked) ---
+async function camThisPhone(){const audio=V.raw?V.raw.getAudioTracks():[];
+  if(!V.raw){await cameraButton();return}
+  try{const s=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}}});
+    V.raw=new MediaStream([...s.getVideoTracks(),...audio]);V.out&&V.out.getTracks().forEach(t=>t.stop());V.out=null;V.canvas=null;startCanvas();if(V.live)attachLocal()}
+  catch(_){alert("Camera permission was refused or no camera was found. You can still score without video.")}
+  V.setup=true;renderCamSetup()}
+function camOwnOff(){cancelAnimationFrame(V.raf);if(V.raw)V.raw.getVideoTracks().forEach(t=>{t.stop();V.raw.removeTrack(t)});
+  if(V.out){V.out.getTracks().forEach(t=>t.stop());V.out=null}V.canvas=null;if(V.live)attachLocal()}
+async function camOtherPhone(){V.setup=true;
+  if(!V.raw){try{V.raw=await navigator.mediaDevices.getUserMedia({audio:true,video:false});V.mic=true}catch(_){V.raw=new MediaStream();V.mic=false}}
+  camOwnOff();await bcStart()}
+// the board-camera button inside the camera card does the same: own camera off first
+(function(){const _bs=bcStart;bcStart=async function(){camOwnOff();if(MS)MS.cam="other";return _bs.apply(this,arguments)}})();
+// while waiting for the other phone, hide this phone's preview, zoom, quality and buttons; offer to go back to this phone's camera
+function camOtherTidy(){const o=$("camSetup");if(!o||o.hidden)return;const own=!!(V.raw&&V.raw.getVideoTracks().length);if(own)return;
+  const hide=el=>{if(el)el.hidden=true};hide(o.querySelector(".vstage.frame"));const z=$("camZoom");if(z&&!B.on)hide(z.closest("label"));
+  const q=$("camQ");if(q&&!B.on)hide(q.closest(".row"));hide($("camFlip"));if(!B.on)hide($("camGo"));
+  const h=o.querySelector("h2");if(h&&!B.on){h.textContent="Board camera on another phone";const p=h.nextElementSibling;if(p&&p.classList.contains("note"))p.textContent="This phone's camera is off. Link your other phone with the code below. Once it's linked, its picture shows here and you can zoom and confirm."}
+  if(!B.on&&!$("camBackOwn")){const b=document.createElement("button");b.className="btn";b.id="camBackOwn";b.textContent="📱 Use this phone's camera instead";b.style.marginTop="8px";
+    b.onclick=async()=>{await bcStop(true);if(MS)MS.cam="this";await camThisPhone();if(MS)msRender()};o.appendChild(b)}}
+
+// --- Bob's 27 ---
+TDRILLS.bobs27={n:"Bob's 27",i:"🎲",d:"Start on 27. Three darts at each double, D1 to D20, then the bull. Every hit adds that double's value. Miss all three and you lose its value. Drop to zero and it's over. Best possible: 1437.",unit:"points",better:"higher"};
+const B27T=[...Array.from({length:20},(_,i)=>i+1),25];
+const b27Val=t=>t===25?50:t*2;
+function b27Score(h){let s=27;for(let i=0;i<h.length;i++){const v=b27Val(B27T[i]);s+=h[i]?h[i]*v:-v;if(s<=0)return {s,over:true,at:i};}return {s,over:false}}
+(function(){const _r=renderTraining;renderTraining=function(){if(TRMODE!=="bobs27")return _r.apply(this,arguments);
+  const out=$("trOut");if(!out)return;const D=TDRILLS.bobs27;TS.h=TS.h||[];const sc=b27Score(TS.h),k=TS.h.length,done=sc.over||k>=B27T.length,t=B27T[Math.min(k,B27T.length-1)];
+  const nm=x=>x===25?"Bull":"D"+x;const best=Math.max(0,...TRAIN.filter(x=>x.drill==="bobs27").map(x=>+x.score));
+  out.innerHTML=`<div class="card"><h2>${D.i} ${D.n}</h2><p class="note">${D.d}</p>
+   <div class="kv"><div><b>${Math.max(sc.s,0)}</b><span>Score</span></div><div><b>${done?"–":nm(t)}</b><span>Target</span></div><div><b>${k}/21</b><span>Doubles done</span></div><div><b>${best||"–"}</b><span>Your best</span></div></div>
+   <div class="b27h">${B27T.map((x,i)=>`<span class="${i===k&&!done?"now":TS.h[i]===0?"z":""}">${nm(x)}${i<k?": "+TS.h[i]:""}</span>`).join("")}</div>
+   ${done?`<p class="okmsg"><b>${sc.over?`Out on ${nm(B27T[sc.at])}. Final score 0.`:`Finished! Final score ${sc.s}.`}</b></p>`:
+     `<p style="text-align:center;margin:10px 0 0"><b>Three darts at ${t===25?"the bull":"double "+t}.</b> How many hit?</p>
+      <div class="b27">${[0,1,2,3].map(n=>`<button data-b27="${n}" class="${n?"":"miss"}" aria-label="${n} hit">${n}</button>`).join("")}</div>`}
+   <div class="row" style="margin-top:8px"><button class="btn" data-b27u="1" ${k?"":"disabled"}>↶ Undo</button>${done?'<button class="btn primary" id="b27Save">Save result</button>':""}</div>
+   <p class="err" id="trErr"></p><div class="row" style="margin-top:10px"><button class="btn" id="trBack">← Back to training</button></div></div>`;
+  out.querySelectorAll("[data-b27]").forEach(b=>b.onclick=()=>{TS.h.push(+b.dataset.b27);try{if(+b.dataset.b27===3)navigator.vibrate&&navigator.vibrate(120)}catch(_){}renderTraining()});
+  out.querySelectorAll("[data-b27u]").forEach(b=>b.onclick=()=>{TS.h.pop();renderTraining()});
+  $("trBack").onclick=()=>{if(k&&!done&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
+  const sv=$("b27Save");if(sv)sv.onclick=async()=>{sv.disabled=true;const s=b27Score(TS.h);
+    const {error}=await db.rpc("v2_log_training",{p_drill:"bobs27",p_score:Math.max(0,s.s),p_detail:{hits:TS.h,out:s.over}});
+    if(error){$("trErr").textContent=error.message;sv.disabled=false;return}TRMODE=null;TS={};await load();show("training")}}})();
+// Bob's 27 hits also count in "Checkout % by double"
+(function(){const _d=doublesTable;doublesTable=function(){const extra=TRAIN.filter(t=>t.drill==="bobs27"&&t.detail&&Array.isArray(t.detail.hits));if(!extra.length)return _d();
+  const keep=TRAIN.slice();extra.forEach(t=>{const dbl={};t.detail.hits.forEach((h,i)=>{const k=B27T[i]===25?"Bull":"D"+B27T[i];dbl[k]={a:3,h:+h||0}});TRAIN.push({drill:"ladder",detail:{dbl},__b27:1})});
+  try{return _d()}finally{TRAIN.length=0;keep.forEach(x=>TRAIN.push(x))}}})();
 
 load();
 </script>
