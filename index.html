@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-YHbwnQttDsDFLJbflpW12bAO9i09+7bQfI8R/YZjMCM=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-uxlocohkXWAWCdZlpe32alUzAnF+IkRK6eyF69+v268=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -2529,6 +2529,41 @@ function b27Score(h){let s=27;for(let i=0;i<h.length;i++){const v=b27Val(B27T[i]
 (function(){const _d=doublesTable;doublesTable=function(){const extra=TRAIN.filter(t=>t.drill==="bobs27"&&t.detail&&Array.isArray(t.detail.hits));if(!extra.length)return _d();
   const keep=TRAIN.slice();extra.forEach(t=>{const dbl={};t.detail.hits.forEach((h,i)=>{const k=B27T[i]===25?"Bull":"D"+B27T[i];dbl[k]={a:3,h:+h||0}});TRAIN.push({drill:"ladder",detail:{dbl},__b27:1})});
   try{return _d()}finally{TRAIN.length=0;keep.forEach(x=>TRAIN.push(x))}}})();
+
+// ---------- 12. join form: find your country by typing (every country, plus England, Scotland, Wales, Holland, USA…) ----------
+(function(){try{const dn=new Intl.DisplayNames(["en"],{type:"region"}),have=new Set(COUNTRIES.map(c=>c[0])),skip=new Set(["AC","AQ","BV","CP","DG","EA","EU","EZ","HM","IC","IO","QO","TA","TF","UM","UN","XA","XB","ZZ"]);
+  for(let a=65;a<91;a++)for(let b=65;b<91;b++){const c=String.fromCharCode(a,b);if(have.has(c)||skip.has(c))continue;let n;try{n=dn.of(c)}catch(_){continue}
+    if(!n||n===c||/unknown/i.test(n))continue;COUNTRIES.push([c,n]);CNAME[c]=n}
+  COUNTRIES.sort((x,y)=>x[1].localeCompare(y[1]))}catch(e){console.warn(e)}})();
+const CTRY_ALIAS={GB:"England Scotland Wales Northern Ireland UK Great Britain Britain",US:"USA America United States of America",NL:"Holland",TR:"Turkey",CZ:"Czech Republic",AE:"UAE Dubai",KR:"Korea",IE:"Eire Republic of Ireland"};
+const ctryNorm=s=>(s||"").normalize("NFD").replace(/[̀-ͯ]/g,"").toLowerCase().trim();
+function ctryFind(q){q=ctryNorm(q);if(!q)return [];const sc=([c,n])=>{const words=(n+" "+(CTRY_ALIAS[c]||"")).split(/[\s,()-]+/).map(ctryNorm),nn=ctryNorm(n);
+    if(nn.startsWith(q))return 0;if(words.some(w=>w.startsWith(q)))return 1;if(ctryNorm(CTRY_ALIAS[c]).includes(q)||nn.includes(q))return 2;if(c.toLowerCase()===q)return 1;return 9};
+  return COUNTRIES.map(c=>[sc(c),c]).filter(x=>x[0]<9).sort((a,b)=>a[0]-b[0]||a[1][1].localeCompare(b[1][1])).slice(0,8).map(x=>x[1])}
+(function(){const st=document.createElement("style");st.textContent=`
+.jclist{display:grid;gap:4px;margin-top:6px}.jclist[hidden]{display:none}
+.jclist button{display:flex;align-items:center;gap:10px;text-align:left;width:100%;min-height:48px;padding:10px 12px;border-radius:12px;border:2px solid var(--line);background:var(--surface);color:var(--ink);font:600 16px var(--body);cursor:pointer}
+.jclist button[aria-selected="true"],.jclist button:focus-visible{border-color:var(--accent);outline:none}
+.jclist .fl{font-size:24px;line-height:1}.jcpick{margin-top:6px;font-weight:700}`;document.head.appendChild(st)})();
+(function(){const _j=renderJoin;renderJoin=function(){const r=_j.apply(this,arguments);try{ctrySearch()}catch(e){console.warn(e)}return r}})();
+function ctrySearch(){const sel=$("jCountry");if(!sel||$("jcQ"))return;
+  // make sure every country is in the list the form sends
+  const opts=new Set([...sel.options].map(o=>o.value));COUNTRIES.forEach(([c,n])=>{if(!opts.has(c)){const o=document.createElement("option");o.value=c;o.textContent=flag(c)+" "+n;sel.appendChild(o)}});
+  sel.hidden=true;
+  const q=document.createElement("input");q.id="jcQ";q.type="search";q.autocomplete="off";q.placeholder="Start typing, e.g. Eng, Neth or Ire";
+  q.setAttribute("role","combobox");q.setAttribute("aria-autocomplete","list");q.setAttribute("aria-controls","jcList");q.setAttribute("aria-expanded","false");q.setAttribute("aria-label","Country: start typing to search");
+  const list=document.createElement("div");list.id="jcList";list.className="jclist";list.setAttribute("role","listbox");list.hidden=true;
+  const pick=document.createElement("div");pick.className="jcpick";pick.setAttribute("aria-live","polite");
+  sel.after(q,list,pick);
+  const show=()=>{const v=sel.value;pick.textContent=v?`${flag(v)} ${CNAME[v]||v} ✓`:"";};
+  const choose=c=>{sel.value=c;sel.dispatchEvent(new Event("change",{bubbles:true}));q.value=CNAME[c]||c;list.hidden=true;q.setAttribute("aria-expanded","false");show()};
+  const draw=()=>{const res=ctryFind(q.value);list.innerHTML=res.map(([c,n],i)=>`<button type="button" role="option" data-cc="${c}" aria-selected="${i===0}"><span class="fl" aria-hidden="true">${flag(c)}</span>${esc(n)}</button>`).join("")||(q.value.trim()?'<p class="note">No country found. Try fewer letters.</p>':"");
+    list.hidden=!q.value.trim();q.setAttribute("aria-expanded",String(!list.hidden));list.querySelectorAll("[data-cc]").forEach(b=>b.onclick=()=>choose(b.dataset.cc))};
+  q.oninput=draw;q.onfocus=()=>{if(sel.value&&q.value===(CNAME[sel.value]||""))q.select()};
+  q.onkeydown=e=>{const bs=[...list.querySelectorAll("[data-cc]")];if(e.key==="Enter"){e.preventDefault();if(bs[0])choose(bs[0].dataset.cc)}else if(e.key==="ArrowDown"&&bs[0]){e.preventDefault();bs[0].focus()}};
+  list.onkeydown=e=>{const bs=[...list.querySelectorAll("[data-cc]")],i=bs.indexOf(document.activeElement);if(e.key==="ArrowDown"&&bs[i+1]){e.preventDefault();bs[i+1].focus()}else if(e.key==="ArrowUp"){e.preventDefault();(bs[i-1]||q).focus()}};
+  sel.addEventListener("change",()=>{if(document.activeElement!==q){q.value=sel.value?(CNAME[sel.value]||""):"";}show()});
+  if(sel.value)q.value=CNAME[sel.value]||"";show()}
 
 load();
 </script>
