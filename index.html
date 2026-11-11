@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-t3HZJN7Be0xm32zTuerycEnVIEx53HCHrDLH1JKvIpw=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-6o9emCSudW518sNJ+h8WC526QYih6i9g4LAGs87jqFU=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -2615,6 +2615,22 @@ let FMT_PENDING=null;
 document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest("#gGo,#bGo");if(!t)return;const s=$(t.id==="gGo"?"gFt":"bFt");if(s)FMT_PENDING=fmtRead(s)},true);
 (function(){const _r=renderScorer;renderScorer=function(){try{if(FMT_PENDING&&SC&&SC.m&&SC.m.id<0&&!SC.m.__fmt){const f=FMT_PENDING;FMT_PENDING=null;SC.m.__fmt=1;SC.m.fmt=f.fmt;SC.m.set_legs=f.set_legs;SC.m.first_to=f.first_to;
     if(!SC.st.legs.some(l=>l.visits.length)){SC.st.first_to=f.first_to;SC.st.set_legs=f.set_legs;SC.st.draw=false}}}catch(_){}return _r.apply(this,arguments)}})();
+
+// ---------- 14. Chalkers overview: tap a tile to jump to that part of the page ----------
+const OV_GO=[[/Waiting approval/i,/^Waiting for approval/i],[/In placement/i,/^Ready to place/i],[/In divisions/i,/^Players$/i],[/Disputes/i,/^Disputes$/i],
+  [/Awaiting accept/i,/^Matches to be played/i],[/Blocks/i,/^Blocks and reports/i],[/Open reports/i,/^Open reports|^Blocks and reports/i]];
+(function(){const st=document.createElement("style");st.textContent=`
+#v-staff .card{scroll-margin-top:96px}.ovgo{cursor:pointer;transition:transform .1s}.ovgo:hover,.ovgo:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.ovgo:active{transform:scale(.97)}
+.ovgo span::after{content:" ›"}@keyframes ovflash{0%{box-shadow:0 0 0 4px var(--accent)}100%{box-shadow:0 0 0 0 transparent}}.ovflash{animation:ovflash 1.6s ease-out}`;document.head.appendChild(st)})();
+function ovJump(re){const v=$("v-staff");if(!v)return;const h=[...v.querySelectorAll("h2,h3")].find(x=>re.test(x.textContent.trim()));if(!h){return}
+  if(h.classList.contains("foldh")&&h.getAttribute("aria-expanded")==="false")h.click();
+  const card=h.closest(".card")||h;card.scrollIntoView({behavior:"smooth",block:"start"});card.classList.remove("ovflash");void card.offsetWidth;card.classList.add("ovflash");
+  h.tabIndex=-1;setTimeout(()=>{try{h.focus({preventScroll:true})}catch(_){}},400)}
+(function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{
+  const ov=[...$("stTop").querySelectorAll(".card")].find(c=>/^Overview/.test((c.querySelector("h2")||{}).textContent||""));if(ov)ov.querySelectorAll(".kv>div").forEach(t=>{
+    const lab=(t.querySelector("span")||{}).textContent||"";const m=OV_GO.find(([a])=>a.test(lab));if(!m||t.dataset.ov)return;t.dataset.ov="1";t.classList.add("ovgo");
+    t.setAttribute("role","button");t.tabIndex=0;t.setAttribute("aria-label",lab+": "+((t.querySelector("b")||{}).textContent||"")+". Go to that section");
+    t.onclick=()=>ovJump(m[1]);t.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();ovJump(m[1])}}})}catch(e){console.warn(e)}return r}})();
 
 load();
 </script>
