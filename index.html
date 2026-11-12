@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-coczfHtnkKbIWRO0lyJ6BRVCEempVKJXV0U/ij2W404=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-43QRG3ZRN+s3O5OiiQD1l3cl7+l92TOggm7NjKMqnPI=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -282,7 +282,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.datase
 async function load(){
   const {data:{session}}=await db.auth.getSession();ME=session?session.user:null;
   STATE=null;if(ME){const r=await db.rpc("v2_my_join_state");if(!r.error)STATE=r.data}
-  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen").in("status",["placement","active"]).order("display_name");
+  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota").in("status",["placement","active"]).order("display_name");
   PLAYERS=p.data||[];
   const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS=d.data||[];
   const se=await db.from("seasons").select("*").order("start_date");SEASONS=se.data||[];
@@ -698,7 +698,11 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
    <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
    <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
    ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">Make a webhook in your private Chalkers channel (Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL) and paste it here. Disputes are posted there, tagged with the division.</p>
-     ${["discord_chalkers","discord_results","discord_general"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_chalkers:"Private Chalkers channel",discord_results:"Results channel",discord_general:"General channel"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}<p class="err" id="whErr"></p></div>`:""}`;
+     ${["discord_chalkers","discord_results","discord_general"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_chalkers:"Private Chalkers channel",discord_results:"Results channel",discord_general:"General channel"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
+     <h3 style="margin-top:14px">Extra channels</h3><p class="note">10 spare webhook slots. Type a name so you know which channel it is (you can change it any time), paste the webhook, then Save. Leave the webhook box empty and Save to clear it.</p>
+     ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="item" style="margin-bottom:8px"><b>Slot ${n}</b> ${settings["discord_slot"+n]?'<span class="pill ok">'+esc(settings["discord_slot"+n])+"</span>":""}
+       <div class="row" style="margin-top:6px"><label class="f">Name<input data-whn="${n}" maxlength="40" value="${esc(settings["whname_slot"+n]||"")}" placeholder="e.g. Division 1"></label>
+       <label class="f">Webhook<input data-whu="${n}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whx="${n}">Save</button></div><p class="err"></p></div>`).join("")}<p class="err" id="whErr"></p></div>`:""}`;
   const errOf=b=>b.closest(".item,.card").querySelector(".err");
   box.querySelectorAll("[data-start]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm: make fixtures";return}const {data,error}=await db.rpc("v2_admin_start_season",{p_season:+b.dataset.start});errOf(b).innerHTML=error?esc(error.message):`<span class="okmsg">${data} fixtures made.</span>`;if(!error){await load();renderStaff()}});
   const ns=$("nsGo");if(ns)ns.onclick=async()=>{const {error}=await db.rpc("v2_admin_create_season",{p_league:DIVS.find(d=>d.tier>0).league_id,p_name:$("nsName").value,p_start:$("nsStart").value||null,p_weeks:+$("nsWeeks").value});$("nsErr").innerHTML=error?esc(error.message):'<span class="okmsg">Season created.</span>';if(!error){await load();renderStaff()}};
@@ -707,6 +711,11 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
   box.querySelectorAll("[data-role],[data-fno]").forEach(s=>s.onchange=async()=>{const id=s.dataset.role||s.dataset.fno;const role=box.querySelector(`[data-role="${id}"]`).value,fno=box.querySelector(`[data-fno="${id}"]`).value;
     const {error}=await db.rpc("v2_admin_set_role",{p_user:id,p_role:role,p_founder_no:fno?+fno:null});$("plErr").innerHTML=error?esc(error.message):'<span class="okmsg">Saved.</span>';if(!error)load()});
   box.querySelectorAll("[data-uph],[data-rep]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_staff_resolve",{p_match:+(b.dataset.uph||b.dataset.rep),p_uphold:!!b.dataset.uph});errOf(b).innerHTML=error?esc(error.message):'<span class="okmsg">Done.</span>';if(!error){await load();renderStaff()}});
+  box.querySelectorAll("[data-whx]").forEach(b=>b.onclick=async()=>{const n=b.dataset.whx,e=errOf(b),u=box.querySelector(`[data-whu="${n}"]`).value.trim();
+    let r=await db.rpc("v2_admin_set_setting",{p_key:"whname_slot"+n,p_value:box.querySelector(`[data-whn="${n}"]`).value.trim()});
+    if(!r.error&&(u||b.dataset.clear==="1"))r=await db.rpc("v2_admin_set_setting",{p_key:"discord_slot"+n,p_value:u});
+    if(!r.error&&!u&&settings["discord_slot"+n]&&b.dataset.clear!=="1"){b.dataset.clear="1";b.textContent="Clear webhook?";e.innerHTML='<span class="okmsg">Name saved. Press again to remove this webhook too.</span>';return}
+    e.innerHTML=r.error?esc(r.error.message):'<span class="okmsg">'+(u?"Saved. A test message was sent to that channel.":"Saved.")+"</span>";if(!r.error)setTimeout(renderStaff,1200)});
   box.querySelectorAll("[data-whs]").forEach(b=>b.onclick=async()=>{const k=b.dataset.whs;const {error}=await db.rpc("v2_admin_set_setting",{p_key:k,p_value:box.querySelector(`[data-wh="${k}"]`).value.trim()});$("whErr").innerHTML=error?esc(error.message):'<span class="okmsg">Saved. A test message was sent to that channel.</span>';if(!error)renderStaff()});
 }
 const _renderStaffOld=renderStaff;
@@ -2438,13 +2447,13 @@ function penTables(){const pd=penDiv();if(!pd||TDIV!==pd.id)return;const card=[.
 async function penStaff(){const box=$("stTop");const pd=penDiv();if(!box||!pd)return;const live=liveSeason();
   // division lists: the pen goes last, shows a plain count, and is picked for new players while a season is running
   box.querySelectorAll("[data-div]").forEach(a=>{if(+a.dataset.div!==pd.id)return;const sm=a.querySelector("small");if(sm)sm.textContent=PLAYERS.filter(p=>p.division_id===pd.id&&p.status==="active").length+" players · joined mid-season";a.parentElement.appendChild(a)});
-  box.querySelectorAll("select[data-psel]").forEach(s=>{const o=[...s.options].find(x=>+x.value===pd.id);if(!o)return;o.textContent="Holding pen (joined mid-season)";s.appendChild(o);
-    if(live){s.value=String(pd.id);if(!s.parentElement.parentElement.querySelector(".pennote")){const n=document.createElement("p");n.className="note pennote";n.textContent=live.name+" is running, so new players go in the holding pen. They play each other, then move into a division next season.";s.closest(".row").after(n)}}else s.value=[...s.options][0].value});
+  box.querySelectorAll("select[data-psel]").forEach(s=>{const o=[...s.options].find(x=>+x.value===pd.id);if(!o)return;o.textContent="Holding pen (new players)";s.appendChild(o);
+    s.value=String(pd.id);if(!s.parentElement.parentElement.querySelector(".pennote")){const n=document.createElement("p");n.className="note pennote";n.textContent="The holding pen is open: new players wait there and get one match every Monday, then go into a division by their 3-dart average when the "+(live?"next":"new")+" season starts.";s.closest(".row").after(n)}});
   // the pen card
   let c=$("penCard");if(!c){c=document.createElement("div");c.className="card";c.id="penCard";const after=[...box.querySelectorAll(".card")].find(x=>/^Ready to place/.test((x.querySelector("h2")||{}).textContent||""));(after||box.lastElementChild).after(c)}
   const t=leagueTable(pd.id,live);const real=DIVS.filter(d=>d.tier>0&&!(d.leagues&&d.leagues.is_placement));
-  c.innerHTML=`<h2>Holding pen</h2><p class="note">Players who joined mid-season. They play each other (first to 5) and the table decides who moves up first. When the season ends, move them into divisions here. Moving someone cancels their unplayed holding-pen matches.</p>
-   ${t.length?t.map((r,i)=>`<div class="item"><b>${i+1}.</b> ${nameLink(r.id)} · ${r.P} played · ${r.Pts} pts · legs ${r.LF}-${r.LA}
+  c.innerHTML=`<h2>Holding pen</h2><p class="note">New players waiting for a division. Each gets one match every Monday (first to 5) until the season starts, then goes into a division by 3-dart average. When the season ends, move them into divisions here. Moving someone cancels their unplayed holding-pen matches.</p>
+   ${t.length?t.map((r,i)=>`<div class="item"><b>${i+1}.</b> ${nameLink(r.id)} · ${r.P} of ${(PLAYERS.find(p=>p.id===r.id)||{}).pen_quota??"–"} played · ${r.Pts} pts · legs ${r.LF}-${r.LA}
      <div class="row" style="margin-top:6px"><label class="f">Move to<select data-pmv="${r.id}">${real.map(d=>`<option value="${d.id}">${esc(d.name)}</option>`).join("")}</select></label><button class="btn" data-pgo="${r.id}">Move</button></div><p class="err"></p></div>`).join(""):'<p class="note">Nobody in the holding pen.</p>'}`;
   c.querySelectorAll("[data-pgo]").forEach(b=>b.onclick=async()=>{const sel=c.querySelector(`[data-pmv="${b.dataset.pgo}"]`);b.disabled=true;
     const {error}=await db.rpc("v2_staff_place",{p_user:b.dataset.pgo,p_division:+sel.value});const e=b.closest(".item").querySelector(".err");
@@ -2706,6 +2715,22 @@ try{TDRILLS.ladder.d="Pick any start from 2 to 170. Check out and you go up 1. M
     if(v<2||v>170){note.textContent=v===1?"1 can't be checked out (you need a double), so the lowest start is 2.":"Pick a number from 2 to 170.";return}
     const n=ladderNext(v);TS.sel.s=n;note.textContent=n!==v?`${v} can't be checked out in 3 darts, so you'll start on ${n}.`:"";mark()};
   }catch(e){console.warn(e)}return r}})();
+
+
+// ---------- 17. Chalkers: everyone's 3-dart average ----------
+let AVG_SORT="avg";
+(function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{await avgCard()}catch(e){console.warn(e)}return r}})();
+async function avgCard(){const box=$("stTop");if(!box)return;let c=$("avgCard");if(!c){c=document.createElement("div");c.className="card";c.id="avgCard";box.appendChild(c)}
+  const {data,error}=await db.rpc("v2_staff_averages");if(error){c.innerHTML=`<h2>Player averages</h2><p class="err">${esc(error.message)}</p>`;return}
+  const rows=data||[];const dn=id=>{const d=DIVS.find(x=>x.id===id);return d?(d.tier<0?"Holding pen":d.name):"–"};
+  const key={avg:x=>-(x.avg??-1),last5:x=>-(x.last5??-1),pa:x=>-(x.pa??-1),name:x=>x.name.toLowerCase(),played:x=>-x.played};
+  const draw=()=>{const q=ctryNorm(($("avgQ")||{}).value||"");const list=rows.filter(x=>!q||ctryNorm(x.name).includes(q)).sort((a,b)=>{const ka=key[AVG_SORT](a),kb=key[AVG_SORT](b);return ka<kb?-1:ka>kb?1:0});
+    $("avgList").innerHTML=list.map((x,i)=>`<div class="item"><b>${i+1}. ${nameLink(x.id)}</b> <span class="pill">${esc(x.status==="placement"?"Placement":dn(x.div))}</span>
+      <div class="row" style="gap:6px;margin-top:6px"><span class="pill"><b>3DA ${x.avg??"–"}</b></span><span class="pill">Last 5: ${x.last5??"–"}</span><span class="pill">PA ${x.pa??"–"} (${x.pm} PM)</span><span class="pill">Said ${x.claimed??"–"}</span><span class="pill">${x.played} played</span></div>
+      <div class="note">${x.last_played?"Last played "+new Date(x.last_played).toLocaleDateString("en-GB",{day:"numeric",month:"short"}):"No matches yet"}</div></div>`).join("")||'<p class="note">Nobody found.</p>'};
+  c.innerHTML=`<h2>Player averages</h2><p class="note">3DA = 3-dart average from all confirmed matches. Last 5 = their 5 most recent. PA = average in placement matches (PM = how many). Said = the average they gave when joining.</p>
+    <div class="row"><label class="f">Find<input id="avgQ" type="search" placeholder="Name"></label><label class="f">Sort by<select id="avgS">${[["avg","3DA"],["last5","Last 5"],["pa","PA"],["played","Matches played"],["name","Name"]].map(([v,l])=>`<option value="${v}" ${v===AVG_SORT?"selected":""}>${l}</option>`).join("")}</select></label></div><div id="avgList"></div>`;
+  $("avgQ").oninput=draw;$("avgS").onchange=e=>{AVG_SORT=e.target.value;draw()};draw()}
 
 load();
 </script>
