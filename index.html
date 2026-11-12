@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-43QRG3ZRN+s3O5OiiQD1l3cl7+l92TOggm7NjKMqnPI=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-97zmoOJDt6C0s6Ay6G31lm4EDzguQaXSxg3b5OZ19B0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -269,7 +269,7 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const flag=cc=>cc&&/^[A-Z]{2}$/.test(cc)?String.fromCodePoint(...[...cc].map(c=>0x1F1E6+c.charCodeAt(0)-65)):"🏳️";
 const COUNTRIES=[["GB","United Kingdom"],["IE","Ireland"],["NL","Netherlands"],["BE","Belgium"],["DE","Germany"],["AT","Austria"],["CH","Switzerland"],["FR","France"],["ES","Spain"],["PT","Portugal"],["IT","Italy"],["DK","Denmark"],["SE","Sweden"],["NO","Norway"],["FI","Finland"],["IS","Iceland"],["PL","Poland"],["CZ","Czechia"],["SK","Slovakia"],["HU","Hungary"],["RO","Romania"],["BG","Bulgaria"],["GR","Greece"],["CY","Cyprus"],["MT","Malta"],["HR","Croatia"],["SI","Slovenia"],["RS","Serbia"],["LT","Lithuania"],["LV","Latvia"],["EE","Estonia"],["UA","Ukraine"],["TR","Türkiye"],["GI","Gibraltar"],["US","United States"],["CA","Canada"],["MX","Mexico"],["BR","Brazil"],["AR","Argentina"],["CL","Chile"],["AU","Australia"],["NZ","New Zealand"],["ZA","South Africa"],["NG","Nigeria"],["KE","Kenya"],["IN","India"],["PK","Pakistan"],["NP","Nepal"],["PH","Philippines"],["SG","Singapore"],["MY","Malaysia"],["HK","Hong Kong"],["JP","Japan"],["KR","South Korea"],["CN","China"],["TH","Thailand"],["AE","United Arab Emirates"],["SA","Saudi Arabia"],["QA","Qatar"],["IL","Israel"],["FJ","Fiji"]].sort((a,b)=>a[1].localeCompare(b[1]));
 const CNAME=Object.fromEntries(COUNTRIES);
-let ME=null,STATE=null,PLAYERS=[],DIVS=[],SEASONS=[],MATCHES=[],CHALL=[],TRAIN=[],PROF=null,DIV=null,CUR="home";
+let ME=null,STATE=null,PLAYERS=[],DIVS=[],DIVS_ALL=[],SEASONS=[],MATCHES=[],CHALL=[],TRAIN=[],PROF=null,DIV=null,CUR="home";
 const isMemberData=()=>!!(STATE&&["placement","active"].includes(STATE.profile.status));
 const pl=n=>n+(n===1?" player":" players");
 const isMember=()=>!!(STATE&&["placement","active"].includes(STATE.profile.status));
@@ -282,9 +282,9 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.datase
 async function load(){
   const {data:{session}}=await db.auth.getSession();ME=session?session.user:null;
   STATE=null;if(ME){const r=await db.rpc("v2_my_join_state");if(!r.error)STATE=r.data}
-  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota").in("status",["placement","active"]).order("display_name");
+  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota,pen_king").in("status",["placement","active"]).order("display_name");
   PLAYERS=p.data||[];
-  const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS=d.data||[];
+  const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS_ALL=d.data||[];DIVS=divsVisible(DIVS_ALL);
   const se=await db.from("seasons").select("*").order("start_date");SEASONS=se.data||[];
   const lm=await db.from("matches").select("*").in("status",["confirmed","submitted","scheduled","disputed","forfeit"]).order("created_at");MATCHES=lm.data||[];
   CHALL=[];TRAIN=[];
@@ -483,7 +483,7 @@ function renderPlay(){const out=$("playOut");if(!ME){out.innerHTML="";return}
   const inC=CHALL.filter(c=>c.to_id===ME.id&&c.status==="open"&&new Date(c.expires_at)>now);
   const outC=CHALL.filter(c=>c.from_id===ME.id&&["open"].includes(c.status)&&c.kind!=="fun");const outF=CHALL.filter(c=>c.from_id===ME.id&&c.status==="open"&&c.kind==="fun"&&new Date(c.expires_at)>now);
   const card=m=>`<div class="item"><b>${KIND[m.kind]}${m.week?" · week "+m.week:""}${m.coach_me?' · <span class="pill">Coach me</span>':""}</b> v ${nameLink(opp(m,ME.id))}
-     <div class="note">${fmtLabel(m).replace(/^./,c=>c.toUpperCase())}${m.kind==="league"?" (4-4 is a draw)":""}${m.start_score&&m.start_score!==501?" · "+m.start_score:""} · play by ${fmtD(m.due_at)}</div>${cancelBox(m)}
+     <div class="note">${fmtLabel(m).replace(/^./,c=>c.toUpperCase())}${m.start_score&&m.start_score!==501?" · "+m.start_score:""} · play by ${fmtD(m.due_at)}</div>${cancelBox(m)}
      <div class="row" style="margin-top:8px"><button class="btn primary" data-score="${m.id}" data-mode="local">Score on one phone</button><button class="btn primary" data-score="${m.id}" data-mode="online">Score online</button><button class="btn" data-app="${m.id}">Enter result from an app</button></div><div data-appform="${m.id}"></div></div>`;
   const res=m=>{const [a,b]=myLegs(m,ME.id),sa=myStats(m,ME.id),so=myStats(m,opp(m,ME.id));return `<b>${a}-${b}</b> v ${nameLink(opp(m,ME.id))} · your avg ${(+sa.tda||0).toFixed(2)}, theirs ${(+so.tda||0).toFixed(2)}`};
   out.innerHTML=`
@@ -554,7 +554,7 @@ const legRem=(L,p)=>((SC&&SC.m&&SC.m.start_score)||501)-L.visits.filter(v=>v.p==
 const turnOf=L=>{if(L.winner)return null;const n=L.visits.length;return n%2===0?L.starter:(L.starter==="A"?"B":"A")};
 const setScore=st=>{let a=0,b=0,sa=0,sb=0;for(const l of st.legs){if(l.winner==="A")a++;else if(l.winner==="B")b++;if(a>=st.set_legs){sa++;a=0;b=0}else if(b>=st.set_legs){sb++;a=0;b=0}}return {sa,sb,a,b}};
 const legsWon=(st,p)=>st.set_legs?setScore(st)[p==="A"?"sa":"sb"]:st.legs.filter(l=>l.winner===p).length;
-const fmtLabel=m=>{const ft=m.first_to||3,t=m.fmt==="best"?`best of ${2*ft-1}`:`first to ${ft}`;return m.set_legs?`${t} sets (each set first to ${m.set_legs} legs)`:`${t} legs`};
+const fmtLabel=m=>{if(m.kind==="league"&&m.fmt!=="best"&&!m.set_legs&&(m.first_to||5)===5)return "best of 8 legs: first to 5 wins, 4-4 is a draw";const ft=m.first_to||3,t=m.fmt==="best"?`best of ${2*ft-1}`:`first to ${ft}`;return m.set_legs?`${t} sets (each set first to ${m.set_legs} legs)`:`${t} legs`};
 function matchOver(st){const a=legsWon(st,"A"),b=legsWon(st,"B"),w=st.first_to;return a>=w||b>=w||(st.draw&&a===w-1&&b===w-1)}
 function calcStats(st,p){let sc=0,d=0,f9s=0,f9d=0,m180=0,t140=0,t100=0,hf=0,bl=0,co=0,dbl=0;
   st.legs.forEach(L=>{let k=0,ld=0;L.visits.forEach(v=>{if(v.p!==p)return;const dd=v.co?v.co:3;sc+=v.s;d+=dd;ld+=dd;if(k<3){f9s+=v.s;f9d+=dd}k++;
@@ -693,8 +693,8 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
        ${adm&&s.status==="planned"?`<div class="row" style="margin-top:6px"><button class="btn primary" data-start="${s.id}">Make fixtures and start</button></div><p class="note">Do this once every division has its players. Fixtures are hidden until each Monday.</p>`:""}<p class="err"></p></div>`).join("")||'<p class="note">No seasons.</p>'}
      ${adm?`<h3>New season</h3><div class="row"><label class="f">Name<input id="nsName" placeholder="Season 2"></label><label class="f">Start (a Monday)<input id="nsStart" type="date"></label><label class="f">Weeks<input id="nsWeeks" type="number" value="10" min="4" max="20"></label><button class="btn" id="nsGo">Create</button></div><p class="err" id="nsErr"></p>`:""}</div>
    <div class="card"><h2>Divisions</h2><div class="divs">${divs.map(d=>`<a href="#" data-div="${d.id}">${esc(d.name)}<small>${d.players} of ${d.max} players</small></a>`).join("")}</div></div>
-   <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · ${p.played} of 3 placement matches · placement avg ${p.avg??"–"} · said ${p.claimed??"–"}
-       <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}</div>
+   <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · <span class="pill">PM ${p.played} of 3</span> <span class="pill">PA ${p.avg??"–"}</span> <span class="pill">Said ${p.claimed??"–"}</span>
+       <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}<p class="note pmkey">PM = placement matches played · PA = average in placement matches · Said = the average they gave when joining.</p></div>
    <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
    <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
    ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">Make a webhook in your private Chalkers channel (Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL) and paste it here. Disputes are posted there, tagged with the division.</p>
@@ -1420,9 +1420,9 @@ rules:()=>`<h2>📜 The rules</h2><p class="note">Plain English. If anything her
 <li>If the video drops, stop and wait. After 5 minutes without video, the match goes to a Chalker, who decides what happens.</li></ul>
 <h3>Results</h3><ul><li>One player sends the result. The other checks it within 48 hours, or it's accepted automatically.</li>
 <li>Wrong result? Tap <b>No, that's wrong</b> and say why. A Chalker sorts it out.</li><li>Someone helping you score? That's fine. Turn on <b>Someone helps me score</b> in your profile so your opponent knows.</li></ul>
-<h3>Tournaments</h3><ul><li>Played in one evening. All matches start at 19:30 (UK time).</li><li>Random draw into groups of 5 to 7. Group games are best of 3 legs. The top 2 go through.</li>
-<li>Group ties: points, then leg difference, then the result between the tied players. Still tied? A play-off match.</li>
-<li>Knockouts are best of 5 legs. The final is best of 7.</li></ul>
+<h3>Tournaments</h3><ul><li>Played in one evening. All matches start at 19:30 (UK time).</li><li>The 11 Darts Cup: with 12 or more players, groups of up to 6 (seeded by average). Group games are best of 3 legs. The top 2 go through, plus the best third places if needed to make 8.</li><li>Fewer than 12 players: straight knockout, with byes.</li>
+<li>Group ties: points, then leg difference, then legs won.</li>
+<li>Quarter-finals (and earlier) best of 3 legs. Semi-finals best of 5. The final is best of 7.</li></ul>
 <h3>Behaviour</h3><ul>${CONDUCT.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>
 <p class="note">Chalkers approve new players and sort out problems. Admins run the site. A ban needs two of them to agree.</p>`,
 accessibility:()=>`<h2>♿ Accessibility</h2><p>11 Darts is for everyone: any age, any ability, standing or seated. If something gets in your way, tell us and we'll fix it.</p>
@@ -1726,7 +1726,7 @@ function renderTourn(){const out=$("tOut");if(!out)return;const t=TOURNS.find(x=
   let h=`<div class="card"><button class="btn" id="tBack" style="padding:6px 10px;font-size:12px">← Back</button><h2 style="margin-top:12px">🏆 ${esc(t.name)}</h2>
    <p><span class="pill">${T_ST[t.status]||t.status}</span> ${tWhen(t)} <span class="note">(19:30 UK time)</span></p>${t.note?`<p class="note">${esc(t.note)}</p>`:""}
    ${t.champion?`<p style="font-size:20px">🥇 Champion: <b>${nameLink(t.champion)}</b></p>`:""}
-   <p class="note">One night. Random draw into groups of 5 to 7, best of 3 legs, top 2 go through. Ties: points, leg difference, head-to-head, then a play-off. Knockouts best of 5, final best of 7. 60 seconds per throw (90 seated).</p>
+   <p class="note">One night. Groups of up to 6, best of 3 legs, top 2 go through. Quarter-finals best of 3, semis best of 5, final best of 7. 60 seconds per throw (90 seated).</p>
    ${t.status==="open"?`<p><b>${ent.length}</b> entered${ent.length?": "+ent.map(id=>nameLink(id)).join(", "):""}</p>${before?`<button class="btn ${tIn(t.id)?"":"primary"}" data-tent="${t.id}" data-in="${tIn(t.id)?0:1}">${tIn(t.id)?"Leave this tournament":"Enter this tournament"}</button>`:'<p class="note">Entries closed. Waiting for the draw.</p>'}`:""}
    <div class="row" id="tStaff" style="margin-top:10px"></div><p class="err" id="tErr"></p></div>`;
   // knockouts
@@ -2446,7 +2446,7 @@ function penTables(){const pd=penDiv();if(!pd||TDIV!==pd.id)return;const card=[.
 (function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{penStaff()}catch(e){console.warn(e)}return r}})();
 async function penStaff(){const box=$("stTop");const pd=penDiv();if(!box||!pd)return;const live=liveSeason();
   // division lists: the pen goes last, shows a plain count, and is picked for new players while a season is running
-  box.querySelectorAll("[data-div]").forEach(a=>{if(+a.dataset.div!==pd.id)return;const sm=a.querySelector("small");if(sm)sm.textContent=PLAYERS.filter(p=>p.division_id===pd.id&&p.status==="active").length+" players · joined mid-season";a.parentElement.appendChild(a)});
+  box.querySelectorAll("[data-div]").forEach(a=>{if(+a.dataset.div!==pd.id)return;const sm=a.querySelector("small");if(sm)sm.textContent=PLAYERS.filter(p=>p.division_id===pd.id&&p.status==="active").length+" players · new players wait here";a.parentElement.appendChild(a)});
   box.querySelectorAll("select[data-psel]").forEach(s=>{const o=[...s.options].find(x=>+x.value===pd.id);if(!o)return;o.textContent="Holding pen (new players)";s.appendChild(o);
     s.value=String(pd.id);if(!s.parentElement.parentElement.querySelector(".pennote")){const n=document.createElement("p");n.className="note pennote";n.textContent="The holding pen is open: new players wait there and get one match every Monday, then go into a division by their 3-dart average when the "+(live?"next":"new")+" season starts.";s.closest(".row").after(n)}});
   // the pen card
@@ -2731,6 +2731,115 @@ async function avgCard(){const box=$("stTop");if(!box)return;let c=$("avgCard");
   c.innerHTML=`<h2>Player averages</h2><p class="note">3DA = 3-dart average from all confirmed matches. Last 5 = their 5 most recent. PA = average in placement matches (PM = how many). Said = the average they gave when joining.</p>
     <div class="row"><label class="f">Find<input id="avgQ" type="search" placeholder="Name"></label><label class="f">Sort by<select id="avgS">${[["avg","3DA"],["last5","Last 5"],["pa","PA"],["played","Matches played"],["name","Name"]].map(([v,l])=>`<option value="${v}" ${v===AVG_SORT?"selected":""}>${l}</option>`).join("")}</select></label></div><div id="avgList"></div>`;
   $("avgQ").oninput=draw;$("avgS").onchange=e=>{AVG_SORT=e.target.value;draw()};draw()}
+
+// ---------- 18. Divisions 4-7 stay hidden until someone is in them (or every division above is full) ----------
+function divsVisible(all){const cnt=id=>PLAYERS.filter(p=>p.division_id===id&&p.status==="active").length;const out=[];
+  for(const d of all){if(d.tier<=3||(d.leagues&&d.leagues.is_placement)||cnt(d.id)>0){out.push(d);continue}
+    const shown=out.filter(x=>x.tier>0);if(shown.length&&shown.every(x=>cnt(x.id)>=x.max_players))out.push(d)}
+  return out}
+const divShown=id=>{const d=DIVS_ALL.find(x=>x.id===id);return !d||DIVS.some(x=>x.id===id)};
+
+// ---------- 19. Chalkers: tick boxes in Ready to place, Divisions above it, every card opens and closes ----------
+(function(){const st=document.createElement("style");st.textContent=`
+.ticks{display:grid;gap:8px;margin-top:8px;flex:1 1 100%}.tick{display:flex;align-items:center;gap:12px;min-height:50px;padding:8px 14px;border-radius:14px;background:var(--surface);font-size:16px;cursor:pointer;border:2px solid transparent}
+.tick input{width:26px;height:26px;min-height:0;padding:0;margin:0;accent-color:var(--accent);flex:none}.tick:has(input:checked){border-color:var(--accent);background:var(--soft)}.tick small{margin-left:auto;color:var(--muted)}`;document.head.appendChild(st)})();
+function staffTidy(){const box=$("stTop");if(!box)return;
+  // hide empty spare divisions
+  box.querySelectorAll("[data-div]").forEach(a=>{if(!divShown(+a.dataset.div))a.hidden=true});
+  box.querySelectorAll("select[data-mv] option").forEach(o=>{if(o.value&&!divShown(+o.value))o.remove()});
+  // tick boxes instead of a drop-down
+  box.querySelectorAll("select[data-psel]").forEach(s=>{if(s.dataset.ticked)return;s.dataset.ticked="1";const lab=s.closest("label");
+    const opts=[...s.options].filter(o=>divShown(+o.value));if(!opts.some(o=>o.value===s.value)&&opts[0])s.value=opts[0].value;
+    const w=document.createElement("div");w.className="ticks";w.setAttribute("role","group");w.setAttribute("aria-label","Choose a division");
+    w.innerHTML=opts.map(o=>{const m=o.textContent.match(/^(.*?)\s*(\(\d+\/\d+\))?$/);return `<label class="tick"><input type="checkbox" value="${o.value}" ${o.value===s.value?"checked":""}> ${esc(m[1])}<small>${esc((m[2]||"").replace(/[()]/g,"").replace("/"," of "))}</small></label>`}).join("");
+    w.querySelectorAll("input").forEach(i=>i.onchange=()=>{if(!i.checked){i.checked=true;return}w.querySelectorAll("input").forEach(x=>{if(x!==i)x.checked=false});s.value=i.value});
+    if(lab){lab.hidden=true;lab.parentElement.prepend(w)}else s.after(w)});
+  // Divisions card just above Ready to place
+  const cards=[...box.children];const cd=cards.find(c=>/^Divisions/.test((c.querySelector("h2")||{}).textContent||"")),cr=cards.find(c=>/^Ready to place/.test((c.querySelector("h2")||{}).textContent||""));
+  if(cd&&cr&&cd.nextElementSibling!==cr)cr.before(cd)}
+function foldStaff(){const v=$("v-staff");if(!v||v.hidden)return;v.querySelectorAll("h2").forEach(h=>{if(h.closest(".npop,#nPop,.ttpop,.mtpop"))return;if(/^Overview/.test(h.textContent.trim()))return;if(!h.closest(".card"))return;foldOne(h)})}
+(function(){const _fa=foldAll;foldAll=function(){_fa();try{foldStaff()}catch(_){}}})();
+(function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{staffTidy();await seasonOwner();mtStaff();foldStaff()}catch(e){console.warn(e)}return r}})();
+
+// ---------- 20. Season dates: only the owner (Jon) can change them ----------
+let AM_OWNER=null;
+async function seasonOwner(){if(AM_OWNER===null){const r=await db.rpc("v2_am_owner");AM_OWNER=!r.error&&r.data===true}if(!AM_OWNER)return;
+  const card=[...$("stTop").querySelectorAll(".card")].find(c=>/^Seasons/.test((c.querySelector("h2")||{}).textContent||""));if(!card||card.querySelector("#godSeas"))return;
+  const ss=(SEASONS||[]).filter(s=>["planned","live"].includes(s.status));if(!ss.length)return;const d=document.createElement("div");d.id="godSeas";
+  d.innerHTML=`<h3>Change season dates <span class="pill">Only you</span></h3><p class="note">Pick a new start Monday and number of weeks. In a live season, fixtures that haven't been revealed yet move by the same number of days.</p>`+
+    ss.map(s=>`<div class="item"><b>${esc(s.name)}</b> · ${s.status}<div class="row" style="margin-top:6px"><label class="f">Starts (a Monday)<input type="date" data-gsd="${s.id}" value="${s.start_date}"></label><label class="f">Weeks<input type="number" min="4" max="20" data-gsw="${s.id}" value="${s.weeks}"></label><button class="btn primary" data-gss="${s.id}">Save dates</button></div><p class="err"></p></div>`).join("");
+  card.appendChild(d);
+  d.querySelectorAll("[data-gss]").forEach(b=>b.onclick=async()=>{const id=+b.dataset.gss,e=b.closest(".item").querySelector(".err");
+    const {data,error}=await db.rpc("v2_owner_set_season",{p_season:id,p_start:d.querySelector(`[data-gsd="${id}"]`).value||null,p_weeks:+d.querySelector(`[data-gsw="${id}"]`).value});
+    e.innerHTML=error?esc(error.message):`<span class="okmsg">Saved.${data?" "+data+" fixtures moved.":""}</span>`;if(!error){await load();renderStaff()}})}
+
+// ---------- 21. Play: next league match is revealed on Monday ----------
+(function(){const _r=renderPlay;renderPlay=function(){const r=_r.apply(this,arguments);try{if(!ME)return r;const now=Date.now();
+  const nx=mine().filter(m=>m.status==="scheduled"&&m.released_at&&new Date(m.released_at)>now).sort((a,b)=>new Date(a.released_at)-new Date(b.released_at))[0];
+  const c=[...$("playOut").querySelectorAll(".card")].find(x=>/^Your matches/.test((x.querySelector("h2")||{}).textContent||""));
+  if(nx&&c&&!c.querySelector(".nextrev")){const p=document.createElement("p");p.className="note nextrev";p.innerHTML=`🔒 Next ${KIND[nx.kind]||""} match is revealed on <b>${new Date(nx.released_at).toLocaleDateString("en-GB",{weekday:"long",day:"numeric",month:"short"})}</b>. One match a week, so there's no rush.`;c.querySelector("h2").after(p)}
+  mtPlay();repPlay()}catch(e){console.warn(e)}return r}})();
+
+// ---------- 22. Match time: agree a time, the other player confirms ----------
+(function(){const st=document.createElement("style");st.textContent=`.mtbox{margin-top:10px;padding:12px;border-radius:14px;background:var(--soft);display:grid;gap:8px}.mtbox .row{gap:8px}.mtbox input{flex:1 1 200px}.mthome{border-left:6px solid var(--accent)}`;document.head.appendChild(st)})();
+const ukT=d=>new Date(d).toLocaleString("en-GB",{timeZone:"Europe/London",weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+const sameTZ=()=>{try{return Intl.DateTimeFormat().resolvedOptions().timeZone==="Europe/London"}catch(_){return true}};
+const mtShow=d=>{const u=ukT(d),l=new Date(d).toLocaleString("en-GB",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});return u+" UK time"+(u===l?"":` (${l} your time)`)};
+const dtLocal=d=>{const x=new Date(d);x.setMinutes(x.getMinutes()-x.getTimezoneOffset());return x.toISOString().slice(0,16)};
+function mtHTML(m){if(m.status!=="scheduled"||m.id<0)return "";const o=PN(opp(m,ME.id));let top;
+  if(m.agreed_at&&m.agreed_ok)top=`<div>📅 <b>${mtShow(m.agreed_at)}</b> <span class="pill ok">Agreed</span></div><div class="row"><button class="btn" data-mtc="${m.id}">Change time</button></div>`;
+  else if(m.agreed_at&&m.agreed_by===ME.id)top=`<div>📅 You suggested <b>${mtShow(m.agreed_at)}</b>. Waiting for ${esc(o)} to confirm.</div><div class="row"><button class="btn" data-mtc="${m.id}">Change time</button></div>`;
+  else if(m.agreed_at)top=`<div>📅 ${esc(o)} says <b>${mtShow(m.agreed_at)}</b></div><div class="row"><button class="btn primary" data-mty="${m.id}">Confirm</button><button class="btn" data-mtn="${m.id}">Suggest another time</button></div>`;
+  else top=`<div class="row"><button class="btn" data-mtc="${m.id}">📅 Set match time</button></div><div class="note">Agreed a time on Discord? Put it here so ${esc(o)} gets a reminder.</div>`;
+  return `<div class="mtbox" data-mt="${m.id}">${top}<div class="row" data-mtf="${m.id}" hidden><label class="f">Date and time (your phone's time)<input type="datetime-local" data-mti="${m.id}" min="${dtLocal(Date.now())}" ${m.due_at?`max="${dtLocal(m.due_at)}"`:""} value="${m.agreed_at?dtLocal(m.agreed_at):""}"></label><button class="btn primary" data-mts="${m.id}">Send to ${esc(o)}</button></div><p class="err"></p></div>`}
+function mtWire(root){const err=b=>b.closest(".mtbox").querySelector(".err");
+  root.querySelectorAll("[data-mtc],[data-mtn]").forEach(b=>b.onclick=()=>{const id=b.dataset.mtc||b.dataset.mtn;const f=root.querySelector(`[data-mtf="${id}"]`);f.hidden=false;const i=f.querySelector("input");try{i.focus()}catch(_){}});
+  root.querySelectorAll("[data-mts]").forEach(b=>b.onclick=async()=>{const id=+b.dataset.mts,v=root.querySelector(`[data-mti="${id}"]`).value;if(!v){err(b).textContent="Pick a date and time.";return}
+    const {error}=await db.rpc("v2_set_match_time",{p_match:id,p_at:new Date(v).toISOString()});if(error){err(b).textContent=error.message;return}await load()});
+  root.querySelectorAll("[data-mty]").forEach(b=>b.onclick=async()=>{const {error}=await db.rpc("v2_confirm_match_time",{p_match:+b.dataset.mty,p_ok:true});if(error){err(b).textContent=error.message;return}await load()})}
+function mtPlay(){const out=$("playOut");if(!out||!ME)return;out.querySelectorAll('[data-score][data-mode="local"]').forEach(b=>{const id=+b.dataset.score;const item=b.closest(".item");if(!item||item.querySelector(".mtbox"))return;
+  const m=MATCHES.find(x=>x.id===id);if(!m)return;const h=mtHTML(m);if(!h)return;b.closest(".row").insertAdjacentHTML("beforebegin",h)});mtWire(out)}
+// Home: coming up
+(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{mtHome()}catch(e){console.warn(e)}return r}})();
+function mtHome(){const h=$("memberHome");let c=$("mtHome");if(!h||!ME||!isMember()){if(c)c.remove();return}
+  const now=Date.now(),soon=mine().filter(m=>m.status==="scheduled"&&m.agreed_at&&new Date(m.agreed_at)>now-3*36e5&&new Date(m.agreed_at)<now+7*864e5).sort((a,b)=>new Date(a.agreed_at)-new Date(b.agreed_at));
+  if(!soon.length){if(c)c.remove();return}if(!c){c=document.createElement("div");c.id="mtHome";c.className="card mthome";h.prepend(c)}
+  const day=d=>{const x=new Date(d),t=new Date();const dd=Math.round((new Date(x.toDateString())-new Date(t.toDateString()))/864e5);return dd===0?"Tonight":dd===1?"Tomorrow":x.toLocaleDateString("en-GB",{weekday:"long"})};
+  c.innerHTML=`<h2>Coming up</h2>${soon.map(m=>`<div class="item">📅 <b>${day(m.agreed_at)} ${new Date(m.agreed_at).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</b> v ${nameLink(opp(m,ME.id))} · ${KIND[m.kind]||"Match"} ${m.agreed_ok?'<span class="pill ok">Agreed</span>':'<span class="pill">Waiting to confirm</span>'}</div>`).join("")}<div class="row" style="margin-top:8px"><button class="btn" onclick="show('play')">Go to Play</button></div>`}
+// Chalkers: agreed times on Matches to be played
+function mtStaff(){const box=$("stTop");if(!box)return;box.querySelectorAll("[data-ext]").forEach(b=>{const it=b.closest(".item");if(!it||it.dataset.mt)return;it.dataset.mt="1";const m=MATCHES.find(x=>x.id===+b.dataset.ext);
+  const n=document.createElement("div");n.className="note";n.textContent=m&&m.agreed_at?`📅 ${ukT(m.agreed_at)} UK ${m.agreed_ok?"(agreed)":"(waiting for the other player to confirm)"}`:"📅 No time set yet";it.querySelector(".note").after(n)})}
+
+// ---------- 23. 🚩 Report a problem with a match (Play and the scorer) ----------
+(function(){const st=document.createElement("style");st.textContent=`.reppop{position:fixed;inset:0;background:rgba(0,0,0,.55);display:grid;place-items:center;z-index:60;padding:16px}.reppop .card{max-width:520px;width:100%;max-height:90vh;overflow:auto}
+.reppop textarea{width:100%;min-height:120px;font:inherit}.repbtn{min-height:44px!important;font-size:14px!important;padding:8px 14px!important}#scRep{margin:0 0 10px}`;document.head.appendChild(st)})();
+function repOpen(mid){const m=MATCHES.find(x=>x.id===mid)||(SC&&SC.m&&SC.m.id===mid?SC.m:null);if(!m||!ME)return;const o=opp(m,ME.id);
+  const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>🚩 Report a problem</h2><p class="note">Match v ${esc(PN(o))}. Only the Chalkers see this. Tell them what happened, for example: wrong scores entered, camera off or pointing away, abuse, cheating, or they left mid-match.</p>
+   <label class="f">What kind of problem?<select id="repK"><option value="match_scores">Wrong scores</option><option value="match_camera">Camera or video</option><option value="conduct">Behaviour or abuse</option><option value="match_left">Left the match</option><option value="match_other">Something else</option></select></label>
+   <label class="f">What happened?<textarea id="repT" maxlength="2000" placeholder="Leg 3, they entered 140 but threw 40…"></textarea></label>
+   <div class="row"><button class="btn primary" id="repGo">Send to the Chalkers</button><button class="btn" id="repX">Cancel</button></div><p class="err" id="repE"></p></div>`;
+  document.body.appendChild(p);const close=()=>p.remove();$("repX").onclick=close;p.onclick=e=>{if(e.target===p)close()};setTimeout(()=>{try{$("repT").focus()}catch(_){}},50);
+  $("repGo").onclick=async()=>{const t=$("repT").value.trim();if(t.length<10){$("repE").textContent="Please say a bit more (at least 10 letters).";return}
+    const {error}=await db.rpc("v2_report",{p_user:o,p_kind:$("repK").value,p_details:`Match #${m.id} (${KIND[m.kind]||m.kind}${m.stage?" "+m.stage:""}): ${t}`,p_evidence:[]});
+    if(error){$("repE").textContent=error.message;return}p.querySelector(".card").innerHTML=`<h2>Sent</h2><p>Thanks. The Chalkers will look at it. You can carry on playing.</p><div class="row"><button class="btn primary" id="repOk">OK</button></div>`;$("repOk").onclick=close;$("repOk").focus()}}
+function repPlay(){const out=$("playOut");if(!out||!ME)return;out.querySelectorAll('[data-score][data-mode="local"]').forEach(b=>{const row=b.closest(".row");if(!row||row.querySelector("[data-rep2]"))return;
+  const x=document.createElement("button");x.className="btn repbtn";x.dataset.rep2=b.dataset.score;x.textContent="🚩 Report";x.onclick=()=>repOpen(+b.dataset.score);row.appendChild(x)})}
+(function(){const _r=renderScorer;renderScorer=function(){const r=_r.apply(this,arguments);try{let b=$("scRep");const real=SC&&SC.m&&SC.m.id>0&&ME&&(SC.m.player_a===ME.id||SC.m.player_b===ME.id);
+  if(!real){if(b)b.hidden=true;return r}if(!b){b=document.createElement("button");b.id="scRep";b.className="btn repbtn";b.textContent="🚩 Report a problem";$("v-scorer").insertBefore(b,$("scOut"))}
+  b.hidden=false;b.onclick=()=>repOpen(SC.m.id)}catch(e){console.warn(e)}return r}})();
+
+// ---------- 24. Holding pen calling cards ----------
+CARDS.push(["penking","👑","King of the Holding Pen","Finished top of the holding pen. Long live the King."],
+  ["freshmeat","🥩","Fresh Meat","Played your first holding pen match. Welcome to the pen."],
+  ["jailbreak","🔓","Jailbreak","Got out of the holding pen and into a division."],
+  ["lifer","⛓️","Lifer","Played every holding pen match you were given."],
+  ["lastorders","🍺","Last Orders","Joined the pen late and still won a match. Just made it to the bar."]);
+(function(){const _e=earnedCards;earnedCards=function(id){const e=_e(id);try{const pd=penDiv();const p=PLAYERS.find(x=>x.id===id)||{};
+  if(p.pen_king>0)e.add("penking");if(!pd)return e;
+  const pm=MATCHES.filter(m=>m.division_id===pd.id&&["confirmed","forfeit"].includes(m.status)&&(m.player_a===id||m.player_b===id));
+  if(pm.length)e.add("freshmeat");const d=DIVS_ALL.find(x=>x.id===p.division_id);if(pm.length&&d&&d.tier>0)e.add("jailbreak");
+  if(p.pen_quota>0&&pm.length>=p.pen_quota)e.add("lifer");if(p.pen_quota>0&&p.pen_quota<=2&&pm.some(m=>{const [a,b]=myLegs(m,id);return a>b}))e.add("lastorders")}catch(_){}return e}})();
 
 load();
 </script>
