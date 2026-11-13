@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-97zmoOJDt6C0s6Ay6G31lm4EDzguQaXSxg3b5OZ19B0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-ewxtvKXPWhqcXz+VrvUqMZZuOBGG55gqTCKlYvsSo+M=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -350,10 +350,10 @@ function renderMe(){
   const st=STATE&&STATE.profile.status;
   $("signin").hidden=!!ME;$("join").hidden=!(ME&&st==="new");$("pending").hidden=!(ME&&st==="pending");$("mine").hidden=!(ME&&!["new","pending"].includes(st));
   if(ME&&st==="new")renderJoin();
-  if(ME&&st==="pending")$("pending").innerHTML=`<h2>Thanks, you're nearly in</h2><p>A Chalker will check your details and photo, usually within 48 hours. You'll then play 3 placement matches.</p><p class="note">Meanwhile, join our <a href="https://discord.gg/Zhf9rNb7h" target="_blank" rel="noopener">Discord</a> to meet everyone.</p><button class="btn" id="out1">Sign out</button>`,$("out1").onclick=()=>db.auth.signOut();
+  if(ME&&st==="pending")$("pending").innerHTML=`<h2>Thanks, you're nearly in</h2><p>A Chalker will check your details and photo, usually within 48 hours. You'll then go straight into the holding pen and get a match every Monday.</p><p class="note">Meanwhile, join our <a href="https://discord.gg/Zhf9rNb7h" target="_blank" rel="noopener">Discord</a> to meet everyone.</p><button class="btn" id="out1">Sign out</button>`,$("out1").onclick=()=>db.auth.signOut();
   if(ME&&!["new","pending"].includes(st)){const p=STATE.profile;
     $("mine").innerHTML=p.status==="banned"?`<h2>Account closed</h2><p>This account has been banned for breaking the code of conduct.</p><button class="btn" id="out2">Sign out</button>`:
-    `<h2>${flag(p.country)} ${esc(p.display_name)}</h2><p>${badges(p)}</p><p class="note">${({placement:"New player: play 3 placement matches and we'll put you in the right division",active:"Playing in the league",suspended:"Paused",banned:"Banned"})[p.status]||esc(p.status)}</p>
+    `<h2>${flag(p.country)} ${esc(p.display_name)}</h2><p>${badges(p)}</p><p class="note">${({placement:"New player: in the holding pen until the season starts",active:"Playing in the league",suspended:"Paused",banned:"Banned"})[p.status]||esc(p.status)}</p>
      <h3>My settings</h3>
      <div class="row"><label class="f">Scoring app<select id="mApp">${["","DartCounter","Autodarts","Dartsmind","Other"].map(a=>`<option ${a===(p.app_name||"")?"selected":""} value="${a}">${a||"None"}</option>`).join("")}</select></label><label class="f">App profile link<input id="mLink" value="${esc(p.app_link||"")}" placeholder="https://"></label></div>
      <label class="check"><input type="checkbox" id="mOpt" ${p.challenge_opt_out?"checked":""}> Don't let people challenge me</label>
@@ -620,7 +620,7 @@ function renderTables(){const out=$("tabOut");const divs=DIVS.filter(d=>!(d.leag
     <div class="tw" style="margin-top:10px"><table><tr><th>#</th><th class="l">Player</th><th>P</th><th>W</th><th>D</th><th>L</th><th>Legs</th><th>+/-</th><th>Pts</th></tr>
     ${t.map((r,i)=>`<tr class="${n>=4&&i===0?"up":n>=4&&i===n-1?"down":""}"><td>${i+1}</td><td class="l">${nameLink(r.id)}</td><td>${r.P}</td><td>${r.W}</td><td>${r.D}</td><td>${r.L}</td><td>${r.LF}-${r.LA}</td><td>${r.LF-r.LA>0?"+":""}${r.LF-r.LA}</td><td><b>${r.Pts}</b></td></tr>`).join("")||'<tr><td colspan="9" class="note">No players in this division yet.</td></tr>'}</table></div>
     <p class="note">Green goes up a division, red goes down, at the end of the season.</p></div>
-   <div class="card"><h2>Placement</h2><p class="note">New players play 3 placement matches. Their average from those matches helps the Chalkers choose their division.</p>
+   <div class="card"><h2>Placement</h2><p class="note">Older accounts still waiting for a division. New players now go straight into the holding pen instead.</p>
     <div class="tw"><table><tr><th class="l">Player</th><th>Played</th><th>Avg</th></tr>${placRows.map(r=>`<tr><td class="l">${nameLink(r.p.id)}</td><td>${r.n} of 3</td><td>${r.av==null?"–":r.av.toFixed(2)}</td></tr>`).join("")||'<tr><td colspan="3" class="note">Nobody in placement.</td></tr>'}</table></div></div>`;
   out.querySelectorAll("[data-tdiv]").forEach(b=>b.onclick=()=>{TDIV=+b.dataset.tdiv;renderTables()});
 }
@@ -1384,7 +1384,7 @@ function nextSteps(){const st=STATE&&STATE.profile&&STATE.profile.status;
   tc.forEach(m=>out.push([`Check the result v <b>${esc(PN(opp(m,ME.id)))}</b>. Tap <b>Yes, that's right</b> or <b>No, that's wrong</b>.`,"play"]));
   inC.forEach(c=>out.push([`<b>${esc(PN(c.from_id))}</b> wants a game. Accept or decline it.`,"play"]));
   tp.slice(0,3).forEach(m=>out.push(m.kind==="tournament"?[`Tournament match v <b>${esc(PN(opp(m,ME.id)))}</b> (${esc(m.stage||"")}). Play it tonight.`,"play"]:[`Play <b>${esc(PN(opp(m,ME.id)))}</b> by ${fmtD(m.due_at)}. Message them on Discord to agree a time, then tap <b>📅 Add to calendar</b>.`,"play"]));
-  if(!out.length)out.push([st==="placement"?"Your placement matches appear on Play as other players join. Practise while you wait.":"Nothing due. Play a friendly with anyone, or practise.","play"]);
+  if(!out.length)out.push([st==="placement"?"You're in the holding pen: you'll get a match every Monday on Play. Practise while you wait.":"Nothing due. Play a friendly with anyone, or practise.","play"]);
   return out}
 function nextHTML(){return `<ol class="next">${nextSteps().map(([t,go])=>`<li>${t}${go?` <button class="btn" data-nx="${go}">Go</button>`:""}</li>`).join("")}</ol>`}
 function wireNext(root){root.querySelectorAll("[data-nx]").forEach(b=>b.onclick=()=>{const g=b.dataset.nx;const o=$("a11ySheet");if(o)o.hidden=true;if(g==="gate"){show("home");setTimeout(()=>$("gate").scrollIntoView(),50)}else show(g)})}
@@ -1411,11 +1411,11 @@ rules:()=>`<h2>📜 The rules</h2><p class="note">Plain English. If anything her
 <h3>League matches</h3><ul><li>One match a week for 10 weeks. Your opponent appears on <b>Play</b> every Monday.</li>
 <li>First to 5 legs wins. 4-4 is a draw.</li><li>Points: win 3, draw 1, loss 0.</li>
 <li>At the end of the season the top player in each division goes up and the bottom player goes down.</li>
-<li>New players play 3 <b>placement</b> matches first, so we can put you in the right division.</li></ul>
+<li>New players go straight into the <b>holding pen</b>. You get one match every Monday until the season starts.</li><li>When the season starts you're put in a division automatically by your 3-dart average (up to 10 players per division).</li></ul>
 <h3>Arranging your match</h3><ul><li>Message your opponent on Discord within 72 hours, then tap <b>I've messaged my opponent</b>.</li>
 <li>If they don't reply within 72 hours, you win 5-0.</li><li>If neither of you arranges it by Sunday, the match is cancelled and nobody gets points.</li>
 <li>Can't make it? Tell a Chalker before the deadline. They can give you more time.</li></ul>
-<h3>Throw timer</h3><ul><li>League and tournament matches: 60 seconds to throw and enter your score.</li><li>Players who play seated: 90 seconds.</li><li>Friendlies: 120 seconds.</li><li>When time runs out you get a beep and a reminder. Nobody is penalised automatically.</li></ul>
+<h3>Throw timer</h3><ul><li>League and tournament matches: 60 seconds to throw and enter your score.</li><li>Players who play seated: 120 seconds.</li><li>Friendlies: 120 seconds.</li><li>When time runs out you get a beep and a reminder. Nobody is penalised automatically.</li></ul>
 <h3>Video and voice scoring</h3><ul><li>Video is on for every online match.</li><li>If you use voice scoring, your video must be on.</li>
 <li>If the video drops, stop and wait. After 5 minutes without video, the match goes to a Chalker, who decides what happens.</li></ul>
 <h3>Results</h3><ul><li>One player sends the result. The other checks it within 48 hours, or it's accepted automatically.</li>
@@ -1432,7 +1432,7 @@ accessibility:()=>`<h2>♿ Accessibility</h2><p>11 Darts is for everyone: any ag
 <li>The caller says every score out loud, and captions show it on screen. Your phone buzzes when it's your turn.</li>
 <li>Score with a laptop keyboard: type the score and press Enter. D for darts at a double, U to undo.</li>
 <li>Joining: tick <i>I'd like extra help</i> to fill the form in one step at a time.</li></ul>
-<h3>Seated and wheelchair players</h3><p>Same board, same height, same rules. Seated players get 90 seconds per throw instead of 60, to collect darts and enter the score.</p>
+<h3>Seated and wheelchair players</h3><p>Same board, same height, same rules. Seated players get 120 seconds per throw instead of 60, to collect darts and enter the score.</p>
 <h3>Still to come</h3><ul><li>Voice scoring: say "one forty" and it's entered.</li><li>Dutch, German and Polish.</li><li>Better support for screen readers (VoiceOver and TalkBack).</li></ul>
 <h3>Tell us</h3><p>Ask in our Discord help channel or email <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a>. We aim to reply within 3 days.</p>
 <p class="note">We test the site with older players. Last checked: November 2026.</p>`,
@@ -1501,7 +1501,7 @@ const _renderMeA=renderMe;renderMe=function(){_renderMeA();const box=$("mine");i
    <h3>Caller and access</h3>
    <label class="f">Name the caller says<input id="acName" maxlength="16" value="${esc(me.caller_name||"")}" placeholder="${esc(callName(ME.id))}"></label>
    <p class="note">Letters only, up to 16. Leave it empty to use your first name. Keep it friendly: Chalkers reset names that could offend anyone.</p>
-   <label class="check big"><input type="checkbox" id="acSeat" ${me.seated?"checked":""}><span><b>I play seated</b> (wheelchair or chair)<br><span class="note">You get 90 seconds per throw in league matches instead of 60. Same board, same rules.</span></span></label>
+   <label class="check big"><input type="checkbox" id="acSeat" ${me.seated?"checked":""}><span><b>I play seated</b> (wheelchair or chair)<br><span class="note">You get 120 seconds per throw in league matches instead of 60. Same board, same rules.</span></span></label>
    <label class="check big"><input type="checkbox" id="acHelp" ${me.helper_scoring?"checked":""}><span><b>Someone helps me score</b><br><span class="note">A partner, carer or friend enters your scores. Your opponent sees "🤝 Helper scores".</span></span></label>
    <div class="row"><button class="btn primary" id="acSave">Save emblem and access</button><button class="btn" id="acDisp">Aa Display settings</button></div><p class="err" id="acErr"></p>`;box.appendChild(d);
   const prev=()=>{$("emPrev").innerHTML=`<span class="av em" style="width:72px;height:72px">${emblemSVG(S+":"+C,lv.l,72)}</span>`};prev();
@@ -1528,7 +1528,7 @@ const _renderProfileA=renderProfile;renderProfile=function(){_renderProfileA();c
 // ---------- scorer: helper/seated tags for the opponent ----------
 const _renderScorerA=renderScorer;renderScorer=function(){_renderScorerA();if(!SC||!SC.m)return;const card=document.querySelector("#scOut .card");if(!card)return;
   card.querySelectorAll(".score2 .side").forEach((el,i)=>{const id=i?SC.m.player_b:SC.m.player_a;if(el.querySelector(".actag"))return;const p=PLAYERS.find(x=>x.id===id);if(!p)return;
-    const t=[p.helper_scoring?"🤝 Helper scores":"",p.seated?"♿ Seated: 90s":""].filter(Boolean).join(" · ");if(!t)return;const s=document.createElement("div");s.className="actag note";s.textContent=t;const nm=el.querySelector(".nm");(nm||el.firstChild).after(s)})};
+    const t=[p.helper_scoring?"🤝 Helper scores":"",p.seated?"♿ Seated: 120s":""].filter(Boolean).join(" · ");if(!t)return;const s=document.createElement("div");s.className="actag note";s.textContent=t;const nm=el.querySelector(".nm");(nm||el.firstChild).after(s)})};
 
 // ---------- add to calendar ----------
 function icsDate(d){return d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"")}
@@ -1549,7 +1549,7 @@ const _renderPlayA=renderPlay;renderPlay=function(){_renderPlayA();if(!ME)return
 const TDRILLS={scoring100:{n:"100-dart scoring",i:"🎯",d:"100 darts at one target. Tap what each dart hits. Your result is your 3-dart average.",unit:"3-dart average",better:"higher"},
  ladder:{n:"Checkout ladder",i:"🪜",d:"Start at 41 or 121. Check out and you go up 1. Miss and you stay. Tops out at 170.",unit:"highest checkout reached",better:"higher"},
  co170:{n:"Checkout 170",i:"💯",d:"10 attempts at 170, 9 darts each. Result: % checked out.",unit:"% checked out",better:"higher"},
- bot:{n:"Play the computer",i:"🤖",d:"A full match against the computer, 10 levels from beginner to pro.",unit:"your 3-dart average v the computer",better:"higher"}};
+ bot:{n:"Play The Punisher",i:"💀",d:"A full match against The Punisher, 10 levels from beginner to pro. He doesn't do mercy.",unit:"your 3-dart average v The Punisher",better:"higher"}};
 const BOT_AVG=[25,31,38,44,51,58,65,72,81,90];
 const NO_CO=[159,162,163,165,166,168,169];
 const ladderNext=n=>{n=Math.min(170,n);while(NO_CO.includes(n))n++;return Math.min(170,n)};
@@ -1573,7 +1573,7 @@ function botMove(){if(!SC)return;SC.botT=null;if(!SC.m.bot||SC.st.done||SC.ask)r
   const v=botVisit(legRem(L,"B"),SC.m.bot);
   if(v.co){SC.ask={v:{p:"B",s:v.s,dbl:v.dbl}};finishLeg(v.co,v.dbl);return}
   L.visits.push(v.bust?{p:"B",s:0,bust:1,dbl:v.dbl}:{p:"B",s:v.s,dbl:v.dbl});saveSC().then(()=>renderScorer())}
-function startBot(lvl,ft,start,first){PLAYERS=PLAYERS.filter(p=>p.id!=="bot");PLAYERS.push({id:"bot",display_name:`Computer (level ${lvl})`,caller_name:"Computer",country:"",status:"guest",emblem:"hex:black"});
+function startBot(lvl,ft,start,first){PLAYERS=PLAYERS.filter(p=>p.id!=="bot");PLAYERS.push({id:"bot",display_name:`The Punisher (level ${lvl})`,caller_name:"The Punisher",country:"",status:"guest",emblem:"hex:black"});
   const m={id:-Date.now(),kind:"fun",bot:lvl,player_a:ME.id,player_b:"bot",first_to:ft,start_score:start,status:"scheduled"};MATCHES.push(m);
   openScorer(m.id,"local").then(()=>{const i=MATCHES.indexOf(m);if(i>=0)MATCHES.splice(i,1);if(SC&&first==="bot"){SC.st.legs[0].starter="B";renderScorer()}})}
 const _renderScorerBot=renderScorer;renderScorer=function(){_renderScorerBot();if(!SC||!SC.m.bot)return;
@@ -1583,7 +1583,7 @@ const _renderScorerBot=renderScorer;renderScorer=function(){_renderScorerBot();i
       if(error){$("scErr").textContent=error.message;return}SC=null;TRMODE=null;await load();show("training")};return}
   const L=SC.st.legs[SC.st.legs.length-1];
   if(turnOf(L)==="B"&&!SC.ask){const pad=document.querySelector("#scOut .pad,#scOut .dpad");if(pad){pad.style.opacity=".4";pad.style.pointerEvents="none"}
-    const t=document.querySelector("#scOut .typed");if(t)t.innerHTML='<span class="note">🤖 The computer is throwing…</span>';if(!SC.botT)SC.botT=setTimeout(botMove,1400)}};
+    const t=document.querySelector("#scOut .typed");if(t)t.innerHTML='<span class="note">💀 The Punisher is throwing…</span>';if(!SC.botT)SC.botT=setTimeout(botMove,1400)}};
 const _undoBot=undo;undo=async function(){if(!SC||!SC.m.bot)return _undoBot();clearTimeout(SC.botT);SC.botT=null;
   const st=SC.st,L=st.legs[st.legs.length-1],last=L.visits[L.visits.length-1]||(st.legs.length>1&&!L.visits.length?{p:"B"}:null);
   await _undoBot();if(last&&last.p==="B")await _undoBot()};
@@ -1597,7 +1597,7 @@ function doublesTable(){const agg={};TRAIN.filter(t=>t.drill==="ladder"&&t.detai
   return `<div class="card"><h2>Checkout % by double</h2><p class="note">From your checkout ladder sessions. Overall: <b>${tot.h} of ${tot.a}</b> darts at a double hit (${(tot.h/tot.a*100).toFixed(1)}%).</p>
    <div class="tw"><table><tr><th class="l">Double</th><th>Darts at it</th><th>Hit</th><th>%</th></tr>${rows.map(([k,v])=>`<tr><td class="l"><b>${k}</b></td><td>${v.a}</td><td>${v.h}</td><td>${(v.h/v.a*100).toFixed(0)}%</td></tr>`).join("")}</table></div></div>`}
 function botRecord(){const g=TRAIN.filter(t=>t.drill==="bot");if(!g.length)return "";const beat=g.filter(t=>t.detail&&t.detail.won).map(t=>+t.detail.level);
-  return `<div class="card"><h2>🤖 You v the computer</h2><p class="note">Won ${beat.length} of ${g.length}.${beat.length?` Highest level beaten: <b>${Math.max(...beat)}</b>.`:" No wins yet. Try a lower level."}</p>
+  return `<div class="card"><h2>💀 You v The Punisher</h2><p class="note">Won ${beat.length} of ${g.length}.${beat.length?` Highest level beaten: <b>${Math.max(...beat)}</b>.`:" No wins yet. Try a lower level."}</p>
    ${g.slice(-8).reverse().map(t=>{const d=t.detail||{},[a,b]=d.legs||[0,0];return `<div class="note">${fmtD(t.at)} · level ${d.level} · <b>${a}-${b}</b> ${d.won?"won":"lost"} · your avg ${(+t.score).toFixed(1)}</div>`}).join("")}</div>`}
 function trPadHTML(mod){return `<div class="dpad"><div class="dmods">${["S","D","T"].map(m=>`<button data-tm="${m}" aria-pressed="${mod===m}">${{S:"Single",D:"Double",T:"Treble"}[m]}</button>`).join("")}</div>
   <div class="dnums">${Array.from({length:20},(_,i)=>`<button data-tn="${i+1}">${i+1}</button>`).join("")}<button data-tn="25" ${mod==="T"?"disabled":""}>${mod==="D"?"Bull":"25"}</button><button data-tn="0" class="miss">Miss</button></div>
@@ -1633,8 +1633,8 @@ renderTraining=function(){const out=$("trOut");if(!out)return;
     body=`<h3>Level</h3><div class="chips">${BOT_AVG.map((a,i)=>`<button class="chip" data-bl="${i+1}" aria-pressed="${TS.lv===i+1}">${i+1}</button>`).join("")}</div>
      <p class="note">Level ${TS.lv}: averages about <b>${BOT_AVG[TS.lv-1]}</b>. ${["Just starting out.","Pub beginner.","Pub regular.","Solid pub player.","County standard-ish.","Strong league player.","Very strong.","Semi-pro.","Pro level.","Top pro. Good luck."][TS.lv-1]}</p>
      <div class="row"><label class="f">First to<select id="bFt">${[1,3,5].map(n=>`<option ${TS.ft===n?"selected":""}>${n}</option>`).join("")}</select></label><label class="f">Game<select id="bSt">${[501,301].map(n=>`<option ${TS.st===n?"selected":""}>${n}</option>`).join("")}</select></label>
-     <label class="f">Who throws first<select id="bFi"><option value="me" ${TS.fi==="me"?"selected":""}>Me</option><option value="bot" ${TS.fi==="bot"?"selected":""}>The computer</option></select></label></div>
-     <div class="row" style="margin-top:10px"><button class="btn primary" id="bGo">Start the match</button></div><p class="note">You score your own darts as normal. The computer throws by itself.</p>`}
+     <label class="f">Who throws first<select id="bFi"><option value="me" ${TS.fi==="me"?"selected":""}>Me</option><option value="bot" ${TS.fi==="bot"?"selected":""}>The Punisher</option></select></label></div>
+     <div class="row" style="margin-top:10px"><button class="btn primary" id="bGo">Start the match</button></div><p class="note">You score your own darts as normal. The Punisher throws by himself.</p>`}
   out.innerHTML=`<div class="card">${head}${body}<p class="err" id="trErr"></p><div class="row" style="margin-top:10px">${back}</div></div>`;
   $("trBack").onclick=()=>{if(TRMODE==="ladder"&&TS.att&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
   // wiring
@@ -1726,7 +1726,7 @@ function renderTourn(){const out=$("tOut");if(!out)return;const t=TOURNS.find(x=
   let h=`<div class="card"><button class="btn" id="tBack" style="padding:6px 10px;font-size:12px">← Back</button><h2 style="margin-top:12px">🏆 ${esc(t.name)}</h2>
    <p><span class="pill">${T_ST[t.status]||t.status}</span> ${tWhen(t)} <span class="note">(19:30 UK time)</span></p>${t.note?`<p class="note">${esc(t.note)}</p>`:""}
    ${t.champion?`<p style="font-size:20px">🥇 Champion: <b>${nameLink(t.champion)}</b></p>`:""}
-   <p class="note">One night. Groups of up to 6, best of 3 legs, top 2 go through. Quarter-finals best of 3, semis best of 5, final best of 7. 60 seconds per throw (90 seated).</p>
+   <p class="note">One night. Groups of up to 6, best of 3 legs, top 2 go through. Quarter-finals best of 3, semis best of 5, final best of 7. 60 seconds per throw (120 seated).</p>
    ${t.status==="open"?`<p><b>${ent.length}</b> entered${ent.length?": "+ent.map(id=>nameLink(id)).join(", "):""}</p>${before?`<button class="btn ${tIn(t.id)?"":"primary"}" data-tent="${t.id}" data-in="${tIn(t.id)?0:1}">${tIn(t.id)?"Leave this tournament":"Enter this tournament"}</button>`:'<p class="note">Entries closed. Waiting for the draw.</p>'}`:""}
    <div class="row" id="tStaff" style="margin-top:10px"></div><p class="err" id="tErr"></p></div>`;
   // knockouts
@@ -2734,7 +2734,7 @@ async function avgCard(){const box=$("stTop");if(!box)return;let c=$("avgCard");
 
 // ---------- 18. Divisions 4-7 stay hidden until someone is in them (or every division above is full) ----------
 function divsVisible(all){const cnt=id=>PLAYERS.filter(p=>p.division_id===id&&p.status==="active").length;const out=[];
-  for(const d of all){if(d.tier<=3||(d.leagues&&d.leagues.is_placement)||cnt(d.id)>0){out.push(d);continue}
+  for(const d of all){if(d.leagues&&d.leagues.is_placement){if(PLAYERS.some(p=>p.division_id===d.id&&p.status==="placement"))out.push(d);continue}if(d.tier<=3||cnt(d.id)>0){out.push(d);continue}
     const shown=out.filter(x=>x.tier>0);if(shown.length&&shown.every(x=>cnt(x.id)>=x.max_players))out.push(d)}
   return out}
 const divShown=id=>{const d=DIVS_ALL.find(x=>x.id===id);return !d||DIVS.some(x=>x.id===id)};
@@ -2840,6 +2840,60 @@ CARDS.push(["penking","👑","King of the Holding Pen","Finished top of the hold
   const pm=MATCHES.filter(m=>m.division_id===pd.id&&["confirmed","forfeit"].includes(m.status)&&(m.player_a===id||m.player_b===id));
   if(pm.length)e.add("freshmeat");const d=DIVS_ALL.find(x=>x.id===p.division_id);if(pm.length&&d&&d.tier>0)e.add("jailbreak");
   if(p.pen_quota>0&&pm.length>=p.pen_quota)e.add("lifer");if(p.pen_quota>0&&p.pen_quota<=2&&pm.some(m=>{const [a,b]=myLegs(m,id);return a>b}))e.add("lastorders")}catch(_){}return e}})();
+
+// ---------- 25. Friendlies and challenges live on Training; Play keeps a pointer ----------
+(function(){const sec=$("v-training");if(sec&&!$("trSocial")){const d=document.createElement("div");d.id="trSocial";d.style.cssText="display:grid;gap:14px;margin-bottom:14px";sec.prepend(d)}})();
+const SOCIAL_RE=/^(Play a friendly|Challenges)/;
+(function(){const _r=renderPlay;renderPlay=function(){const r=_r.apply(this,arguments);try{socialMove()}catch(e){console.warn(e)}return r}})();
+function socialMove(){const out=$("playOut"),soc=$("trSocial");if(!out||!soc)return;
+  const cards=[...out.querySelectorAll(":scope > .card")].filter(c=>SOCIAL_RE.test(((c.querySelector("h2")||{}).textContent||"").trim()));
+  if(!cards.length)return;soc.querySelectorAll(".card.social").forEach(c=>c.remove());
+  const fc=$("friendsCard");cards.forEach(c=>{c.classList.add("social");if(fc)soc.insertBefore(c,fc.nextSibling&&fc.nextSibling.classList&&fc.nextSibling.classList.contains("social")?null:fc.nextSibling);else soc.appendChild(c)});
+  // keep them in order after the Friends card
+  const order=[$("friendsCard"),...[...soc.querySelectorAll(".card.social")]].filter(Boolean);order.forEach(c=>soc.appendChild(c));
+  const inv=(CHALL||[]).filter(c=>ME&&c.to_id===ME.id&&c.status==="pending").length;
+  if(!$("socPtr")){const p=document.createElement("div");p.id="socPtr";p.className="card";out.appendChild(p)}
+  $("socPtr").innerHTML=`<h2>Friendlies and challenges</h2><p class="note">These are on the Training page now, with your friends list.${inv?` <b>You have ${inv} invite${inv>1?"s":""} waiting.</b>`:""}</p><div class="row"><button class="btn ${inv?"primary":""}" id="socGo">Go to Training</button></div>`;
+  $("socGo").onclick=()=>show("training")}
+(function(){const _t=renderTraining;renderTraining=function(){const r=_t.apply(this,arguments);try{const soc=$("trSocial");if(!soc)return r;
+  const inDrill=(typeof DRILL!=="undefined"&&DRILL)||(typeof TRMODE!=="undefined"&&TRMODE);soc.hidden=!!inDrill||!ME||!isMember();if(soc.hidden)return r;
+  friendsCard();if(CUR==="training"){const cur=CUR;renderPlay();CUR=cur}}catch(e){console.warn(e)}return r}})();
+
+// ---------- 26. Friends ----------
+let FRIENDS=[];
+async function loadFriends(){if(!ME)return;const r=await db.from("friends").select("*");if(!r.error)FRIENDS=r.data||[]}
+(function(){const _l=load;load=async function(){const had=!!ME;if(had)await loadFriends();const r=await _l.apply(this,arguments);if(!had&&ME){await loadFriends();if(CUR==="training")renderTraining();if(CUR==="profile")renderProfile()}return r}})();
+const frRow=id=>FRIENDS.find(f=>(f.user_id===ME.id&&f.friend_id===id)||(f.user_id===id&&f.friend_id===ME.id));
+function frState(id){if(!ME)return null;const f=frRow(id);if(!f||["declined","removed"].includes(f.status))return "none";if(f.status==="accepted")return "friends";return f.user_id===ME.id?"sent":"asked"}
+async function frAct(fn,args,errEl){const {error}=await db.rpc(fn,args);if(error){if(errEl)errEl.textContent=error.message;return false}await loadFriends();if(CUR==="training")renderTraining();if(CUR==="profile")renderProfile();return true}
+function frOnline(id){const p=PLAYERS.find(x=>x.id===id);return p&&p.last_seen&&Date.now()-new Date(p.last_seen).getTime()<5*60e3}
+function friendsCard(){const soc=$("trSocial");let c=$("friendsCard");if(!c){c=document.createElement("div");c.id="friendsCard";c.className="card";soc.prepend(c)}
+  const other=f=>f.user_id===ME.id?f.friend_id:f.user_id;
+  const fr=FRIENDS.filter(f=>f.status==="accepted").map(other).filter(id=>PLAYERS.some(p=>p.id===id)).sort((a,b)=>(frOnline(b)-frOnline(a))||PN(a).localeCompare(PN(b)));
+  const asked=FRIENDS.filter(f=>f.status==="pending"&&f.friend_id===ME.id).map(f=>f.user_id);
+  const sent=FRIENDS.filter(f=>f.status==="pending"&&f.user_id===ME.id).map(f=>f.friend_id);
+  c.innerHTML=`<h2>Friends${fr.length?` <span class="pill">${fr.length}</span>`:""}</h2>
+   ${asked.map(id=>`<div class="item"><b>${nameLink(id)}</b> wants to be friends<div class="row" style="margin-top:6px"><button class="btn primary" data-fry="${id}">Accept</button><button class="btn" data-frn="${id}">No thanks</button></div></div>`).join("")}
+   ${fr.length?fr.map(id=>`<div class="item"><div class="row" style="justify-content:space-between;align-items:center;gap:8px"><b>${nameLink(id)}</b>
+      <div class="row" style="gap:6px"><button class="btn" data-frf="${id}">Friendly</button><button class="btn" data-frc="${id}">Challenge</button></div></div></div>`).join(""):`<p class="note">No friends yet. Open anyone's profile (tap their name) and press <b>Add friend</b>. Friends show here with a quick Friendly or Challenge button, and you can see when they're online.</p>`}
+   ${sent.length?`<p class="note">Waiting for: ${sent.map(id=>esc(PN(id))).join(", ")}</p>`:""}
+   <label class="f" style="margin-top:8px">Find a player to add<input id="frFind" type="search" placeholder="Type a name" autocomplete="off"></label><div id="frFound"></div><p class="err" id="frE"></p>`;
+  const e=$("frE");c.querySelectorAll("[data-fry]").forEach(b=>b.onclick=()=>frAct("v2_friend_respond",{p_user:b.dataset.fry,p_ok:true},e));
+  c.querySelectorAll("[data-frn]").forEach(b=>b.onclick=()=>frAct("v2_friend_respond",{p_user:b.dataset.frn,p_ok:false},e));
+  const pick=(sel,id)=>{const s=$(sel);if(!s)return;if(![...s.options].some(o=>o.value===id)){e.textContent=`${PN(id)} isn't taking ${sel==="chTo"?"challenges":"friendlies"} right now.`;return}const cd=s.closest(".card"),hh=cd&&cd.querySelector("h2[aria-expanded='false']");if(hh)hh.click();s.value=id;s.dispatchEvent(new Event("change",{bubbles:true}));s.closest(".card").scrollIntoView({behavior:"smooth",block:"start"});try{s.focus()}catch(_){}};
+  c.querySelectorAll("[data-frf]").forEach(b=>b.onclick=()=>pick("frTo",b.dataset.frf));c.querySelectorAll("[data-frc]").forEach(b=>b.onclick=()=>pick("chTo",b.dataset.frc));
+  $("frFind").oninput=()=>{const q=ctryNorm($("frFind").value.trim());const box=$("frFound");if(!q){box.innerHTML="";return}
+    const list=PLAYERS.filter(p=>p.id!==ME.id&&["active","placement"].includes(p.status)&&ctryNorm(p.display_name).includes(q)).slice(0,6);
+    box.innerHTML=list.map(p=>{const st=frState(p.id);return `<div class="item row" style="justify-content:space-between;align-items:center">${nameLink(p.id)}${st==="friends"?'<span class="pill ok">Friends</span>':st==="sent"?'<span class="pill">Asked</span>':`<button class="btn" data-fra="${p.id}">${st==="asked"?"Accept":"➕ Add friend"}</button>`}</div>`}).join("")||'<p class="note">Nobody found.</p>';
+    box.querySelectorAll("[data-fra]").forEach(b=>b.onclick=()=>frAct("v2_friend_request",{p_user:b.dataset.fra},e))}}
+// Profile: Add friend button
+(function(){const _p=renderProfile;renderProfile=function(){const r=_p.apply(this,arguments);try{const p=PLAYERS.find(x=>x.id===PROF);const box=$("profOut");
+  if(!p||!ME||p.id===ME.id||!isMember()||!["active","placement"].includes(p.status)||box.querySelector("#pFriend"))return r;const st=frState(p.id);
+  const d=document.createElement("div");d.id="pFriend";d.className="row";d.style.margin="10px 0";
+  d.innerHTML=st==="friends"?`<span class="pill ok">✓ Friends</span><button class="btn" id="pFrX">Remove friend</button>`:st==="sent"?`<span class="pill">Friend request sent</span><button class="btn" id="pFrX">Cancel request</button>`:st==="asked"?`<button class="btn primary" id="pFrA">Accept friend request</button>`:`<button class="btn primary" id="pFrA">➕ Add friend</button>`;
+  const e=document.createElement("p");e.className="err";d.after(e);(box.querySelector(".kv")||box.querySelector("h2")).after(d);d.after(e);
+  if($("pFrA"))$("pFrA").onclick=()=>frAct("v2_friend_request",{p_user:p.id},e);
+  if($("pFrX"))$("pFrX").onclick=async()=>{if($("pFrX").dataset.sure!=="1"){$("pFrX").dataset.sure="1";$("pFrX").textContent="Tap again to confirm";return}frAct("v2_friend_remove",{p_user:p.id},e)}}catch(err){console.warn(err)}return r}})();
 
 load();
 </script>
