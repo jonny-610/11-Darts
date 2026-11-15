@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-9Rd+QwXgSFnnJFiJvBFq73dRqpjAd78eeQrqug8CFW0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-cMZ/jjY4B8crpEK/aNwQ/CAaiTsud0f33HUgxiuJUXk=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -255,6 +255,7 @@ body.ohMem #v-home .hero{display:none}
 #howItWorks li::before{content:counter(hw);width:32px;height:32px;border-radius:16px;background:#0F3D2E;color:#F5EFE0;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 @media (prefers-color-scheme:dark){#howItWorks li::before{background:#E8C25A;color:#0F3D2E}}
 
+#howItWorks li>div{display:flex;flex-direction:column;gap:2px;padding-top:3px;min-width:0}#howItWorks li b{font-size:18px;line-height:1.2}#howItWorks li span{color:var(--muted);line-height:1.4}#howItWorks ol{gap:16px!important;margin-top:6px!important}
 @media (max-width:440px){.hin{padding:8px 12px;gap:8px}.brand h1{font-size:22px}.brand .beta,#hBtn{display:none!important}.hin .hbtns{gap:6px}}
 </style>
 </head>
@@ -291,13 +292,13 @@ body.ohMem #v-home .hero{display:none}
     </div>
     <div class="card" id="howItWorks">
       <h2>How it works</h2>
-      <ol style="margin:0;padding-left:20px">
-        <li><b>Sign in</b> with Google, Discord or your email.</li>
-        <li><b>Join</b> in one minute: your name, date of birth and country. You can train and look around straight away.</li>
-        <li><b>Ask to play</b> when you want to face other people. A Chalker accepts you, normally the same day.</li>
-        <li><b>Holding pen:</b> one match every Monday against other new players.</li>
-        <li><b>League:</b> when the season starts you go into a division that fits your average. One match a week, revealed every Monday.</li>
-        <li><b>Friendlies and the Cup:</b> play anyone for fun, and everyone in the league is in the Cup.</li>
+      <ol class="hiw">
+        <li><div><b>Sign in</b><span>Use Google, Discord or your email.</span></div></li>
+        <li><div><b>Join</b><span>Takes one minute: your name, date of birth and country. You can train and look around straight away.</span></div></li>
+        <li><div><b>Ask to play</b><span>When you want to play other people. A Chalker accepts you, normally the same day.</span></div></li>
+        <li><div><b>Holding pen</b><span>One match every Monday against other new players.</span></div></li>
+        <li><div><b>League</b><span>When the season starts you go into a division that fits your average. One match a week, revealed every Monday.</span></div></li>
+        <li><div><b>Friendlies and the Cup</b><span>Play anyone for fun. Everyone in the league is in the Cup.</span></div></li>
       </ol>
       <p class="note">All you need is a board, darts and a camera pointed at the board. It's free. Always.</p>
     </div>
@@ -2965,7 +2966,7 @@ function friendsCard(){const soc=$("trSocial");let c=$("friendsCard");if(!c){c=d
 // ---------- 27. Share the site ----------
 (function(){const st=document.createElement("style");st.textContent=`.toast11{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--head);color:var(--head-ink);padding:12px 18px;border-radius:14px;z-index:70;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3)}`;document.head.appendChild(st)})();
 function toast11(t){const d=document.createElement("div");d.className="toast11";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
-async function shareSite(){const data={title:"11 Darts",text:"11 Darts: a free online darts league. One match a week from your own board, camera on, all levels. 18+.",url:"https://11darts.com/"};
+async function shareSite(){const data={title:"11 Darts",text:"11 Darts: a free online darts league. One match a week from your own board, camera on, all levels.",url:"https://11darts.com/"};
   try{if(navigator.share){await navigator.share(data);return}}catch(e){if(e&&e.name==="AbortError")return}
   try{await navigator.clipboard.writeText(data.text+" "+data.url);toast11("Link copied. Paste it anywhere.")}catch(_){prompt("Copy this link:",data.url)}}
 (function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{const cta=$("heroCta");if(cta&&!$("shareRow")){const d=document.createElement("div");d.className="row";d.id="shareRow";d.style.marginTop="14px";d.innerHTML='<button class="btn" id="shareBtn">📤 Share 11 Darts</button>';cta.after(d);$("shareBtn").onclick=shareSite}
