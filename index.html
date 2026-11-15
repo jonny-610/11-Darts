@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-ewxtvKXPWhqcXz+VrvUqMZZuOBGG55gqTCKlYvsSo+M=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-wNlqmYg2tKcHV4x7iPzhC6sTSq8+NpWqGub7uoc4HUM=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -181,6 +181,16 @@ input:focus,select:focus,textarea:focus{border-color:var(--accent);outline:none}
 /* high contrast (Aa menu) keeps strong borders */
 html.hc .card,html.hc .item,html.hc .prow,html.hc .lb,html.hc .pad button,html.hc nav#tabs{border:2px solid var(--line)!important}
 html.hc nav#tabs button[aria-selected="true"]{outline:2px solid var(--accent)}
+
+/* ===== easier to read and tap (13 Nov check): nothing under 13px, tap areas 44px ===== */
+.kv span,.ccard small,.dcard small,.lbn small,.donate .dq small,.divs a small,.pill,.actag,.vlabel,.brand .by,th,footer{font-size:13px}
+ol.next .btn{font-size:14px;min-height:44px;min-width:56px}
+a.pn{padding:13px 4px;margin:0 -4px;border-radius:8px}
+a.pn:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.foldrow{min-height:44px}.foldh{min-height:44px!important;display:flex!important;align-items:center}a[data-lbgo]{display:inline-block;padding:12px 0}
+input[type=checkbox],input[type=radio]{width:26px;height:26px;min-height:0;padding:0;accent-color:var(--accent);flex:none}
+label.check{display:flex;align-items:center;gap:12px;min-height:44px}
+td select{min-height:44px}
 </style>
 </head>
 <body>
@@ -217,11 +227,12 @@ html.hc nav#tabs button[aria-selected="true"]{outline:2px solid var(--accent)}
     <div class="card" id="howItWorks">
       <h2>How it works</h2>
       <ol style="margin:0;padding-left:20px">
-        <li><b>Sign in</b> with Discord or your email.</li>
-        <li><b>Join:</b> accept the code of conduct, tell us your average, and send a photo of your board.</li>
-        <li><b>Placement:</b> play 3 matches so we can put you in the right division.</li>
-        <li><b>League:</b> one match a week for 10 weeks. Your opponent is revealed every Monday.</li>
-        <li><b>Challenges:</b> play anyone for fun. Tick <i>Coach me</i> to learn from a stronger player.</li>
+        <li><b>Sign in</b> with Google, Discord or your email.</li>
+        <li><b>Join</b> in one minute: your name, date of birth and country. You can train and look around straight away.</li>
+        <li><b>Ask to play</b> when you want to face other people. A Chalker accepts you, normally the same day.</li>
+        <li><b>Holding pen:</b> one match every Monday against other new players.</li>
+        <li><b>League:</b> when the season starts you go into a division that fits your average. One match a week, revealed every Monday.</li>
+        <li><b>Friendlies and the Cup:</b> play anyone for fun, and everyone in the league is in the Cup.</li>
       </ol>
       <p class="note">All you need is a board, darts and a camera pointed at the board. It's free. Always.</p>
     </div>
@@ -282,7 +293,7 @@ document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.datase
 async function load(){
   const {data:{session}}=await db.auth.getSession();ME=session?session.user:null;
   STATE=null;if(ME){const r=await db.rpc("v2_my_join_state");if(!r.error)STATE=r.data}
-  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota,pen_king").in("status",["placement","active"]).order("display_name");
+  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota,pen_king,camera_ok_at,play_asked_at").in("status",["placement","active"]).order("display_name");
   PLAYERS=p.data||[];
   const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS_ALL=d.data||[];DIVS=divsVisible(DIVS_ALL);
   const se=await db.from("seasons").select("*").order("start_date");SEASONS=se.data||[];
@@ -338,7 +349,7 @@ $("discordBtn").onclick=async()=>{const {error}=await db.auth.signInWithOAuth({p
 $("emailBtn").onclick=async()=>{const e=$("email").value.trim();$("signinErr").textContent="";$("signinOk").textContent="";
   if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(e)){$("signinErr").textContent="Check the email address.";return}
   $("emailBtn").disabled=true;const {error}=await db.auth.signInWithOtp({email:e,options:{emailRedirectTo:location.origin+location.pathname}});$("emailBtn").disabled=false;
-  if(error)$("signinErr").textContent=/rate|seconds/i.test(error.message)?"Too many emails just now. Wait a few minutes and try again.":error.message;else{$("signinOk").textContent="Email sent. Type the 6-digit code below, or tap the link in the email. Check spam if it's not there in 2 minutes.";$("codeRow").hidden=false;$("otp").focus()}};
+  if(error)$("signinErr").textContent=/rate|seconds/i.test(error.message)?"Too many emails just now. Wait a few minutes and try again.":error.message;else{$("signinOk").textContent="Email sent. Type the 6-digit code below, or tap the link in the email. Check spam if it's not there in 2 minutes.";$("codeRow").hidden=false;emailPop(e)}};
 $("otpBtn").onclick=async()=>{const e=$("email").value.trim(),t=$("otp").value.replace(/\D/g,"");$("signinErr").textContent="";
   if(t.length<6){$("signinErr").textContent="Type the 6-digit code from the email.";return}
   $("otpBtn").disabled=true;const {error}=await db.auth.verifyOtp({email:e,token:t,type:"email"});$("otpBtn").disabled=false;
@@ -362,34 +373,26 @@ function renderMe(){
     $("out2").onclick=()=>db.auth.signOut();}
 }
 const CONDUCT=["I am 18 or over.","I will keep my camera on the board for every match.","I will play fair: no cheating, no fake scores and no fake accounts.","I will be respectful: no abuse, bullying, hate or harassment of any kind.","I will never share indecent images or behave indecently on camera or in chat.","I understand that serious breaches mean a permanent ban, with no appeal.","I will reply to my opponent within 72 hours and play by Sunday, or tell a Chalker."];
-let photoPath=null;
+let photoPath=null,JUST_JOINED=false;
 function renderJoin(){
   const d=STATE,p=d.profile;if($("join").dataset.built==="1")return;$("join").dataset.built="1";
-  $("join").innerHTML=`<h2>Join 11 Darts</h2><p class="note">Four quick steps. Everything is checked by a Chalker before you play.</p>
+  $("join").innerHTML=`<h2>Join 11 Darts</h2><p class="note">One minute. Then you can train and look around straight away.</p>
   <div class="steps">
-   <div class="step"><h3>1. About you</h3>
-    <div class="row"><label class="f">Name other players will see<input id="jName" maxlength="30" value="${esc(p.display_name||"")}"></label><label class="f">Date of birth<input id="jDob" type="date" max="${new Date().toISOString().slice(0,10)}"></label></div>
-    <div class="row" style="margin-top:8px"><label class="f">Country<select id="jCountry"><option value="">Choose…</option>${COUNTRIES.map(([c,n])=>`<option value="${c}">${flag(c)} ${n}</option>`).join("")}</select></label><label class="f">Your average score per 3 darts (a guess is fine)<input id="jAvg" type="number" step="0.01" min="5" max="120" inputmode="decimal" placeholder="e.g. 45.5"></label></div></div>
-   <div class="step"><h3>2. Your scoring app (optional)</h3>
-    <div class="row"><label class="f">App<select id="jApp"><option value="">None</option><option>DartCounter</option><option>Autodarts</option><option>Dartsmind</option><option>Other</option></select></label><label class="f">Profile link<input id="jLink" placeholder="https://"></label></div></div>
-   <div class="step"><h3>3. Photo of your board</h3>
-    <p>Write this code on a piece of paper, hold or stick it next to your dartboard, and take a photo:</p><p><span class="code">${esc(d.verify_code||"")}</span></p>
-    <p class="note">It proves you're a real player with a real board. Only Chalkers see it, and it's removed once you're approved.</p>
-    <input type="file" id="jPhoto" accept="image/*"><p class="note" id="jPhotoMsg"></p></div>
-   <div class="step"><h3>4. Code of conduct</h3>${CONDUCT.map((c,i)=>`<label class="check"><input type="checkbox" class="jc" data-i="${i}"> ${c}</label>`).join("")}</div>
+   <div class="step"><h3>About you</h3>
+    <label class="f">Name other players will see<input id="jName" maxlength="30" autocomplete="nickname" value="${esc(p.display_name||"")}"></label>
+    <label class="f" style="margin-top:8px">Date of birth (you must be 18 or over)<input id="jDob" type="date" max="${new Date().toISOString().slice(0,10)}"></label>
+    <label class="f" style="margin-top:8px">Country<select id="jCountry"><option value="">Choose…</option>${COUNTRIES.map(([c,n])=>`<option value="${c}">${flag(c)} ${n}</option>`).join("")}</select></label></div>
+   <div class="step"><h3>Code of conduct</h3><ul style="margin:0 0 10px;padding-left:20px">${CONDUCT.slice(1).map(c=>`<li>${c}</li>`).join("")}</ul>
+    <label class="check"><input type="checkbox" id="jc"> <b>I am 18 or over and I agree to all of this.</b></label></div>
   </div>
-  <div class="row" style="margin-top:14px"><button class="btn primary" id="jGo">Send for approval</button><button class="btn" id="jOut">Sign out</button></div><p class="err" id="jErr"></p>`;
+  <div class="row" style="margin-top:14px"><button class="btn primary" id="jGo">Join 11 Darts</button><button class="btn" id="jOut">Sign out</button></div><p class="err" id="jErr"></p>`;
   const tzc=Intl.DateTimeFormat().resolvedOptions().timeZone||"";const guess=tzc.startsWith("Europe/London")?"GB":"";if(guess)$("jCountry").value=guess;
   $("jOut").onclick=()=>db.auth.signOut();
-  $("jPhoto").onchange=async()=>{const f=$("jPhoto").files[0];if(!f)return;$("jPhotoMsg").textContent="Uploading…";photoPath=null;
-    try{const blob=await shrink(f);const path=`${ME.id}/${Date.now()}.jpg`;const {error}=await db.storage.from("setup").upload(path,blob,{contentType:"image/jpeg",upsert:false});
-      if(error)throw error;photoPath=path;$("jPhotoMsg").innerHTML='<span class="okmsg">Photo uploaded ✓</span>';}catch(e){$("jPhotoMsg").textContent="Upload failed: "+(e.message||e)}};
   $("jGo").onclick=async()=>{$("jErr").textContent="";
-    if([...document.querySelectorAll(".jc")].some(c=>!c.checked)){$("jErr").textContent="Tick every line of the code of conduct.";return}
-    if(!photoPath){$("jErr").textContent="Upload the photo of your board with your code.";return}
+    if(!$("jc").checked){$("jErr").textContent="Tick the box to agree to the code of conduct.";return}
     $("jGo").disabled=true;
-    const {error}=await db.rpc("v2_submit_join",{p_name:$("jName").value.trim(),p_dob:$("jDob").value||null,p_country:$("jCountry").value,p_tz:tzc,p_avg:+$("jAvg").value||null,p_app:$("jApp").value,p_app_link:$("jLink").value.trim(),p_photo:photoPath,p_conduct:true});
-    $("jGo").disabled=false;if(error){$("jErr").textContent=error.message;return}$("join").dataset.built="";load();};
+    const {error}=await db.rpc("v2_submit_join",{p_name:$("jName").value.trim(),p_dob:$("jDob").value||null,p_country:$("jCountry").value,p_tz:tzc,p_avg:null,p_app:"",p_app_link:"",p_photo:null,p_conduct:true});
+    $("jGo").disabled=false;if(error){$("jErr").textContent=error.message;return}$("join").dataset.built="";JUST_JOINED=true;await load();try{show("home");window.scrollTo(0,0)}catch(_){}};
 }
 function shrink(file){return new Promise((res,rej)=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const m=1600,k=Math.min(1,m/Math.max(img.width,img.height));const c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(new Error("Could not read that photo")),"image/jpeg",.82)};img.onerror=()=>rej(new Error("That file isn't a photo we can read. Try a JPG or PNG."));img.src=u})}
 
@@ -696,12 +699,12 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
    <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · <span class="pill">PM ${p.played} of 3</span> <span class="pill">PA ${p.avg??"–"}</span> <span class="pill">Said ${p.claimed??"–"}</span>
        <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}<p class="note pmkey">PM = placement matches played · PA = average in placement matches · Said = the average they gave when joining.</p></div>
    <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
-   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
-   ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">Make a webhook in your private Chalkers channel (Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL) and paste it here. Disputes are posted there, tagged with the division.</p>
-     ${["discord_chalkers","discord_results","discord_general"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_chalkers:"Private Chalkers channel",discord_results:"Results channel",discord_general:"General channel"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
+   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}" aria-label="Move to a division"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
+   ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">For each channel: in Discord, Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL, then paste it here and Save. If a box is left empty, its posts go to #results (or #darts-chat for tournaments) instead.</p>
+     ${["discord_results","discord_moments","discord_alerts","discord_tournaments","discord_general","discord_chalkers","discord_div1","discord_div2","discord_div3","discord_div4"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_results:"#results · result banners, Sunday tables",discord_moments:"#180s-and-big-finishes · 100+ checkouts, 170s, 9-darters",discord_alerts:"#league-alert · Monday fixtures, match nights, season start",discord_tournaments:"#tournaments · Cup start, knockouts, champion",discord_general:"#darts-chat · general news",discord_chalkers:"Private Chalkers channel · disputes, reports, feedback",discord_div1:"Titan Division gen-chat · its results and weekly fixtures",discord_div2:"Championship gen-chat · its results and weekly fixtures",discord_div3:"Division 1 gen-chat · its results and weekly fixtures",discord_div4:"Contender channel · its results and weekly fixtures"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
      <h3 style="margin-top:14px">Extra channels</h3><p class="note">10 spare webhook slots. Type a name so you know which channel it is (you can change it any time), paste the webhook, then Save. Leave the webhook box empty and Save to clear it.</p>
      ${[1,2,3,4,5,6,7,8,9,10].map(n=>`<div class="item" style="margin-bottom:8px"><b>Slot ${n}</b> ${settings["discord_slot"+n]?'<span class="pill ok">'+esc(settings["discord_slot"+n])+"</span>":""}
-       <div class="row" style="margin-top:6px"><label class="f">Name<input data-whn="${n}" maxlength="40" value="${esc(settings["whname_slot"+n]||"")}" placeholder="e.g. Division 1"></label>
+       <div class="row" style="margin-top:6px"><label class="f">Name<input data-whn="${n}" maxlength="40" value="${esc(settings["whname_slot"+n]||"")}" placeholder="e.g. Nations Cup results"></label>
        <label class="f">Webhook<input data-whu="${n}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whx="${n}">Save</button></div><p class="err"></p></div>`).join("")}<p class="err" id="whErr"></p></div>`:""}`;
   const errOf=b=>b.closest(".item,.card").querySelector(".err");
   box.querySelectorAll("[data-start]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm: make fixtures";return}const {data,error}=await db.rpc("v2_admin_start_season",{p_season:+b.dataset.start});errOf(b).innerHTML=error?esc(error.message):`<span class="okmsg">${data} fixtures made.</span>`;if(!error){await load();renderStaff()}});
@@ -1344,9 +1347,10 @@ const LV=[0,3,6,10,15,22,30,40,55,75];
 function levelOf(id){const n=MATCHES.filter(m=>m.status==="confirmed"&&(m.player_a===id||m.player_b===id)).length;let l=1;LV.forEach((t,i)=>{if(n>=t)l=i+1});return {l,n,next:LV[l]}}
 const EM_SHAPES={circle:'<circle cx="50" cy="50" r="44"/>',shield:'<path d="M50 5 91 19v29c0 25-19 41-41 47C28 89 9 73 9 48V19z"/>',
   star:'<polygon points="'+Array.from({length:10},(_,i)=>{const r=i%2?24:47,a=Math.PI/5*i-Math.PI/2;return (50+r*Math.cos(a)).toFixed(1)+","+(52+r*Math.sin(a)).toFixed(1)}).join(" ")+'"/>',
-  diamond:'<polygon points="50,4 96,50 50,96 4,50"/>',hex:'<polygon points="50,4 90,27 90,73 50,96 10,73 10,27"/>'};
+  diamond:'<polygon points="50,4 96,50 50,96 4,50"/>',hex:'<polygon points="50,4 90,27 90,73 50,96 10,73 10,27"/>',
+  gavel:'<g transform="rotate(-18 50 50)"><rect x="41" y="60" width="18" height="38" rx="6"/><rect x="8" y="18" width="84" height="48" rx="12"/></g>'};
 const EM_COL={purple:"#7A5BCB",gold:"#C99A1A",silver:"#8D96A2",bronze:"#A8693A",green:"#1E9E55",blue:"#2F6FD6",red:"#C0392B",black:"#222222"};
-const EM_NAMES={circle:"Circle",shield:"Shield",star:"Star",diamond:"Diamond",hex:"Hexagon"};
+const EM_NAMES={circle:"Circle",shield:"Shield",star:"Star",diamond:"Diamond",hex:"Hexagon",gavel:"Gavel"};
 function emblemSVG(em,l,px){const [s,c]=String(em||"circle:purple").split(":");const ring=l>=10?"#FFFFFF":l>=7?"#FFD34D":l>=4?"#D9D9D9":"#CD7F32";
   return `<svg viewBox="0 0 100 100" width="${px}" height="${px}" aria-hidden="true"><g fill="${EM_COL[c]||EM_COL.purple}" stroke="${ring}" stroke-width="${l>=10?8:6}" stroke-linejoin="round">${EM_SHAPES[s]||EM_SHAPES.circle}</g><text x="50" y="${s==="star"?62:64}" text-anchor="middle" font-family="Barlow Condensed,Arial Narrow,Arial,sans-serif" font-weight="700" font-size="${s==="star"?30:l>=10?40:46}" fill="#fff" stroke="#000" stroke-opacity=".35" stroke-width="2" paint-order="stroke">${l}</text></svg>`}
 avatarHTML=function(id,px){const p=PLAYERS.find(x=>x.id===id)||{};const {l}=levelOf(id);return `<span class="av em" role="img" aria-label="Level ${l}" title="Level ${l}" style="width:${px}px;height:${px}px">${emblemSVG(p.emblem,l,px)}</span>`};
@@ -1496,7 +1500,7 @@ const _renderMeA=renderMe;renderMe=function(){_renderMeA();const box=$("mine");i
   const ph=box.querySelector("#avIn");if(ph){const blk=ph.closest("div[class=''],div:not([class])")||ph.closest("div");let d=ph;while(d&&d.parentElement!==box)d=d.parentElement;if(d)d.remove()}
   if($("acSave"))return;const me=meP();const [s0,c0]=String(me.emblem||"circle:purple").split(":");const lv=levelOf(ME.id);let S=s0,C=c0;
   const d=document.createElement("div");d.innerHTML=`<h3>Your emblem</h3><div class="row" style="align-items:center;gap:14px"><span id="emPrev"></span><div style="flex:1"><p class="note" style="margin:0">Level ${lv.l} · ${lv.n} match${lv.n===1?"":"es"} played${lv.next?` · level ${lv.l+1} at ${lv.next}`:" · top level!"}. The number goes up as you play more matches.</p></div></div>
-   <div class="chips" style="margin-top:8px" id="emS">${Object.keys(EM_SHAPES).map(k=>`<button class="chip" data-es="${k}" aria-pressed="${k===S}">${EM_NAMES[k]}</button>`).join("")}</div>
+   <div class="chips" style="margin-top:8px" id="emS">${Object.keys(EM_SHAPES).filter(k=>k!=="gavel"||me.founder==="five").map(k=>`<button class="chip" data-es="${k}" aria-pressed="${k===S}">${EM_NAMES[k]}</button>`).join("")}</div>
    <div class="chips" style="margin-top:6px" id="emC">${Object.keys(EM_COL).map(k=>`<button class="chip swatch" data-ec="${k}" aria-pressed="${k===C}" aria-label="${k}" style="background:${EM_COL[k]}"></button>`).join("")}</div>
    <h3>Caller and access</h3>
    <label class="f">Name the caller says<input id="acName" maxlength="16" value="${esc(me.caller_name||"")}" placeholder="${esc(callName(ME.id))}"></label>
@@ -2734,7 +2738,7 @@ async function avgCard(){const box=$("stTop");if(!box)return;let c=$("avgCard");
 
 // ---------- 18. Divisions 4-7 stay hidden until someone is in them (or every division above is full) ----------
 function divsVisible(all){const cnt=id=>PLAYERS.filter(p=>p.division_id===id&&p.status==="active").length;const out=[];
-  for(const d of all){if(d.leagues&&d.leagues.is_placement){if(PLAYERS.some(p=>p.division_id===d.id&&p.status==="placement"))out.push(d);continue}if(d.tier<=3||cnt(d.id)>0){out.push(d);continue}
+  for(const d of all){if(d.leagues&&d.leagues.is_placement){if(PLAYERS.some(p=>p.division_id===d.id&&p.status==="placement"))out.push(d);continue}if(d.tier<=4||cnt(d.id)>0){out.push(d);continue}
     const shown=out.filter(x=>x.tier>0);if(shown.length&&shown.every(x=>cnt(x.id)>=x.max_players))out.push(d)}
   return out}
 const divShown=id=>{const d=DIVS_ALL.find(x=>x.id===id);return !d||DIVS.some(x=>x.id===id)};
@@ -2894,6 +2898,100 @@ function friendsCard(){const soc=$("trSocial");let c=$("friendsCard");if(!c){c=d
   const e=document.createElement("p");e.className="err";d.after(e);(box.querySelector(".kv")||box.querySelector("h2")).after(d);d.after(e);
   if($("pFrA"))$("pFrA").onclick=()=>frAct("v2_friend_request",{p_user:p.id},e);
   if($("pFrX"))$("pFrX").onclick=async()=>{if($("pFrX").dataset.sure!=="1"){$("pFrX").dataset.sure="1";$("pFrX").textContent="Tap again to confirm";return}frAct("v2_friend_remove",{p_user:p.id},e)}}catch(err){console.warn(err)}return r}})();
+
+// ---------- 27. Share the site ----------
+(function(){const st=document.createElement("style");st.textContent=`.toast11{position:fixed;left:50%;bottom:110px;transform:translateX(-50%);background:var(--head);color:var(--head-ink);padding:12px 18px;border-radius:14px;z-index:70;font-weight:700;box-shadow:0 6px 20px rgba(0,0,0,.3)}`;document.head.appendChild(st)})();
+function toast11(t){const d=document.createElement("div");d.className="toast11";d.setAttribute("role","status");d.textContent=t;document.body.appendChild(d);setTimeout(()=>d.remove(),2600)}
+async function shareSite(){const data={title:"11 Darts",text:"11 Darts: a free online darts league. One match a week from your own board, camera on, all levels. 18+.",url:"https://11darts.com/"};
+  try{if(navigator.share){await navigator.share(data);return}}catch(e){if(e&&e.name==="AbortError")return}
+  try{await navigator.clipboard.writeText(data.text+" "+data.url);toast11("Link copied. Paste it anywhere.")}catch(_){prompt("Copy this link:",data.url)}}
+(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{const cta=$("heroCta");if(cta&&!$("shareRow")){const d=document.createElement("div");d.className="row";d.id="shareRow";d.style.marginTop="10px";d.innerHTML='<button class="btn" id="shareBtn">📤 Share 11 Darts</button>';cta.after(d);$("shareBtn").onclick=shareSite}
+  camCards();pushHome()}catch(e){console.warn(e)}return r}})();
+
+// ---------- 28. Email sign-in: "check your email now" ----------
+function emailPop(email){const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>📧 Check your email now</h2><p>We've sent a 6-digit code to <b>${esc(email)}</b>.</p><ol style="padding-left:20px"><li>Open your email.</li><li>Find the message from 11 Darts.</li><li>Come back here and type the code, or tap the link in the email.</li></ol><p class="note">Not there in 2 minutes? Look in your spam or junk folder.</p><div class="row"><button class="btn primary" id="epOk">OK, I'll get the code</button></div></div>`;
+  document.body.appendChild(p);const close=()=>{p.remove();try{$("otp").focus();$("otp").scrollIntoView({block:"center"})}catch(_){}};$("epOk").onclick=close;p.onclick=e=>{if(e.target===p)close()};setTimeout(()=>{try{$("epOk").focus()}catch(_){}},50)}
+
+// ---------- 29. Ask to play: a Chalker accepts new players before they play other people ----------
+const camReady=()=>{if(!ME)return false;const p=PLAYERS.find(x=>x.id===ME.id);return !!(p&&p.camera_ok_at)};
+const playAsked=()=>{const p=ME&&PLAYERS.find(x=>x.id===ME.id);return !!(p&&p.play_asked_at)};
+function askHTML(first){return playAsked()?`<h2>⏳ Waiting for a Chalker</h2><p>You've asked to play. A Chalker will accept you, normally the same day, and you'll get a notification. Until then you can train, play The Punisher and look around.</p>`
+  :`${first?`<p><span class="pill ok">You're in. Welcome to 11 Darts!</span></p>`:""}<h2>🎯 Want to play other people?</h2><p>You can train, play The Punisher and see the leagues and tournaments now. To play league matches, the Cup and friendlies, ask a Chalker to accept you. It takes a minute.</p><div class="row"><button class="btn primary" data-askgo>Ask to play</button></div>`}
+function camCards(){const need=!!ME&&isMember()&&!camReady();
+  [["camHome","memberHome"],["camPlay","playOut"],["camTr","trSocial"]].forEach(([id,host])=>{let c=$(id);const h=$(host);if(!need||!h){if(c)c.remove();return}
+    if(!c){c=document.createElement("div");c.id=id;c.className="card mthome"}c.innerHTML=askHTML(id==="camHome"&&JUST_JOINED);
+    if(h.firstElementChild!==c)h.prepend(c);const b=c.querySelector("[data-askgo]");if(b)b.onclick=askOpen});
+  const soc=$("trSocial");if(soc){soc.querySelectorAll(".card.social").forEach(c=>c.hidden=need);
+    ["frTo","chTo"].forEach(id=>{const s=$(id);if(s)[...s.options].forEach(o=>{const p=PLAYERS.find(x=>x.id===o.value);if(p&&!p.camera_ok_at)o.remove()})})}
+  const sp=$("socPtr");if(sp)sp.hidden=need}
+(function(){const _p=renderPlay;renderPlay=function(){const r=_p.apply(this,arguments);try{camCards()}catch(_){}return r};
+  const _t=renderTraining;renderTraining=function(){const r=_t.apply(this,arguments);try{camCards()}catch(_){}return r}})();
+function askOpen(){let path=null;const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>🎯 Ask to play</h2><p>Tell the Chalkers roughly how good you are, so you meet players near your level. A guess is fine.</p>
+   <label class="f">Your average score per 3 darts (leave empty if you don't know)<input id="askAvg" type="number" step="0.01" min="5" max="120" inputmode="decimal" placeholder="e.g. 45"></label>
+   <label class="f" style="margin-top:10px">Screenshot of your average from a scoring app (optional)<input type="file" id="askPhoto" accept="image/*"></label><p class="note" id="askMsg">Only Chalkers see it, and it's deleted once they decide.</p>
+   <p class="note">For online matches you'll need a phone camera pointed at your board. The site asks you to switch it on when a match starts.</p>
+   <div class="row" style="margin-top:10px"><button class="btn primary" id="askGo">Send to the Chalkers</button><button class="btn" id="askX">Not now</button></div><p class="err" id="askE"></p></div>`;
+  document.body.appendChild(p);$("askX").onclick=()=>p.remove();
+  $("askPhoto").onchange=async()=>{const f=$("askPhoto").files[0];if(!f)return;$("askMsg").textContent="Uploading…";path=null;$("askGo").disabled=true;
+    try{const blob=await shrink(f);const pa=`${ME.id}/${Date.now()}.jpg`;const {error}=await db.storage.from("setup").upload(pa,blob,{contentType:"image/jpeg",upsert:false});if(error)throw error;path=pa;$("askMsg").innerHTML='<span class="okmsg">Screenshot uploaded ✓</span>'}
+    catch(e){$("askMsg").textContent="Upload failed: "+(e.message||e)+". You can send without it."}$("askGo").disabled=false};
+  $("askGo").onclick=async()=>{$("askGo").disabled=true;const {error}=await db.rpc("v2_ask_to_play",{p_avg:+$("askAvg").value||null,p_photo:path});
+    if(error){$("askE").textContent=error.message;$("askGo").disabled=false;return}p.remove();JUST_JOINED=false;await load();toast11("Sent. A Chalker will accept you soon.")}}
+// Chalkers: accept or reject players who asked to play
+(function(){const _s=renderStaffTop;renderStaffTop=async function(){const r=await _s.apply(this,arguments);try{await askStaff()}catch(e){console.warn(e)}return r}})();
+async function askStaff(){const box=$("stTop");if(!box)return;const {data,error}=await db.rpc("v2_staff_play_requests");if(error)return;const rows=data||[];let c=$("askCard");
+  if(!c){c=document.createElement("div");c.className="card";c.id="askCard"}const ov=box.firstElementChild;if(ov&&c.previousElementSibling!==ov)ov.after(c);else if(!ov)box.prepend(c);
+  c.innerHTML=`<h2>Asked to play${rows.length?` <span class="pill bad">${rows.length}</span>`:""}</h2><p class="note">These players have joined and can train. Accept them to put them in the holding pen and let them play friendlies and the Cup. Check the screenshot of their average if they sent one.</p>`+
+    (rows.map(x=>`<div class="item" data-id="${x.id}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
+      ${x.photo?`<img class="photo" data-path="${esc(x.photo)}" alt="Screenshot of their average">`:'<p class="note">No screenshot sent.</p>'}
+      <label class="f" style="margin-top:6px">Note to the player if you reject (optional)<input class="askNote" maxlength="200"></label>
+      <div class="row" style="margin-top:8px"><button class="btn primary" data-askok="1">Accept</button><button class="btn" data-askok="0">Reject</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody waiting.</p>');
+  for(const img of c.querySelectorAll("img[data-path]")){photoFail(img);const u=await signed(img.dataset.path);if(u)img.src=u}
+  c.querySelectorAll("[data-askok]").forEach(b=>b.onclick=async()=>{const it=b.closest(".item"),ok=b.dataset.askok==="1";
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent=ok?"Confirm accept":"Confirm reject";return}
+    const {error}=await db.rpc("v2_staff_play_decide",{p_id:it.dataset.id,p_ok:ok,p_note:it.querySelector(".askNote").value.trim()||null});
+    if(error){it.querySelector(".err").textContent=error.message;return}await load();renderStaff()})}
+
+// ---------- 29b. Online match: camera pop-up for both players ----------
+let CAMPOP_SEEN={};
+(function(){const _o=openScorer;openScorer=async function(id,mode){const r=await _o.apply(this,arguments);try{
+  if(SC&&SC.m&&SC.m.id===id&&SC.m.id>0&&SC.mode==="online"&&!SC.st.done&&!V.live&&!B.on&&!CAMPOP_SEEN[id]&&ME&&(SC.m.player_a===ME.id||SC.m.player_b===ME.id))camPop(id)}catch(e){console.warn(e)}return r}})();
+function camPop(id){CAMPOP_SEEN[id]=1;const p=document.createElement("div");p.className="reppop";p.id="camPop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>🎥 Camera on</h2><p>This is an online match, so your opponent needs to see your board. Where is your camera?</p>
+   <div style="display:grid;gap:10px"><button class="btn primary" id="cpThis">📱 This phone. Stand it facing the board</button><button class="btn" id="cpOther">📲 Another phone. Link it with a code</button><button class="btn" id="cpNo">Not yet</button></div>
+   <p class="note" style="margin-top:10px">Both players get this message. League and Cup matches must be played with the camera on.</p></div>`;
+  document.body.appendChild(p);const close=()=>p.remove();$("cpNo").onclick=close;
+  $("cpThis").onclick=async()=>{close();try{if(MS)MS.cam="this";if(B.state!=="off"||B.on)await bcStop(true);if(!V.raw||!V.raw.getVideoTracks().length)await camThisPhone();else{V.setup=true;renderCamSetup()}if(MS)msRender()}catch(e){console.warn(e)}};
+  $("cpOther").onclick=async()=>{close();try{if(MS)MS.cam="other";await camOtherPhone();if(MS)msRender()}catch(e){console.warn(e)}}}
+
+// ---------- 30. Phone notifications (works best once 11 Darts is on your home screen) ----------
+const PUSH_OK=("serviceWorker" in navigator)&&("PushManager" in window)&&("Notification" in window);
+let PUSH_SUB=null,PUSH_CHECKED=false;
+if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").then(async reg=>{try{if(PUSH_OK)PUSH_SUB=await reg.pushManager.getSubscription()}catch(_){}PUSH_CHECKED=true;try{pushCard();pushHome()}catch(_){}}).catch(()=>{PUSH_CHECKED=true})}
+window.addEventListener("appinstalled",()=>{try{localStorage.removeItem("pushAskNo")}catch(_){}try{pushHome(true)}catch(_){}});
+const b64u=s=>{const pad="=".repeat((4-s.length%4)%4),b=atob((s+pad).replace(/-/g,"+").replace(/_/g,"/"));return Uint8Array.from(b,c=>c.charCodeAt(0))};
+async function pushOn(errEl){try{if(!CFG.vapid_public)throw new Error("Notifications aren't ready yet. Try again in a minute.");
+    const perm=await Notification.requestPermission();if(perm!=="granted"){pushCard();pushHome();return}
+    const reg=await navigator.serviceWorker.ready;PUSH_SUB=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(CFG.vapid_public)});
+    const j=PUSH_SUB.toJSON();const {error}=await db.rpc("v2_push_subscribe",{p_endpoint:j.endpoint,p_p256dh:j.keys.p256dh,p_auth:j.keys.auth});if(error)throw error;toast11("Notifications are on for this phone.")}
+  catch(e){if(errEl)errEl.textContent=e.message||String(e)}pushCard();pushHome()}
+async function pushOff(){try{if(PUSH_SUB){await db.rpc("v2_push_unsubscribe",{p_endpoint:PUSH_SUB.endpoint});await PUSH_SUB.unsubscribe()}}catch(_){}PUSH_SUB=null;pushCard()}
+function pushCard(){const sec=$("v-me");if(!sec)return;let c=$("pushCard");const ios=/iPhone|iPad|iPod/i.test(navigator.userAgent||"");
+  if(!ME||!isMember()||(!PUSH_OK&&!ios)){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.className="card";c.id="pushCard";const n=$("installCard")||$("notesCard");if(n)n.after(c);else sec.insertBefore(c,sec.firstElementChild)}
+  let body;if(!PUSH_OK)body=`<p>On iPhone, notifications work once 11 Darts is on your Home Screen. Tap <b>Share</b> (the square with an arrow), then <b>Add to Home Screen</b>. Open 11 Darts from the new icon and come back to this page.</p>`;
+  else if(Notification.permission==="denied")body=`<p>Notifications are blocked for 11 Darts on this phone. Allow them in your phone's settings for this site, then come back here.</p>`;
+  else if(Notification.permission==="granted"&&PUSH_SUB)body=`<p><span class="pill ok">On for this phone</span> You get a message when a match, invite or result needs you.</p><div class="row"><button class="btn" id="pushOffB">Turn off on this phone</button></div>`;
+  else body=`<p>Get a message on this phone when your match is drawn, someone invites you, or a result needs confirming.</p><div class="row"><button class="btn primary" id="pushOnB">Turn on notifications</button></div><p class="err"></p>`;
+  c.innerHTML=`<h2>🔔 Phone notifications</h2>${body}`;const a=$("pushOnB"),b=$("pushOffB");if(a)a.onclick=()=>pushOn(c.querySelector(".err"));if(b)b.onclick=pushOff}
+function pushHome(force){const h=$("memberHome");let c=$("pushHome");let no=false;try{no=localStorage.getItem("pushAskNo")==="1"}catch(_){}
+  const want=!!ME&&isMember()&&PUSH_OK&&PUSH_CHECKED&&!PUSH_SUB&&Notification.permission==="default"&&(STANDALONE||force)&&!no;
+  if(!want||!h){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.id="pushHome";c.className="card mthome";c.innerHTML=`<h2>🔔 Turn on notifications</h2><p>11 Darts is on your home screen. Turn on notifications so you never miss a match, an invite or a result.</p><div class="row"><button class="btn primary" id="phOn">Turn on</button><button class="btn" id="phNo">Not now</button></div><p class="err"></p>`}
+  if(h.firstElementChild!==c)h.prepend(c);$("phOn").onclick=()=>pushOn(c.querySelector(".err"));$("phNo").onclick=()=>{try{localStorage.setItem("pushAskNo","1")}catch(_){}c.remove()}}
+(function(){const _m=renderMe;renderMe=function(){const r=_m.apply(this,arguments);try{pushCard()}catch(_){}return r}})();
 
 load();
 </script>
