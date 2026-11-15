@@ -46,6 +46,6 @@ This is a single static page (`index.html`) hosted on GitHub Pages, with data st
 
 © 2026 Jon. All rights reserved.
 
-11 Darts is an independent project. It is not affiliated with any armed forces unit, darts body or app maker. You may not copy, reuse or redistribute this code or design without permission.
+11 Darts is an independent project. It is not affiliated with any darts body or app maker. You may not copy, reuse or redistribute this code or design without permission.
 
 The page includes [supabase-js](https://github.com/supabase/supabase-js) (MIT licence).
