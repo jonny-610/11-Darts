@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-g0fGFZQmqiGdJeQqFpzhuKYKnyZn1nflH6FNIDnQIa4=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-W/1ntdtXvHThv8bIQFeUwxAQRcQ6xzMSUJGwNy9LWK4=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -3205,6 +3205,51 @@ function slotCard(){const box=$("stTop");if(!box||!isAdminMe())return;let c=$("s
     b.disabled=true;const {error}=await db.rpc("v2_admin_set_role",{p_user:sel.value,p_role:"chalker",p_founder_no:null});if(error){$("slotE").textContent=error.message;b.disabled=false;return}await load();renderStaff()});
   c.querySelectorAll("[data-unslot]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm remove";return}
     const {error}=await db.rpc("v2_admin_set_role",{p_user:b.dataset.unslot,p_role:"player",p_founder_no:null});if(error){$("slotE").textContent=error.message;return}await load();renderStaff()})}
+
+// ===================== 33 Training: Halve It, High score, 121 game (15 Nov) =====================
+TDRILLS.halveit={n:"Halve It",i:"✂️",d:"Nine rounds, three darts each: 15, 16, any double, 17, 18, any treble, 19, 20, bull. Only darts in the target count. Score nothing in a round and your total is cut in half.",unit:"points",better:"higher"};
+TDRILLS.highscore={n:"High score",i:"🔥",d:"Ten visits, aim anywhere. Type each 3-dart score. Your result is the total. Best possible: 1800.",unit:"points",better:"higher"};
+TDRILLS.g121={n:"121 game",i:"🎯",d:"Nine darts to check out 121. Do it and the next target is one higher. Miss and you go back to 121. Ten goes. Your result is the highest checkout you hit.",unit:"highest checkout",better:"higher"};
+const HV=[["15","15",135,15],["16","16",144,16],["D","Any double",120,"D"],["17","17",153,17],["18","18",162,18],["T","Any treble",180,"T"],["19","19",171,19],["20","20",180,20],["B","Bull",150,"B"]];
+function hvTotal(r){let s=0;r.forEach(v=>{s=v===0?Math.floor(s/2):s+v});return s}
+function hvOk(i,v){const [, ,mx,k]=HV[i];if(v<0||v>mx)return false;if(k==="D")return v%2===0&&v!==0?true:v===0;if(k==="T")return v%3===0;if(k==="B")return v%25===0;return v%k===0}
+const trBest=k=>Math.max(0,...TRAIN.filter(x=>x.drill===k).map(x=>+x.score));
+const tPad=t=>`<div class="typed" aria-live="polite">${t||'<span class="note">Type the score</span>'}</div><div class="pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button data-hk="${n}">${n}</button>`).join("")}<button data-hk="del" aria-label="Delete">⌫</button><button data-hk="0">0</button><button class="go" data-hk="ok">Enter</button></div>`;
+(function(){const _r=renderTraining;renderTraining=function(){if(!["halveit","highscore","g121"].includes(TRMODE))return _r.apply(this,arguments);
+  const out=$("trOut");if(!out)return;const D=TDRILLS[TRMODE];let body="",done=false,score=0,detail={};
+  if(TRMODE==="halveit"){TS.r=TS.r||[];const k=TS.r.length;done=k>=HV.length;score=hvTotal(TS.r);detail={rounds:TS.r};
+    body=`<div class="kv"><div><b>${score}</b><span>Score</span></div><div><b>${done?"–":HV[k][1]}</b><span>Target</span></div><div><b>${k}/9</b><span>Rounds</span></div><div><b>${trBest("halveit")||"–"}</b><span>Your best</span></div></div>
+     <div class="b27h">${HV.map((h,i)=>`<span class="${i===k&&!done?"now":TS.r[i]===0?"z":""}">${h[1]}${i<k?": "+(TS.r[i]===0?"halved":TS.r[i]):""}</span>`).join("")}</div>
+     ${done?`<p class="okmsg"><b>Finished! Final score ${score}.</b></p>`:`<p style="text-align:center;margin:10px 0 4px"><b>Three darts at ${HV[k][1].toLowerCase()}.</b> What did you score on it?</p>${tPad(TS.t)}
+      <div class="row" style="margin-top:8px"><button class="btn" data-hvz="1">Missed it all (halve)</button></div>`}`}
+  else if(TRMODE==="highscore"){TS.v=TS.v||[];const k=TS.v.length;done=k>=10;score=TS.v.reduce((a,b)=>a+b,0);detail={visits:TS.v};
+    body=`<div class="kv"><div><b>${score}</b><span>Total</span></div><div><b>${Math.min(k+1,10)}/10</b><span>Visit</span></div><div><b>${k?(score/k).toFixed(1):"–"}</b><span>Average</span></div><div><b>${trBest("highscore")||"–"}</b><span>Your best</span></div></div>
+     <div class="b27h">${TS.v.map((v,i)=>`<span>${i+1}: ${v}</span>`).join("")}</div>
+     ${done?`<p class="okmsg"><b>Done! You scored ${score} in 10 visits.</b></p>`:tPad(TS.t)}`}
+  else{TS.tg=TS.tg||121;TS.g=TS.g||[];const k=TS.g.length;done=k>=10;score=Math.max(0,...TS.g.filter(x=>x.ok).map(x=>x.tg));detail={goes:TS.g};
+    body=`<div class="kv"><div><b>${done?"–":TS.tg}</b><span>Target</span></div><div><b>${Math.min(k+1,10)}/10</b><span>Go</span></div><div><b>${score||"–"}</b><span>Highest out</span></div><div><b>${trBest("g121")||"–"}</b><span>Your best</span></div></div>
+     <div class="b27h">${TS.g.map(x=>`<span class="${x.ok?"":"z"}">${x.tg} ${x.ok?"✓":"✗"}</span>`).join("")}</div>
+     ${done?`<p class="okmsg"><b>Done! Highest checkout: ${score||"none this time"}.</b></p>`:`<p style="text-align:center;margin:10px 0 0"><b>Nine darts to check out ${TS.tg}.</b></p>
+      <div class="b27" style="grid-template-columns:1fr 1fr"><button data-g121="1">Checked out</button><button data-g121="0" class="miss">Missed</button></div>`}`}
+  const k=(TS.r||TS.v||TS.g||[]).length;
+  out.innerHTML=`<div class="card"><h2>${D.i} ${D.n}</h2><p class="note">${D.d}</p>${body}
+   <div class="row" style="margin-top:8px"><button class="btn" data-hu="1" ${k?"":"disabled"}>↶ Undo</button>${done?'<button class="btn primary" id="hSave">Save result</button>':""}</div>
+   <p class="err" id="trErr"></p><div class="row" style="margin-top:10px"><button class="btn" id="trBack">← Back to training</button></div></div>`;
+  const err=m=>{$("trErr").textContent=m};
+  out.querySelectorAll("[data-hk]").forEach(b=>b.onclick=()=>{const key=b.dataset.hk;TS.t=TS.t||"";
+    if(key==="del"){TS.t=TS.t.slice(0,-1);renderTraining();return}
+    if(key!=="ok"){if(TS.t.length<3)TS.t=(TS.t+key).replace(/^0+(?=\d)/,"");renderTraining();return}
+    if(TS.t===""){err("Type a score first.");return}const v=+TS.t;
+    if(TRMODE==="halveit"){const i=TS.r.length;if(!hvOk(i,v)){err(`${v} isn't possible on ${HV[i][1].toLowerCase()} with three darts.`);return}TS.r.push(v)}
+    else{if(v>180||IMPOSS.includes(v)){err(`${v} isn't possible with three darts.`);return}TS.v.push(v)}
+    TS.t="";renderTraining()});
+  out.querySelectorAll("[data-hvz]").forEach(b=>b.onclick=()=>{TS.r.push(0);TS.t="";renderTraining()});
+  out.querySelectorAll("[data-g121]").forEach(b=>b.onclick=()=>{const ok=b.dataset.g121==="1";TS.g.push({tg:TS.tg,ok});TS.tg=ok?ladderNext(TS.tg+1):121;
+    try{if(ok)navigator.vibrate&&navigator.vibrate(120)}catch(_){}renderTraining()});
+  out.querySelectorAll("[data-hu]").forEach(b=>b.onclick=()=>{if(TRMODE==="halveit")TS.r.pop();else if(TRMODE==="highscore")TS.v.pop();else{const x=TS.g.pop();if(x)TS.tg=x.tg}TS.t="";renderTraining()});
+  $("trBack").onclick=()=>{if(k&&!done&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
+  const sv=$("hSave");if(sv)sv.onclick=async()=>{sv.disabled=true;const {error}=await db.rpc("v2_log_training",{p_drill:TRMODE,p_score:score,p_detail:detail});
+    if(error){err(error.message);sv.disabled=false;return}TRMODE=null;TS={};await load();show("training")}}})();
 
 load();
 </script>
