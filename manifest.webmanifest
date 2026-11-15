@@ -1,13 +1,13 @@
 {
  "name": "11 Darts",
  "short_name": "11 Darts",
- "description": "Free online darts leagues for everyone.",
- "start_url": "./",
- "scope": "./",
+ "description": "A free online darts league. One match a week from your own board.",
+ "start_url": "/",
+ "scope": "/",
  "display": "standalone",
  "orientation": "portrait",
- "background_color": "#141120",
- "theme_color": "#4A3878",
+ "background_color": "#0F3D2E",
+ "theme_color": "#0F3D2E",
  "icons": [
   {
    "src": "icon-192.png",
@@ -21,5 +21,6 @@
    "type": "image/png",
    "purpose": "any"
   }
- ]
+ ],
+ "id": "/"
 }

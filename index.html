@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-cMZ/jjY4B8crpEK/aNwQ/CAaiTsud0f33HUgxiuJUXk=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-g0fGFZQmqiGdJeQqFpzhuKYKnyZn1nflH6FNIDnQIa4=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -256,6 +256,16 @@ body.ohMem #v-home .hero{display:none}
 @media (prefers-color-scheme:dark){#howItWorks li::before{background:#E8C25A;color:#0F3D2E}}
 
 #howItWorks li>div{display:flex;flex-direction:column;gap:2px;padding-top:3px;min-width:0}#howItWorks li b{font-size:18px;line-height:1.2}#howItWorks li span{color:var(--muted);line-height:1.4}#howItWorks ol{gap:16px!important;margin-top:6px!important}
+/* board code, Discord card, Chalker slots (15 Nov) */
+.codebig{font:800 34px/1.1 var(--display);letter-spacing:3px;background:#E8C25A;color:#0F3D2E;border-radius:14px;padding:10px 16px;display:inline-block}
+.codebig.sm{font-size:22px;padding:4px 10px;letter-spacing:2px}
+.asksteps{padding-left:22px;display:grid;gap:4px;margin:12px 0}
+.dcc{display:grid;gap:12px}.dcrow{display:flex;gap:12px;align-items:center}
+.dcic{width:48px;height:48px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.dcbtn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.slots{display:grid;gap:8px}.slot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:48px;border-top:1px solid var(--line);padding-top:8px}
+.slot .sn{width:28px;height:28px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
+.slot select{flex:1;min-width:150px;min-height:44px}
 @media (max-width:380px){.brand h1{font-size:19px!important}.omMenu{padding:0 10px 0 8px}.hin .logo{width:32px;height:32px}.hin{gap:6px!important}}
 @media (max-width:440px){.hin{padding:8px 12px;gap:8px}.brand h1{font-size:22px}.brand .beta,#hBtn{display:none!important}.hin .hbtns{gap:6px}}
 </style>
@@ -3135,6 +3145,66 @@ function ocheGuest(){const hs=$("heroStats");if(hs&&!hs.querySelector(".hsM")){c
   const c=$("heroCta");if(c&&!ME&&!$("ohStart")){c.innerHTML=`<button class="btn ohStart" id="ohStart">Start playing free</button>`;$("ohStart").onclick=()=>omGo("signin")}}
 (function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{ocheHome();ocheGuest()}catch(e){console.warn(e)}return r}})();
 (function(){const _s=show;show=function(){omClose();return _s.apply(this,arguments)}})();
+
+// ===================== 32 Board photo + code, Discord community, 10 Chalker slots (15 Nov) =====================
+const DISCORD_URL=()=>(typeof CFG!=="undefined"&&CFG&&CFG.discord_invite)||"https://discord.gg/Zhf9rNb7h";
+function dcCard(){let c=$("dcCard");if(!c){c=document.createElement("div");c.id="dcCard";c.className="card dcc"}
+  c.innerHTML=`<div class="dcrow"><span class="dcic" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5h16v11H9l-5 4z"/><path d="M8 10h.01M12 10h.01M16 10h.01"/></svg></span><div><h2 style="margin:0">Join the community</h2><p class="note" style="margin:2px 0 0">Chat, find opponents and see every result on our Discord.</p></div></div>
+   <a class="btn primary dcbtn" href="${esc(DISCORD_URL())}" target="_blank" rel="noopener">Join our Discord</a>`;
+  const h=$("v-home");if(!h)return;const oh=$("ocheHome"),how=$("howItWorks");
+  if(oh&&oh.parentElement===h){if(oh.nextElementSibling!==c)oh.after(c);["pushHome","camHome"].forEach(id=>{const x=$(id);if(x&&x.parentElement===h)oh.after(x)})}
+  else if(how){if(how.previousElementSibling!==c)how.before(c)}else h.appendChild(c)}
+(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{dcCard()}catch(e){console.warn(e)}return r}})();
+// menu: Discord for everyone
+(function(){const _i=omItems;omItems=function(){const it=_i.apply(this,arguments);it.you=it.you.filter(x=>x[0]!=="discord");const at=Math.max(0,it.you.findIndex(x=>x[0]==="share"));it.you.splice(at,0,["discord","Join our Discord"]);return it}})();
+(function(){const _g=omGo;omGo=function(k){if(k==="discord"){omClose();window.open(DISCORD_URL(),"_blank","noopener");return}return _g.apply(this,arguments)}})();
+
+// Ask to play: photo of the board with the player's code
+askHTML=function(first){return playAsked()?`<h2>⏳ Waiting for a Chalker</h2><p>You've sent your board photo. A Chalker will check it, normally the same day, and you'll get a notification. Until then you can train, play The Punisher and look around.</p>`
+  :`${first?`<p><span class="pill ok">You're in. Welcome to 11 Darts!</span></p>`:""}<h2>🎯 Want to play other people?</h2><p>You can train, play The Punisher and see the leagues and tournaments now. To play friendlies, the league and tournaments, send a Chalker one photo of your board with your code next to it. It takes two minutes.</p><div class="row"><button class="btn primary" data-askgo>Send my board photo</button></div>`};
+askOpen=async function(){let path=null;const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>📸 Send your board photo</h2><p>This shows us you have a real board set up. Only Chalkers see the photo, and it's deleted once they decide.</p>
+   <p class="note" style="margin-bottom:4px">Your code</p><div class="codebig" id="askCode">…</div>
+   <ol class="asksteps"><li>Write your code on a piece of paper.</li><li>Put the paper on or right next to your board.</li><li>Take one photo that shows the whole board and the paper.</li></ol>
+   <label class="f">Photo of your board and code<input type="file" id="askPhoto" accept="image/*" capture="environment"></label><p class="note" id="askMsg">No photo added yet.</p>
+   <label class="f" style="margin-top:10px">Your average score per 3 darts (optional, a guess is fine)<input id="askAvg" type="number" step="0.01" min="5" max="120" inputmode="decimal" placeholder="e.g. 45"></label>
+   <div class="row" style="margin-top:12px"><button class="btn primary" id="askGo" disabled>Send to the Chalkers</button><button class="btn" id="askX">Not now</button></div><p class="err" id="askE"></p></div>`;
+  document.body.appendChild(p);$("askX").onclick=()=>p.remove();
+  const cr=await db.rpc("v2_my_play_code");$("askCode").textContent=(cr.error||!cr.data)?"Couldn't load your code. Close this and try again.":cr.data;
+  $("askPhoto").onchange=async()=>{const f=$("askPhoto").files[0];if(!f)return;$("askMsg").textContent="Uploading…";path=null;$("askGo").disabled=true;
+    try{const blob=await shrink(f);const pa=`${ME.id}/${Date.now()}.jpg`;const {error}=await db.storage.from("setup").upload(pa,blob,{contentType:"image/jpeg",upsert:false});if(error)throw error;path=pa;$("askMsg").innerHTML='<span class="okmsg">Photo added ✓</span>';$("askGo").disabled=false}
+    catch(e){$("askMsg").textContent="That photo didn't upload: "+(e.message||e)+". Try again."}};
+  $("askGo").onclick=async()=>{if(!path){$("askE").textContent="Add a photo of your board with your code first.";return}$("askGo").disabled=true;const {error}=await db.rpc("v2_ask_to_play",{p_avg:+$("askAvg").value||null,p_photo:path});
+    if(error){$("askE").textContent=error.message;$("askGo").disabled=false;return}p.remove();JUST_JOINED=false;await load();toast11("Sent. A Chalker will check your photo soon.")};
+  setTimeout(()=>{try{$("askPhoto").focus()}catch(_){}},60)};
+askStaff=async function(){const box=$("stTop");if(!box)return;const {data,error}=await db.rpc("v2_staff_play_requests");if(error)return;const rows=data||[];let c=$("askCard");
+  if(!c){c=document.createElement("div");c.className="card";c.id="askCard"}const ov=box.firstElementChild;if(ov&&c.previousElementSibling!==ov)ov.after(c);else if(!ov)box.prepend(c);
+  c.innerHTML=`<h2>Asked to play${rows.length?` <span class="pill bad">${rows.length}</span>`:""}</h2><p class="note">Check the photo shows a real board <b>and</b> the player's code. If either is missing, reject with a note so they can send a new one.</p>`+
+    (rows.map(x=>`<div class="item" data-id="${x.id}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
+      <p style="margin:8px 0 4px">Code to look for: <span class="codebig sm">${esc(x.code||"?")}</span></p>
+      ${x.photo?`<img class="photo" data-path="${esc(x.photo)}" alt="Board photo from ${esc(x.name)}">`:'<p class="err">No photo. Reject and ask them to send one.</p>'}
+      <label class="f" style="margin-top:6px">Note to the player if you reject (optional)<input class="askNote" maxlength="200" placeholder="e.g. We can't see your code in the photo"></label>
+      <div class="row" style="margin-top:8px"><button class="btn primary" data-askok="1">Accept</button><button class="btn" data-askok="0">Reject</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody waiting.</p>');
+  for(const img of c.querySelectorAll("img[data-path]")){photoFail(img);const u=await signed(img.dataset.path);if(u)img.src=u}
+  c.querySelectorAll("[data-askok]").forEach(b=>b.onclick=async()=>{const it=b.closest(".item"),ok=b.dataset.askok==="1";
+    if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent=ok?"Confirm accept":"Confirm reject";return}
+    const {error}=await db.rpc("v2_staff_play_decide",{p_id:it.dataset.id,p_ok:ok,p_note:it.querySelector(".askNote").value.trim()||null});
+    if(error){it.querySelector(".err").textContent=error.message;return}await load();renderStaff()});
+  try{slotCard()}catch(e){console.warn(e)}};
+// 10 Chalker slots (admins set them; only the owner makes admins)
+function slotCard(){const box=$("stTop");if(!box||!isAdminMe())return;let c=$("slotCard");if(!c){c=document.createElement("div");c.className="card";c.id="slotCard"}
+  const ask=$("askCard");if(ask&&c.previousElementSibling!==ask)ask.after(c);else if(!ask&&!c.parentElement)box.appendChild(c);
+  const live=PLAYERS.filter(p=>!["banned","suspended"].includes(p.status));const ch=live.filter(p=>p.role==="chalker"),ad=live.filter(p=>p.role==="admin");
+  const pick=live.filter(p=>p.role==="player"&&p.status==="active").sort((a,b)=>(a.display_name||"").localeCompare(b.display_name||""));
+  const opts=`<option value="">Pick a player…</option>`+pick.map(p=>`<option value="${p.id}">${esc(p.display_name)}</option>`).join("");
+  c.innerHTML=`<h2>Chalker slots <span class="pill">${ch.length} of 10</span></h2><p class="note">Chalkers accept new players, settle disputes and check reports. They can't change the Discord, Reddit or donate links, the Discord alerts, or anyone's role. Only admins can, and only you can make someone an admin.</p>
+   <div class="slots">${Array.from({length:10},(_,i)=>{const p=ch[i];return p?`<div class="slot"><span class="sn">${i+1}</span><b style="flex:1">${flag(p.country)} ${esc(p.display_name)}</b><button class="btn" data-unslot="${p.id}">Remove</button></div>`
+     :`<div class="slot"><span class="sn">${i+1}</span><select class="slotSel" aria-label="Player for Chalker slot ${i+1}">${opts}</select><button class="btn primary" data-slot="1">Make Chalker</button></div>`}).join("")}</div>
+   <p class="note" style="margin-top:10px">Admins: ${ad.map(p=>esc(p.display_name)).join(", ")||"none"}</p><p class="err" id="slotE"></p>`;
+  c.querySelectorAll("[data-slot]").forEach(b=>b.onclick=async()=>{const sel=b.parentElement.querySelector(".slotSel");if(!sel.value){sel.focus();return}
+    b.disabled=true;const {error}=await db.rpc("v2_admin_set_role",{p_user:sel.value,p_role:"chalker",p_founder_no:null});if(error){$("slotE").textContent=error.message;b.disabled=false;return}await load();renderStaff()});
+  c.querySelectorAll("[data-unslot]").forEach(b=>b.onclick=async()=>{if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent="Confirm remove";return}
+    const {error}=await db.rpc("v2_admin_set_role",{p_user:b.dataset.unslot,p_role:"player",p_founder_no:null});if(error){$("slotE").textContent=error.message;return}await load();renderStaff()})}
 
 load();
 </script>
