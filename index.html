@@ -196,7 +196,7 @@ td select{min-height:44px}
 @media (prefers-color-scheme:dark){:root{--bg:#0B1712;--surface:#12241C;--sunk:#0E1E17;--ink:#EEF3EF;--muted:#A9BDB2;--line:#21402F;--head:#0B1712;--head-ink:#EEF3EF;--accent:#E8C25A;--accent-ink:#0F3D2E;--soft:#1A3A2B;--hero2:#17573F;--gold:#E8C25A;--shadow:none}}
 nav#tabs{display:none!important}
 main{padding-bottom:28px}footer{padding-bottom:28px}
-.hin .logo{display:none}
+.hin .logo{display:block;width:38px;height:38px;flex-shrink:0;cursor:pointer}
 .hin{gap:10px}
 .brand h1{font-family:var(--display);font-weight:800;letter-spacing:1px;text-transform:uppercase}
 .omMenu{height:46px;min-width:46px;border:0;border-radius:23px;background:#17573F;color:#F5EFE0;padding:0 14px 0 10px;display:inline-flex;align-items:center;gap:6px;font:700 16px/1 var(--body);flex-shrink:0;cursor:pointer}
@@ -256,6 +256,7 @@ body.ohMem #v-home .hero{display:none}
 @media (prefers-color-scheme:dark){#howItWorks li::before{background:#E8C25A;color:#0F3D2E}}
 
 #howItWorks li>div{display:flex;flex-direction:column;gap:2px;padding-top:3px;min-width:0}#howItWorks li b{font-size:18px;line-height:1.2}#howItWorks li span{color:var(--muted);line-height:1.4}#howItWorks ol{gap:16px!important;margin-top:6px!important}
+@media (max-width:380px){.brand h1{font-size:19px!important}.omMenu{padding:0 10px 0 8px}.hin .logo{width:32px;height:32px}.hin{gap:6px!important}}
 @media (max-width:440px){.hin{padding:8px 12px;gap:8px}.brand h1{font-size:22px}.brand .beta,#hBtn{display:none!important}.hin .hbtns{gap:6px}}
 </style>
 </head>
