@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-mRpVmgDV47kkDNcXhwgkF/hWxbhPJkG3FobAmZbsbbg=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-JzHT8gwKpB4RvW1bZS4eh0McLj7p5Y0HoWErI4O4hg0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -2291,7 +2291,7 @@ let INSTALL_EVT=null;window.addEventListener("beforeinstallprompt",e=>{e.prevent
   const em=$("email");try{const v=localStorage.getItem("lastEmail");if(em&&v&&!em.value)em.value=v}catch(_){}
   const eb=$("emailBtn");if(eb&&em)eb.addEventListener("click",()=>{try{localStorage.setItem("lastEmail",em.value.trim())}catch(_){}},true);
   // after "Email me a code": tell them to type the code here rather than tap the link
-  const ok=$("signinOk");if(ok)new MutationObserver(()=>{if(/Type the 6-digit code/.test(ok.textContent)&&!/stay signed in/.test(ok.textContent))ok.textContent="Email sent. Type the 6-digit code from the email in the box below. Typing the code (not tapping the link) keeps you signed in on this phone. Check spam if it isn't there in 2 minutes."}).observe(ok,{childList:true,characterData:true,subtree:true});
+  const ok=$("signinOk");if(ok)new MutationObserver(()=>{if(/Type the 6-digit code/.test(ok.textContent)&&!/keeps you signed in/.test(ok.textContent))ok.textContent="Email sent. Type the 6-digit code from the email in the box below. Typing the code (not tapping the link) keeps you signed in on this phone. Check spam if it isn't there in 2 minutes."}).observe(ok,{childList:true,characterData:true,subtree:true});
   // Google sign-in: only shown when it's switched on in Supabase
   fetch(SB_URL+"/auth/v1/settings",{headers:{apikey:SB_KEY}}).then(r=>r.json()).then(s=>{if(!(s&&s.external&&s.external.google)||$("googleBtn"))return;
     const g=document.createElement("button");g.className="btn google";g.id="googleBtn";g.innerHTML="<b>G</b>&nbsp; Sign in with Google";
