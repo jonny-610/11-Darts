@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-W/1ntdtXvHThv8bIQFeUwxAQRcQ6xzMSUJGwNy9LWK4=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-mRpVmgDV47kkDNcXhwgkF/hWxbhPJkG3FobAmZbsbbg=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -262,10 +262,20 @@ body.ohMem #v-home .hero{display:none}
 .asksteps{padding-left:22px;display:grid;gap:4px;margin:12px 0}
 .dcc{display:grid;gap:12px}.dcrow{display:flex;gap:12px;align-items:center}
 .dcic{width:48px;height:48px;border-radius:50%;background:var(--soft);color:var(--accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
-.dcbtn{width:100%;min-height:50px;display:flex;align-items:center;justify-content:center;text-decoration:none}
+.dcbtn{width:100%;box-sizing:border-box;min-height:50px;display:flex;align-items:center;justify-content:center;text-decoration:none}
 .slots{display:grid;gap:8px}.slot{display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-height:48px;border-top:1px solid var(--line);padding-top:8px}
 .slot .sn{width:28px;height:28px;border-radius:50%;background:var(--soft);display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0}
 .slot select{flex:1;min-width:150px;min-height:44px}
+/* players list (16 Nov) */
+.rolekey{background:var(--soft);border-radius:12px;padding:10px 12px;font-size:14.5px;margin-bottom:10px}.rolekey p{margin:4px 0}
+.plist{display:grid;gap:10px}.pitem{border:1px solid var(--line);border-radius:14px;padding:12px;display:grid;gap:10px}
+.ptop{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.ptop b{font-size:17px;margin-right:4px}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px}.pgrid select{width:100%;min-height:46px}.pval{display:flex;align-items:center;min-height:46px;font-weight:600}
+.pitem [data-mng]{justify-self:start;min-height:44px}
+.loadbar{position:sticky;top:0;z-index:250;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;background:#8A1C1C;color:#fff;padding:10px 14px;font-weight:600}
+.loadbar .btn{min-height:44px;background:#fff;color:#8A1C1C}
+.bcpromise{display:flex;gap:10px;align-items:flex-start;margin:8px 0 10px;font-size:15.5px;line-height:1.4;cursor:pointer}
+.bcpromise input{width:26px;height:26px;flex-shrink:0;margin-top:2px}
 @media (max-width:380px){.brand h1{font-size:19px!important}.omMenu{padding:0 10px 0 8px}.hin .logo{width:32px;height:32px}.hin{gap:6px!important}}
 @media (max-width:440px){.hin{padding:8px 12px;gap:8px}.brand h1{font-size:22px}.brand .beta,#hBtn{display:none!important}.hin .hbtns{gap:6px}}
 </style>
@@ -289,7 +299,7 @@ body.ohMem #v-home .hero{display:none}
 <main id="main">
   <section id="v-home" class="view">
     <div class="card hero">
-      <img class="herologo" src="logo.webp" alt="11 Darts" width="480" height="480">
+      <img class="herologo" loading="lazy" src="logo.webp" alt="11 Darts" width="480" height="480">
       <h2>Play a real league from your own oche.</h2>
       <p>Weekly matches on camera, a Friday Cup and training. Free, always. 18+.</p>
       <div class="kv" id="heroStats"></div>
@@ -367,17 +377,24 @@ function show(v){if(!isMember()&&!["home","profile"].includes(v))v="home";if(v!=
   window.scrollTo(0,0);render()}
 document.querySelectorAll("#tabs button").forEach(b=>b.onclick=()=>show(b.dataset.v));
 
-async function load(){
+let LOADSEQ=0;
+async function load(){const seq=++LOADSEQ;
   const {data:{session}}=await db.auth.getSession();ME=session?session.user:null;
-  STATE=null;if(ME){const r=await db.rpc("v2_my_join_state");if(!r.error)STATE=r.data}
-  const p=await db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota,pen_king,camera_ok_at,play_asked_at").in("status",["placement","active"]).order("display_name");
-  PLAYERS=p.data||[];
-  const d=await db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier");DIVS_ALL=d.data||[];DIVS=divsVisible(DIVS_ALL);
-  const se=await db.from("seasons").select("*").order("start_date");SEASONS=se.data||[];
-  const lm=await db.from("matches").select("*").in("status",["confirmed","submitted","scheduled","disputed","forfeit"]).order("created_at");MATCHES=lm.data||[];
-  CHALL=[];TRAIN=[];
-  if(ME&&isMemberData()){const c=await db.from("challenges").select("*").order("created_at",{ascending:false});CHALL=c.data||[];
-    const t=await db.from("training").select("*").eq("user_id",ME.id).order("at");TRAIN=t.data||[];}
+  // all first-load questions go to the database at the same time (much quicker on a phone signal)
+  const [js,p,d,se,lm]=await Promise.all([ME?db.rpc("v2_my_join_state"):Promise.resolve({error:true}),
+    db.from("profiles").select("id,display_name,country,claimed_avg,status,role,founder,founder_no,app_name,app_link,discord_name,challenge_opt_out,joined_at,division_id,avatar_path,caller_name,seated,emblem,helper_scoring,last_seen,pen_quota,pen_king,camera_ok_at,play_asked_at"),db.from("divisions").select("id,tier,name,league_id,max_players,leagues(name,is_placement)").order("tier"),
+    db.from("seasons").select("*").order("start_date"),
+    db.from("matches").select("id,kind,season_id,division_id,week,player_a,player_b,first_to,legs_a,legs_b,stats_a,stats_b,coach_me,status,submitted_by,submitted_at,confirmed_at,due_at,released_at,created_at,proofs,archived,contact_a,contact_b,extended,start_score,cancel_a,cancel_b,tournament_id,stage,grp,timeout_by,review_state,review_at,safety_state,noshow_by,fmt,set_legs,agreed_at,agreed_by,agreed_ok,time_reminded,time_nudged").in("status",["confirmed","submitted","scheduled","disputed","forfeit"]).order("created_at")]);
+  if(seq!==LOADSEQ)return; // a newer refresh has started; ignore this older answer
+  if(!ME)STATE=null;else if(!js.error)STATE=js.data;
+  const failed=[p,d,se,lm].some(x=>x&&x.error);try{loadBanner(failed)}catch(_){}
+  if(!p.error)PLAYERS=p.data||[];
+  if(!d.error){DIVS_ALL=d.data||[];DIVS=divsVisible(DIVS_ALL)}
+  if(!se.error)SEASONS=se.data||[];
+  if(!lm.error)MATCHES=lm.data||[];
+  if(!(ME&&isMemberData())){CHALL=[];TRAIN=[]}
+  if(ME&&isMemberData()){const [c,tr]=await Promise.all([db.from("challenges").select("*").order("created_at",{ascending:false}),db.from("training").select("*").eq("user_id",ME.id).order("at")]);
+    if(seq!==LOADSEQ)return;if(!c.error)CHALL=c.data||[];if(!tr.error)TRAIN=tr.data||[];}
   $("staffTab").hidden=!(STATE&&["chalker","admin"].includes(STATE.profile.role)&&!["banned","suspended"].includes(STATE.profile.status));
   $("tabs").hidden=!isMember();if(!isMember()&&!["home","profile"].includes(CUR))CUR="home";
   render();
@@ -447,7 +464,7 @@ function renderMe(){
     const s=$("mSave");if(s)s.onclick=async()=>{const {error}=await db.rpc("v2_update_me",{p_tz:Intl.DateTimeFormat().resolvedOptions().timeZone,p_app:$("mApp").value,p_app_link:$("mLink").value.trim(),p_opt_out:$("mOpt").checked});$("mErr").textContent=error?error.message:"";if(!error){$("mErr").innerHTML='<span class="okmsg">Saved.</span>';load()}};
     $("out2").onclick=()=>db.auth.signOut();}
 }
-const CONDUCT=["I am 18 or over.","I will keep my camera on the board for every match.","I will play fair: no cheating, no fake scores and no fake accounts.","I will be respectful: no abuse, bullying, hate or harassment of any kind.","I will never share indecent images or behave indecently on camera or in chat.","I understand that serious breaches mean a permanent ban, with no appeal.","I will reply to my opponent within 72 hours and play by Sunday, or tell a Chalker."];
+const CONDUCT=["I am 18 or over.","I will keep my camera on the board for every match.","I will play fair: no cheating, no fake scores and no fake accounts.","I will be respectful: no abuse, bullying, hate or harassment of any kind.","I will never share indecent images or behave indecently on camera or in chat.","I understand that serious breaches mean a permanent ban. If I think a ban is a mistake, I can ask on Discord within 14 days and an admin who wasn't involved will review it once.","I will reply to my opponent within 72 hours and play by Sunday, or tell a Chalker."];
 let photoPath=null,JUST_JOINED=false;
 function renderJoin(){
   const d=STATE,p=d.profile;if($("join").dataset.built==="1")return;$("join").dataset.built="1";
@@ -477,7 +494,7 @@ function renderProfile(){const p=PLAYERS.find(x=>x.id===PROF);const box=$("profO
   box.innerHTML=`<button class="btn" id="pBack" style="padding:6px 10px;font-size:12px">← Back</button>
    <h2 style="margin-top:12px;font-size:30px">${flag(p.country)} ${esc(p.display_name)}</h2><p>${badges(p)}</p>
    <div class="kv"><div><b>${p.claimed_avg?(+p.claimed_avg).toFixed(1):"–"}</b><span>Starting avg</span></div><div><b>${esc(CNAME[p.country]||p.country||"–")}</b><span>Country</span></div><div><b>${new Date(p.joined_at).toLocaleDateString("en-GB",{month:"short",year:"numeric"})}</b><span>Joined</span></div></div>
-   ${p.app_link?`<p><a href="${esc(p.app_link)}" target="_blank" rel="noopener nofollow">${esc(p.app_name||"App")} profile ↗</a></p>`:""}
+   ${safeLink(p.app_link)?`<p><a href="${esc(p.app_link)}" target="_blank" rel="noopener nofollow">${esc(p.app_name||"App")} profile ↗</a></p>`:""}
    <p class="note">Results, form and training graphs arrive with the leagues.${p.challenge_opt_out?" This player isn't taking challenges.":""}</p>
    ${canAct?`<h3>Safety</h3><div class="row"><button class="btn danger" id="pBlock">Block</button><button class="btn" id="pReport">Report</button></div><div id="pForm"></div>`:""}`;
   $("pBack").onclick=()=>show(PREV||"home");
@@ -499,7 +516,7 @@ async function renderStaff(){
   const pend=await db.rpc("v2_staff_pending");const box=$("stPending");
   if(pend.error){box.textContent=pend.error.message;return}
   box.innerHTML=(pend.data||[]).map(r=>`<div class="item" data-id="${r.id}"><b>${flag(r.country)} ${esc(r.display_name)}</b> <span class="note">age ${r.age} · avg ${r.claimed_avg} · ${esc(r.discord_name?"Discord: "+r.discord_name:"email sign-up")}</span>
-    ${r.app_link?`<div><a href="${esc(r.app_link)}" target="_blank" rel="noopener nofollow">${esc(r.app_name||"App")} profile ↗</a></div>`:""}
+    ${safeLink(r.app_link)?`<div><a href="${esc(r.app_link)}" target="_blank" rel="noopener nofollow">${esc(r.app_name||"App")} profile ↗</a></div>`:""}
     <p class="note">Code to look for: <b>${esc(r.verify_code)}</b></p><img class="photo" data-path="${esc(r.setup_photo||"")}" alt="Board photo">
     <label class="f" style="margin-top:6px">Note (optional)<input class="stNote"></label>
     <div class="row" style="margin-top:8px"><button class="btn primary" data-ok="1">Approve</button><button class="btn" data-ok="0">Send back</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody waiting.</p>';
@@ -774,7 +791,14 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
    <div class="card"><h2>Ready to place</h2>${(o.placement_done||[]).map(p=>`<div class="item"><b>${esc(p.name)}</b> · <span class="pill">PM ${p.played} of 3</span> <span class="pill">PA ${p.avg??"–"}</span> <span class="pill">Said ${p.claimed??"–"}</span>
        <div class="row" style="margin-top:6px"><label class="f">Division<select data-psel="${p.id}">${divOpts()}</select></label><button class="btn primary" data-place="${p.id}">Place</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody in placement.</p>'}<p class="note pmkey">PM = placement matches played · PA = average in placement matches · Said = the average they gave when joining.</p></div>
    <div class="card"><h2>Disputes</h2>${(o.disputed||[]).map(m=>`<div class="item"><b>${esc(m.label)}</b> ${m.la}-${m.lb}<p>${esc(m.note||"")}</p><div class="row"><button class="btn primary" data-uph="${m.id}">Uphold result</button><button class="btn" data-rep="${m.id}">Clear it: replay</button></div><p class="err"></p></div>`).join("")||'<p class="note">No disputes.</p>'}</div>
-   <div class="card"><h2>Players</h2><div class="tw"><table><tr><th class="l">Player</th><th>Status</th><th>Division</th>${adm?"<th>Role</th><th></th>":""}</tr>${players.map(p=>`<tr><td class="l">${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</td><td>${p.status}</td><td>${adm&&(p.status==="active"||p.status==="placement")?`<select data-mv="${p.id}" aria-label="Move to a division"><option value="">–</option>${divOpts(p.division_id)}</select>`:"–"}</td>${adm?`<td><select data-role="${p.id}">${["player","chalker","admin"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select> <select data-fno="${p.id}" title="Founding Five number"><option value="">–</option>${[1,2,3,4,5].map(n=>`<option ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></td><td><button class="btn" data-mng="${p.id}" style="padding:4px 8px;font-size:12px">Manage</button></td>`:""}</tr>`).join("")}</table></div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
+   <div class="card"><h2>Players</h2>${adm?`<div class="rolekey"><p><b>Role</b>: <b>Player</b> plays. <b>Chalker</b> accepts new players, settles disputes and checks reports. <b>Admin</b> can also change links, Discord alerts, divisions and roles. Only the owner can make or remove admins.</p><p><b>Founding Five number (1 to 5)</b>: marks the five founders and gives them the gold gavel emblem. Leave it on "Not a founder" for everyone else.</p></div>`:""}
+   <div class="plist">${players.map(p=>{const st={active:"Active",suspended:"Removed",banned:"Banned",new:"Not finished joining",pending:"Waiting",placement:"Placement"}[p.status]||p.status;
+     const dv=DIVS_ALL.find(d=>d.id===p.division_id);const canMove=adm&&(p.status==="active"||p.status==="placement");
+     return `<div class="pitem"><div class="ptop"><b>${flag(p.country)} ${esc(p.display_name)}${p.times_blocked>=3?' 🚩':""}</b><span class="pill${p.status==="active"?" ok":p.status==="suspended"||p.status==="banned"?" bad":""}">${st}</span>${p.role!=="player"?`<span class="pill">${p.role==="admin"?"Admin":"Chalker"}</span>`:""}${p.founder==="five"?`<span class="pill gold">Founding Five #${p.founder_no||"?"}</span>`:""}</div>
+      ${adm?`<div class="pgrid"><label class="f">Division${canMove?`<select data-mv="${p.id}"><option value="">${dv?"":"Not in a division"}</option>${divOpts(p.division_id)}</select>`:`<span class="pval">${dv?esc(dv.name):"Not in a division"}</span>`}</label>
+        <label class="f">Role<select data-role="${p.id}">${[["player","Player"],["chalker","Chalker"],["admin","Admin"]].map(([r,l])=>`<option value="${r}" ${r===p.role?"selected":""}>${l}</option>`).join("")}</select></label>
+        <label class="f">Founding Five number<select data-fno="${p.id}"><option value="">Not a founder</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></label></div>
+        <button class="btn" data-mng="${p.id}">Manage ${esc(p.display_name)}</button>`:`<p class="note" style="margin:4px 0 0">${dv?esc(dv.name):"Not in a division"}</p>`}</div>`}).join("")}</div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
    ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">For each channel: in Discord, Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL, then paste it here and Save. If a box is left empty, its posts go to #results (or #darts-chat for tournaments) instead.</p>
      ${["discord_results","discord_moments","discord_alerts","discord_tournaments","discord_general","discord_chalkers","discord_div1","discord_div2","discord_div3","discord_div4"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_results:"#results · result banners, Sunday tables",discord_moments:"#180s-and-big-finishes · 100+ checkouts, 170s, 9-darters",discord_alerts:"#league-alert · Monday fixtures, match nights, season start",discord_tournaments:"#tournaments · Cup start, knockouts, champion",discord_general:"#darts-chat · general news",discord_chalkers:"Private Chalkers channel · disputes, reports, feedback",discord_div1:"Titan Division gen-chat · its results and weekly fixtures",discord_div2:"Championship gen-chat · its results and weekly fixtures",discord_div3:"Division 1 gen-chat · its results and weekly fixtures",discord_div4:"Contender channel · its results and weekly fixtures"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
      <h3 style="margin-top:14px">Extra channels</h3><p class="note">10 spare webhook slots. Type a name so you know which channel it is (you can change it any time), paste the webhook, then Save. Leave the webhook box empty and Save to clear it.</p>
@@ -912,7 +936,11 @@ let SIGQ=Promise.resolve();
 async function videoJoin(m,side){if(V.match===m.id)return;videoLeave();V.match=m.id;V.side=side;V.sid=Math.random().toString(36).slice(2,10);V.peer=null;V.oid=0;V.offerAt=0;
   try{const r=await db.functions.invoke("turn",{body:{}});V.ice=(r.data&&r.data.iceServers)||[{urls:"stun:stun.l.google.com:19302"}]}catch(_){V.ice=[{urls:"stun:stun.l.google.com:19302"}]}
   if(V.match!==m.id)return;
-  V.ch=db.channel("match-"+m.id,{config:{broadcast:{self:false}}});
+  // private room only: if the database can't hand out this match's private room, don't connect at all (no guessable fallback)
+  let room=null;try{const rr=await db.rpc("v2_match_room",{p_match:m.id});if(!rr.error&&typeof rr.data==="string"&&/^[0-9a-f]{32,}$/.test(rr.data))room="m-"+rr.data}catch(_){}
+  if(V.match!==m.id)return;
+  if(!room){V.match=null;try{toast11("Couldn't open the private video link for this match. Check your signal, then leave the match and open it again.")}catch(_){}return}
+  V.ch=db.channel(room,{config:{broadcast:{self:false}}});
   V.ch.on("broadcast",{event:"sig"},({payload})=>{SIGQ=SIGQ.then(()=>onSig(payload)).catch(()=>{})}).on("broadcast",{event:"state"},()=>pollLive());
   V.ch.subscribe(st=>{if(st==="SUBSCRIBED")send({t:"hello"})});
   clearInterval(V.dog);V.dog=setInterval(watchdog,6000)}
@@ -946,13 +974,19 @@ async function onSig(p){if(!p||p.from===V.side||p.sid===V.sid)return;
 async function goLive(){V.live=true;const sv=$("vSelf");if(sv){sv.srcObject=V.out;sv.play().catch(()=>{})}if(V.pc)await attachLocal();else if(V.side==="B")send({t:"hello"});else if(V.peer)SIGQ=SIGQ.then(makeOffer).catch(()=>{});vidUpdate()}
 function nudge(){if(V.ch)V.ch.send({type:"broadcast",event:"state",payload:{}})}
 // front/back camera
-async function switchCam(){if(!V.raw)return;try{const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
-  const cur=V.raw.getVideoTracks()[0],set=cur?cur.getSettings():{};let c;
-  if(devs.length>1&&devs.every(d=>d.deviceId)){const i=devs.findIndex(d=>d.deviceId===set.deviceId);c={deviceId:{exact:devs[(i+1)%devs.length].deviceId}}}
-  else c={facingMode:{exact:set.facingMode==="user"?"environment":"user"}};
-  if(cur)cur.stop();const s=await navigator.mediaDevices.getUserMedia({video:{...c,width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}}});const nt=s.getVideoTracks()[0];
-  if(cur)V.raw.removeTrack(cur);V.raw.addTrack(nt);V.rawVid.srcObject=new MediaStream([nt]);V.rawVid.play().catch(()=>{})}
-  catch(e){alert("Couldn't switch camera on this phone.")}}
+async function switchCam(){if(!V.raw)return;const cur=V.raw.getVideoTracks()[0],set=cur?cur.getSettings():{};let c;
+  try{const devs=(await navigator.mediaDevices.enumerateDevices()).filter(d=>d.kind==="videoinput");
+    if(devs.length>1&&devs.every(d=>d.deviceId)){const i=devs.findIndex(d=>d.deviceId===set.deviceId);c={deviceId:{exact:devs[(i+1)%devs.length].deviceId}}}
+    else c={facingMode:{exact:set.facingMode==="user"?"environment":"user"}}}catch(_){c={facingMode:{exact:set.facingMode==="user"?"environment":"user"}}}
+  const want=x=>navigator.mediaDevices.getUserMedia({video:{...x,width:{ideal:VQ[V.q].w},height:{ideal:VQ[V.q].h}}});
+  // get the new camera first, so the old one keeps working if this phone can't switch
+  let s=null;try{s=await want(c)}catch(_){}
+  if(!s&&cur){cur.stop();try{s=await want(c)}catch(_){}
+    if(!s){try{s=await want(set.deviceId?{deviceId:{exact:set.deviceId}}:{facingMode:{ideal:set.facingMode||"environment"}})}catch(_){}
+      if(s){const back=s.getVideoTracks()[0];V.raw.removeTrack(cur);V.raw.addTrack(back);V.rawVid.srcObject=new MediaStream([back]);V.rawVid.play().catch(()=>{})}
+      toast11(s?"This phone can't switch cameras, so it kept the same one.":"The camera stopped. Close the camera and turn it on again.");return}}
+  if(!s){toast11("This phone can't switch cameras, so it kept the same one.");return}
+  const nt=s.getVideoTracks()[0];if(cur){V.raw.removeTrack(cur);try{cur.stop()}catch(_){}}V.raw.addTrack(nt);V.rawVid.srcObject=new MediaStream([nt]);V.rawVid.play().catch(()=>{})}
 
 // ---------- who's on screen ----------
 function vidUpdate(){const box=vidEl();const on=SC&&SC.mode==="online"&&(V.live||(V.remote&&V.remote.getTracks().length));box.hidden=!on;if(!on)return;
@@ -1504,7 +1538,7 @@ rules:()=>`<h2>📜 The rules</h2><p class="note">Plain English. If anything her
 <li>Quarter-finals (and earlier) best of 3 legs. Semi-finals best of 5. The final is best of 7.</li></ul>
 <h3>Behaviour</h3><ul>${CONDUCT.map(c=>`<li>${esc(c)}</li>`).join("")}</ul>
 <p class="note">Chalkers approve new players and sort out problems. Admins run the site. A ban needs two of them to agree.</p>`,
-accessibility:()=>`<h2>♿ Accessibility</h2><p>11 Darts is for everyone: any age, any ability, standing or seated. If something gets in your way, tell us and we'll fix it.</p>
+accessibility:()=>`<h2>♿ Accessibility</h2><p>11 Darts is for every adult player (18 and over): any ability, standing or seated. If something gets in your way, tell us and we'll fix it.</p>
 <h3>What you can change</h3><ul><li><b>Aa</b> (top of every page): bigger text, high contrast, simple mode, captions, less movement and easier reading.</li>
 <li><b>?</b> (top of every page): tells you what to do next, and how to reach a person.</li>
 <li><b>Profile</b>: tick <i>I play seated</i> for extra throw time, or <i>Someone helps me score</i> if a helper enters your scores.</li>
@@ -2884,7 +2918,7 @@ function mtHome(){const h=$("memberHome");let c=$("mtHome");if(!h||!ME||!isMembe
   const now=Date.now(),soon=mine().filter(m=>m.status==="scheduled"&&m.agreed_at&&new Date(m.agreed_at)>now-3*36e5&&new Date(m.agreed_at)<now+7*864e5).sort((a,b)=>new Date(a.agreed_at)-new Date(b.agreed_at));
   if(!soon.length){if(c)c.remove();return}if(!c){c=document.createElement("div");c.id="mtHome";c.className="card mthome";h.prepend(c)}
   const day=d=>{const x=new Date(d),t=new Date();const dd=Math.round((new Date(x.toDateString())-new Date(t.toDateString()))/864e5);return dd===0?"Tonight":dd===1?"Tomorrow":x.toLocaleDateString("en-GB",{weekday:"long"})};
-  c.innerHTML=`<h2>Coming up</h2>${soon.map(m=>`<div class="item">📅 <b>${day(m.agreed_at)} ${new Date(m.agreed_at).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</b> v ${nameLink(opp(m,ME.id))} · ${KIND[m.kind]||"Match"} ${m.agreed_ok?'<span class="pill ok">Agreed</span>':'<span class="pill">Waiting to confirm</span>'}</div>`).join("")}<div class="row" style="margin-top:8px"><button class="btn" onclick="show('play')">Go to Play</button></div>`}
+  c.innerHTML=`<h2>Coming up</h2>${soon.map(m=>`<div class="item">📅 <b>${day(m.agreed_at)} ${new Date(m.agreed_at).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"})}</b> v ${nameLink(opp(m,ME.id))} · ${KIND[m.kind]||"Match"} ${m.agreed_ok?'<span class="pill ok">Agreed</span>':'<span class="pill">Waiting to confirm</span>'}</div>`).join("")}<div class="row" style="margin-top:8px"><button class="btn" data-showv="play">Go to Play</button></div>`}
 // Chalkers: agreed times on Matches to be played
 function mtStaff(){const box=$("stTop");if(!box)return;box.querySelectorAll("[data-ext]").forEach(b=>{const it=b.closest(".item");if(!it||it.dataset.mt)return;it.dataset.mt="1";const m=MATCHES.find(x=>x.id===+b.dataset.ext);
   const n=document.createElement("div");n.className="note";n.textContent=m&&m.agreed_at?`📅 ${ukT(m.agreed_at)} UK ${m.agreed_ok?"(agreed)":"(waiting for the other player to confirm)"}`:"📅 No time set yet";it.querySelector(".note").after(n)})}
@@ -3180,7 +3214,7 @@ askOpen=async function(){let path=null;const p=document.createElement("div");p.c
 askStaff=async function(){const box=$("stTop");if(!box)return;const {data,error}=await db.rpc("v2_staff_play_requests");if(error)return;const rows=data||[];let c=$("askCard");
   if(!c){c=document.createElement("div");c.className="card";c.id="askCard"}const ov=box.firstElementChild;if(ov&&c.previousElementSibling!==ov)ov.after(c);else if(!ov)box.prepend(c);
   c.innerHTML=`<h2>Asked to play${rows.length?` <span class="pill bad">${rows.length}</span>`:""}</h2><p class="note">Check the photo shows a real board <b>and</b> the player's code. If either is missing, reject with a note so they can send a new one.</p>`+
-    (rows.map(x=>`<div class="item" data-id="${x.id}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
+    (rows.map(x=>`<div class="item" data-id="${x.id}" data-photo="${esc(x.photo||"")}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
       <p style="margin:8px 0 4px">Code to look for: <span class="codebig sm">${esc(x.code||"?")}</span></p>
       ${x.photo?`<img class="photo" data-path="${esc(x.photo)}" alt="Board photo from ${esc(x.name)}">`:'<p class="err">No photo. Reject and ask them to send one.</p>'}
       <label class="f" style="margin-top:6px">Note to the player if you reject (optional)<input class="askNote" maxlength="200" placeholder="e.g. We can't see your code in the photo"></label>
@@ -3189,7 +3223,7 @@ askStaff=async function(){const box=$("stTop");if(!box)return;const {data,error}
   c.querySelectorAll("[data-askok]").forEach(b=>b.onclick=async()=>{const it=b.closest(".item"),ok=b.dataset.askok==="1";
     if(b.dataset.armed!=="1"){b.dataset.armed="1";b.textContent=ok?"Confirm accept":"Confirm reject";return}
     const {error}=await db.rpc("v2_staff_play_decide",{p_id:it.dataset.id,p_ok:ok,p_note:it.querySelector(".askNote").value.trim()||null});
-    if(error){it.querySelector(".err").textContent=error.message;return}await load();renderStaff()});
+    if(error){it.querySelector(".err").textContent=error.message;return}if(it.dataset.photo)db.storage.from("setup").remove([it.dataset.photo]).catch(()=>{});await load();renderStaff()});
   try{slotCard()}catch(e){console.warn(e)}};
 // 10 Chalker slots (admins set them; only the owner makes admins)
 function slotCard(){const box=$("stTop");if(!box||!isAdminMe())return;let c=$("slotCard");if(!c){c=document.createElement("div");c.className="card";c.id="slotCard"}
@@ -3250,6 +3284,114 @@ const tPad=t=>`<div class="typed" aria-live="polite">${t||'<span class="note">Ty
   $("trBack").onclick=()=>{if(k&&!done&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
   const sv=$("hSave");if(sv)sv.onclick=async()=>{sv.disabled=true;const {error}=await db.rpc("v2_log_training",{p_drill:TRMODE,p_score:score,p_detail:detail});
     if(error){err(error.message);sv.disabled=false;return}TRMODE=null;TS={};await load();show("training")}}})();
+
+// ===================== 34 Install the app + app check (16 Nov) =====================
+let INST_EVT=null,INST_SEEN=false;
+window.addEventListener("beforeinstallprompt",e=>{e.preventDefault();INST_EVT=e;INST_SEEN=true;try{installCard()}catch(_){}});
+window.addEventListener("appinstalled",()=>{INST_EVT=null;const c=$("instCard");if(c)c.remove();toast11("11 Darts is installed. Find it in your apps.")});
+function installCard(){return;/* the site already has its own install card (renderInstall) */if(STANDALONE||!INST_EVT)return;const h=$("v-home");if(!h)return;let c=$("instCard");
+  if(!c){c=document.createElement("div");c.className="card";c.id="instCard";c.innerHTML=`<h2>📲 Get the 11 Darts app</h2><p class="note">Opens full screen from your home screen, with notifications. Free, no app store needed.</p><button class="btn primary" id="instGo" style="width:100%;min-height:50px">Install the app</button>`;
+    const ref=$("dcCard")||$("ocheHome");if(ref&&ref.parentElement===h)ref.after(c);else h.prepend(c);
+    $("instGo").onclick=async()=>{if(!INST_EVT)return;INST_EVT.prompt();try{await INST_EVT.userChoice}catch(_){}INST_EVT=null;c.remove()}}}
+(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);try{installCard()}catch(_){}return r}})();
+async function appCheck(){const row=(ok,t,why)=>`<li style="margin:6px 0">${ok?"✅":"❌"} ${t}${!ok&&why?`<br><span class="note">${why}</span>`:""}</li>`;let html="";
+  html+=row(window.isSecureContext&&location.protocol==="https:","Secure address (https)","Open https://11darts.com, not http.");
+  let man=null;try{const r=await fetch("/manifest.webmanifest",{cache:"no-store"});man=r.ok?await r.json():null}catch(_){}
+  html+=row(!!man,"App details file loads","The manifest.webmanifest file didn't load.");
+  const ic=async u=>{try{const r=await fetch(u,{cache:"no-store"});return r.ok}catch(_){return false}};
+  const i1=await ic("/icon-192.png"),i2=await ic("/icon-512.png");html+=row(i1&&i2,"App icons load","icon-192.png or icon-512.png didn't load.");
+  let sw=null;try{sw=await navigator.serviceWorker.getRegistration()}catch(_){}
+  html+=row(!!(sw&&sw.active),"Background helper (sw.js) running","Reload the page once and check again.");
+  html+=row(!!navigator.serviceWorker&&!!navigator.serviceWorker.controller,"Helper is looking after this page","Reload the page once and check again.");
+  html+=row(INST_SEEN||STANDALONE,STANDALONE?"You're using the installed app":"Chrome has offered to install","If everything above is ✅, this phone's Chrome is refusing. Update Chrome, or use Create shortcut.");
+  const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");
+  p.innerHTML=`<div class="card"><h2>📲 App check</h2><ul style="list-style:none;padding:0;margin:8px 0">${html}</ul>${INST_EVT?'<button class="btn primary" id="acGo">Install the app</button> ':""}<button class="btn" id="acX">Close</button><p class="note" style="margin-top:10px">Chrome: ${esc((navigator.userAgent.match(/Chrome\/[\d.]+/)||["not Chrome"])[0])}</p></div>`;
+  document.body.appendChild(p);$("acX").onclick=()=>p.remove();const g=$("acGo");if(g)g.onclick=async()=>{INST_EVT.prompt();try{await INST_EVT.userChoice}catch(_){}INST_EVT=null;p.remove()}}
+(function(){const _i=omItems;omItems=function(){const it=_i.apply(this,arguments);if(!STANDALONE){const at=Math.max(0,it.you.findIndex(x=>x[0]==="share"));it.you.splice(at,0,["appcheck","Install the app"])}return it}})();
+(function(){const _g=omGo;omGo=function(k){if(k==="appcheck"){omClose();if(INST_EVT){INST_EVT.prompt();INST_EVT.userChoice.catch(()=>{}).finally(()=>{INST_EVT=null})}else appCheck();return}return _g.apply(this,arguments)}})();
+
+// ===================== 35 Audit fixes (16 Nov) =====================
+// links people put on their profile only show if they're normal https web links
+function safeLink(u){return typeof u==="string"&&/^https:\/\/[^\s"'<>]+$/i.test(u)}
+// leaving a live match always turns the camera and video link off (the old check ran before the page changed)
+(function(){const _s=show;show=function(v){const was=CUR;const r=_s.apply(this,arguments);const chk=()=>{try{if(was==="scorer"&&CUR!=="scorer")videoLeave()}catch(_){}};chk();if(r&&typeof r.then==="function")r.then(chk,chk);return r}})();
+window.addEventListener("pagehide",()=>{try{videoLeave()}catch(_){}});
+document.addEventListener("click",e=>{const a=e.target.closest&&e.target.closest("[data-showv]");if(!a)return;e.preventDefault();show(a.dataset.showv)});
+// if the database can't be reached, say so (instead of showing empty tables) and offer a retry
+function loadBanner(bad){let b=$("loadBar");if(!bad){if(b)b.remove();return}
+  if(!b){b=document.createElement("div");b.id="loadBar";b.setAttribute("role","alert");b.className="loadbar";b.innerHTML=`<span>Couldn't reach 11 Darts just now. What you see may be out of date.</span><button class="btn" id="loadRetry">Try again</button>`;document.body.prepend(b);
+    $("loadRetry").onclick=async()=>{$("loadRetry").disabled=true;try{await load()}finally{const r=$("loadRetry");if(r)r.disabled=false}}}}
+// tidy board and proof photos nobody needs any more (runs quietly when a Chalker opens their page)
+let OLDPHOTOS_DONE=false;
+async function cleanOldPhotos(){if(OLDPHOTOS_DONE)return;OLDPHOTOS_DONE=true;try{const {data,error}=await db.rpc("v2_staff_old_photos");if(error||!data||!data.length)return;
+  for(let i=0;i<data.length;i+=50)await db.storage.from("setup").remove(data.slice(i,i+50))}catch(_){}}
+(function(){const _a=askStaff;askStaff=async function(){const r=await _a.apply(this,arguments);cleanOldPhotos();return r}})();
+
+// ===================== 36 Remember this camera (16 Nov) =====================
+// Pair a board-camera phone once. After that: open 11 Darts on the camera phone, start a match on the main phone, and they find each other.
+// The saved code is a long random secret kept only on the two phones (never on the server).
+const BCS_MAIN="11d_boardcam_main",BCS_CAM="11d_boardcam_phone";
+const bcLsG=k=>{try{return localStorage.getItem(k)}catch(_){return null}};
+const bcLsS=(k,v)=>{try{v==null?localStorage.removeItem(k):localStorage.setItem(k,v)}catch(_){}};
+const bcOkCode=c=>!!c&&/^[A-Za-z0-9_-]{20,}$/.test(c);
+const savedMainCam=()=>{const c=bcLsG(BCS_MAIN);return bcOkCode(c)?c:null};
+const savedCamPhone=()=>{const c=bcLsG(BCS_CAM);return bcOkCode(c)?c:null};
+let BC_SAVED_MODE=false;
+// ---------- main phone ----------
+(function(){const _s=bcStart;bcStart=async function(){BC_SAVED_MODE=false;return _s.apply(this,arguments)}})();
+async function bcStartSaved(){const code=savedMainCam();if(!code)return bcStart();
+  camOwnOff();if(MS)MS.cam="other";await bcStop(true);
+  B.code=code;B.until=Date.now()+6*3600e3;B.state="waiting";B.peer=null;BC_SAVED_MODE=true;
+  B.ice=await bcIce();
+  B.ch=db.channel("cam-"+code,{config:{broadcast:{self:false}}});
+  B.ch.on("broadcast",{event:"cam"},({payload})=>bcHostSig(payload).catch(()=>{}));
+  B.ch.subscribe();clearInterval(B.tick);B.tick=setInterval(bcTick,1000);renderCamSetup()}
+async function camSavedPhone(){V.setup=true;
+  if(!V.raw){try{V.raw=await navigator.mediaDevices.getUserMedia({audio:true,video:false});V.mic=true}catch(_){V.raw=new MediaStream();V.mic=false}}
+  await bcStartSaved()}
+(function(){const _p=bcPanel;bcPanel=function(){const saved=savedMainCam();
+  if(BC_SAVED_MODE&&(B.state==="waiting"||B.state==="connecting"))return `<div class="bcbox"><h3>⭐ Waiting for your board camera</h3>
+    <p>Open <b>11darts.com</b> on your board-camera phone and tap <b>Start board camera</b>. It connects by itself.</p>
+    <p class="note" aria-live="polite">${B.state==="connecting"?"Board camera found. Connecting…":"Waiting…"}</p>
+    <div class="row"><button class="btn" id="bcCancel">Cancel</button><button class="btn" id="bcNew">Use a new code instead</button></div></div>`;
+  let h=_p.apply(this,arguments);
+  if(B.state==="on"){h+=saved&&saved===B.code?`<p class="note">⭐ This camera is saved. Next match it connects by itself. <button class="btn" id="bcForget" style="min-height:44px">Forget this camera</button></p>`
+    :`<div class="bcbox"><h3>⭐ Save this board camera?</h3><p class="note">Next time you won't need a code. Just open 11 Darts on that phone.</p>
+      <label class="bcpromise"><input type="checkbox" id="bcPromise"> <span>My board camera shows my <b>whole board, numbers included</b>, and keeping it working for every match is <b>my responsibility</b>.</span></label>
+      <button class="btn primary" id="bcRemember" disabled>⭐ Remember this camera</button></div>`}
+  else if(saved&&!["waiting","connecting"].includes(B.state))h=`<div class="bcbox"><button class="btn primary" id="bcSaved" style="width:100%">⭐ Use my saved board camera</button>
+     <p class="note" style="margin-top:6px">Open 11 Darts on your board-camera phone too. <button class="btn" id="bcForget" style="min-height:44px">Forget it</button></p></div>`+h;
+  return h}})();
+(function(){const _r=renderCamSetup;renderCamSetup=function(){_r.apply(this,arguments);const on=(id,f)=>{const b=$(id);if(b)b.onclick=f};
+  on("bcSaved",()=>bcStartSaved());on("bcNew",()=>bcStart());
+  on("bcForget",async()=>{bcLsS(BCS_MAIN,null);try{await db.rpc("v2_camera_promise",{p_kind:"forgot"})}catch(_){}toast11("Saved board camera forgotten.");renderCamSetup()});
+  const pr=$("bcPromise"),rb=$("bcRemember");if(pr&&rb)pr.onchange=()=>{rb.disabled=!pr.checked};
+  on("bcRemember",async()=>{if(!pr||!pr.checked)return;bcLsS(BCS_MAIN,B.code);BC_SAVED_MODE=true;B.until=Date.now()+6*3600e3;
+    bcSend({t:"remember",to:B.peer});try{await db.rpc("v2_camera_promise",{p_kind:"saved"})}catch(_){}toast11("Saved. Next match it connects by itself.");renderCamSetup()})}})();
+// the camera pop-up at the start of an online match offers the saved camera first
+(function(){const _c=camPop;camPop=function(id){_c.apply(this,arguments);if(!savedMainCam())return;const box=$("camPop");if(!box)return;const g=box.querySelector("div[style*='grid']");if(!g)return;
+  const b=document.createElement("button");b.className="btn primary";b.id="cpSaved";b.textContent="⭐ My saved board camera";g.prepend(b);const t=$("cpThis");if(t)t.classList.remove("primary");
+  b.onclick=async()=>{box.remove();try{await camSavedPhone();if(MS)msRender()}catch(e){console.warn(e)}}}})();
+// ---------- board-camera phone ----------
+function bcCamExtras(code){(function(){
+  const _sig=cpSig;cpSig=async function(p){if(p&&p.from!=="cam"&&p.to===C.sid){
+      if(p.t==="remember"){bcLsS(BCS_CAM,code);cpStat("⭐ Saved. Next time just open 11darts.com on this phone and tap Start board camera.");return}
+      if(p.t==="bye"&&savedCamPhone()===code){if(C.pc)try{C.pc.close()}catch(_){}C.pc=null;C.offerAt=0;cpStat("Match finished. Keep this page open for your next match, or close it and open 11 Darts again later.");return}}
+    return _sig.apply(this,arguments)};
+  setTimeout(()=>{const w=$("camPhone");if(!w)return;const card=w.querySelector(".card");if(!card)return;const p=document.createElement("div");p.className="row";p.style.marginTop="10px";
+    const draw=()=>{p.innerHTML=savedCamPhone()===code?`<span class="note">⭐ This phone is your saved board camera.</span><button class="btn" id="cpForget">Forget</button>`:`<button class="btn" id="cpKeep">⭐ Keep this phone as my board camera</button>`;
+      const k=$("cpKeep");if(k)k.onclick=()=>{bcLsS(BCS_CAM,code);draw()};const f=$("cpForget");if(f)f.onclick=()=>{bcLsS(BCS_CAM,null);draw()}};
+    draw();card.appendChild(p)},300)})()}
+if(BCAM)bcCamExtras(BCAM[1]);
+// opening 11 Darts on a saved board-camera phone asks what to do first
+async function bcChooser(code){return new Promise(res=>{const o=document.createElement("div");o.className="reppop";o.id="bcChoose";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");
+  o.innerHTML=`<div class="card"><h2>📷 This phone is your board camera</h2><p>Stand it facing your dartboard, then start a match on your main phone. They connect by themselves.</p>
+    <div style="display:grid;gap:10px"><button class="btn primary" id="bcsGo" style="min-height:54px">Start board camera</button><button class="btn" id="bcsApp">Use 11 Darts normally on this phone</button><button class="btn" id="bcsForget">Stop using this phone as a camera</button></div></div>`;
+  document.body.appendChild(o);
+  $("bcsGo").onclick=()=>{o.remove();camPhone(code);bcCamExtras(code);res(true)};
+  $("bcsApp").onclick=()=>{o.remove();res(false)};
+  $("bcsForget").onclick=()=>{bcLsS(BCS_CAM,null);o.remove();res(false)}})}
+if(!BCAM&&savedCamPhone()){const _ld=load;let first=true;load=async function(){if(first){first=false;if(await bcChooser(savedCamPhone()))return}load=_ld;return _ld.apply(this,arguments)}}
 
 load();
 </script>
