@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-7chZVY6e/TpJh07APix67GJnjaGgN2mvr72WmxzTzI0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-FlAlxhOYbANS8EHLs6h64TnQvOoAy+TNEgyJ1CfGZRc=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -351,7 +351,7 @@ body.ohMem #v-home .hero{display:none}
 
   <section id="v-staff" class="view" hidden>
     <div id="stTop" style="display:grid;gap:14px"></div>
-    <div class="card"><h2>Asked to play</h2><p class="note">Check the photo shows a dartboard with the player's code written on paper. The photo is removed as soon as you decide.</p><div class="list" id="stPending"></div></div>
+    <div class="card" id="stPendCard" hidden><h2>Older join requests</h2><p class="note">Check the photo shows a dartboard with the player's code written on paper. The photo is removed as soon as you decide.</p><div class="list" id="stPending"></div></div>
     <div class="card"><h2>Blocks and reports</h2><p class="note">Every block starts a safeguarding check: read the reason, check on the person who blocked, and look at anyone blocked 3 or more times. Bans need two Chalkers or admins to agree.</p><div id="stSafety"></div></div>
   </section>
 </main>
@@ -362,7 +362,16 @@ body.ohMem #v-home .hero{display:none}
 const SB_URL="https://gqtdhrlzyrhcdpuhjwov.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxdGRocmx6eXJoY2RwdWhqd292Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MTc1NjQsImV4cCI6MjEwOTI5MzU2NH0.GQD-eAb_pu-5izhpDoswshYS4a05JzBnm9pqKTDYNJ8";
 const H0=location.hash||"";
 const divLabel=tier=>{const d=(typeof DIVS!=="undefined"&&DIVS||[]).find(x=>x.tier===tier);return (d?d.name:"Division "+tier)+" channel · its results and weekly fixtures"};
-const db=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit"}});
+// Sign-in lock: phones freeze old background tabs, and a frozen tab can hold the lock forever,
+// so a new sign-in never finishes. Wait up to 5s for the lock, then carry on without it.
+let SB_STUCK=false,SB_Q=Promise.resolve();
+function sbLocal(fn){const run=SB_Q.then(()=>fn());SB_Q=run.catch(()=>{});return run}
+async function sbLock(name,t,fn){const L=navigator.locks;if(!L||!L.request||SB_STUCK)return await sbLocal(fn);
+  if(t===0)return await L.request(name,{mode:"exclusive",ifAvailable:true},async l=>{if(!l){const e=new Error("busy");e.isAcquireTimeout=true;throw e}return await fn()});
+  const ac=new AbortController();const tm=setTimeout(()=>ac.abort(),3000);
+  try{return await L.request(name,{mode:"exclusive",signal:ac.signal},async()=>{clearTimeout(tm);return await fn()})}
+  catch(e){if(e&&e.name==="AbortError"){SB_STUCK=true;return await sbLocal(fn)}throw e}}
+const db=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit",lock:sbLock}});
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const flag=cc=>cc&&/^[A-Z]{2}$/.test(cc)?String.fromCodePoint(...[...cc].map(c=>0x1F1E6+c.charCodeAt(0)-65)):"🏳️";
@@ -473,7 +482,7 @@ function renderJoin(){
   <div class="steps">
    <div class="step"><h3>About you</h3>
     <label class="f">Name other players will see<input id="jName" maxlength="30" autocomplete="nickname" value="${esc(p.display_name||"")}"></label>
-    <label class="f" style="margin-top:8px">Date of birth (you must be 18 or over)<input id="jDob" type="date" max="${new Date().toISOString().slice(0,10)}"></label>
+    <label class="f" style="margin-top:8px">Date of birth (you must be 18 or over)<input id="jDob" type="date" max="${new Date().toISOString().slice(0,10)}"></label><p class="note" style="margin-top:4px">We only use it to check you're 18 or over. We don't keep your date of birth.</p>
     <label class="f" style="margin-top:8px">Country<select id="jCountry"><option value="">Choose…</option>${COUNTRIES.map(([c,n])=>`<option value="${c}">${flag(c)} ${n}</option>`).join("")}</select></label></div>
    <div class="step"><h3>Code of conduct</h3><ul style="margin:0 0 10px;padding-left:20px">${CONDUCT.slice(1).map(c=>`<li>${c}</li>`).join("")}</ul>
     <label class="check"><input type="checkbox" id="jc"> <b>I am 18 or over and I agree to all of this.</b></label></div>
@@ -516,7 +525,8 @@ function photoFail(img){img.onerror=()=>img.replaceWith(Object.assign(document.c
 async function renderStaff(){
   const pend=await db.rpc("v2_staff_pending");const box=$("stPending");
   if(pend.error){box.textContent=pend.error.message;return}
-  box.innerHTML=(pend.data||[]).map(r=>`<div class="item" data-id="${r.id}"><b>${flag(r.country)} ${esc(r.display_name)}</b> <span class="note">age ${r.age} · avg ${r.claimed_avg} · ${esc(r.discord_name?"Discord: "+r.discord_name:"email sign-up")}</span>
+  {const pc=$("stPendCard");if(pc)pc.hidden=!(pend.data||[]).length}
+  box.innerHTML=(pend.data||[]).map(r=>`<div class="item" data-id="${r.id}"><b>${flag(r.country)} ${esc(r.display_name)}</b> <span class="note">${r.age?"18+ checked":"age not checked"} · avg ${r.claimed_avg} · ${esc(r.discord_name?"Discord: "+r.discord_name:"email sign-up")}</span>
     ${safeLink(r.app_link)?`<div><a href="${esc(r.app_link)}" target="_blank" rel="noopener nofollow">${esc(r.app_name||"App")} profile ↗</a></div>`:""}
     <p class="note">Code to look for: <b>${esc(r.verify_code)}</b></p><img class="photo" data-path="${esc(r.setup_photo||"")}" alt="Board photo">
     <label class="f" style="margin-top:6px">Note (optional)<input class="stNote"></label>
@@ -1530,7 +1540,7 @@ rules:()=>`<h2>📜 The rules</h2><p class="note">Plain English. If anything her
 <h3>Arranging your match</h3><ul><li>Message your opponent on Discord within 72 hours, then tap <b>I've messaged my opponent</b>.</li>
 <li>If they don't reply within 72 hours, you win 5-0.</li><li>If neither of you arranges it by Sunday, the match is cancelled and nobody gets points.</li>
 <li>Can't make it? Tell a Chalker before the deadline. They can give you more time.</li></ul>
-<h3>Throw timer</h3><ul><li>League and tournament matches: 60 seconds to throw and enter your score.</li><li>Players who play seated: 120 seconds.</li><li>Friendlies: 120 seconds.</li><li>When time runs out you get a beep and a reminder. Nobody is penalised automatically.</li></ul>
+<h3>Throw timer</h3><ul><li>League and tournament matches: 60 seconds to throw and enter your score.</li><li>Players who turned on extra throw time: 120 seconds.</li><li>Friendlies: 120 seconds.</li><li>When time runs out you get a beep and a reminder. Nobody is penalised automatically.</li></ul>
 <h3>Video and voice scoring</h3><ul><li>Video is on for every online match.</li><li>If you use voice scoring, your video must be on.</li>
 <li>If the video drops, stop and wait. After 5 minutes without video, the match goes to a Chalker, who decides what happens.</li></ul>
 <h3>Results</h3><ul><li>One player sends the result. The other checks it within 48 hours, or it's accepted automatically.</li>
@@ -1543,11 +1553,11 @@ rules:()=>`<h2>📜 The rules</h2><p class="note">Plain English. If anything her
 accessibility:()=>`<h2>♿ Accessibility</h2><p>11 Darts is for every adult player (18 and over): any ability, standing or seated. If something gets in your way, tell us and we'll fix it.</p>
 <h3>What you can change</h3><ul><li><b>Aa</b> (top of every page): bigger text, high contrast, simple mode, captions, less movement and easier reading.</li>
 <li><b>?</b> (top of every page): tells you what to do next, and how to reach a person.</li>
-<li><b>Profile</b>: tick <i>I play seated</i> for extra throw time, or <i>Someone helps me score</i> if a helper enters your scores.</li>
+<li><b>Profile</b>: tick <i>I need extra throw time</i> for 120 seconds per throw (no reason needed), or <i>Someone helps me score</i> if a helper enters your scores.</li>
 <li>The caller says every score out loud, and captions show it on screen. Your phone buzzes when it's your turn.</li>
 <li>Score with a laptop keyboard: type the score and press Enter. D for darts at a double, U to undo.</li>
 <li>Joining: tick <i>I'd like extra help</i> to fill the form in one step at a time.</li></ul>
-<h3>Seated and wheelchair players</h3><p>Same board, same height, same rules. Seated players get 120 seconds per throw instead of 60, to collect darts and enter the score.</p>
+<h3>Extra throw time</h3><p>Same board, same height, same rules. Anyone who needs longer, for example to collect darts from a chair, can turn on extra throw time in Profile and gets 120 seconds per throw instead of 60. You don't have to tell us why.</p>
 <h3>Still to come</h3><ul><li>Voice scoring: say "one forty" and it's entered.</li><li>Dutch, German and Polish.</li><li>Better support for screen readers (VoiceOver and TalkBack).</li></ul>
 <h3>Tell us</h3><p>Ask in our Discord help channel or email <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a>. We aim to reply within 3 days.</p>
 <p class="note">We test the site with older players. Last checked: November 2026.</p>`,
@@ -1555,19 +1565,28 @@ legal:()=>`<h2>⚖️ Terms and privacy</h2><p class="note">Plain English. Last 
 <h3>Who we are</h3><p>11 Darts is a free online darts league run by Jon as a hobby. It isn't a company. Contact: <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a>.</p>
 <h3>Using the site</h3><ul><li>It's free. Donations are optional and don't buy you anything.</li><li>You must be 18 or over.</li><li>Follow the rules and the code of conduct. Breaking them can get you banned.</li>
 <li>We try to keep the site running but can't promise it'll always work. Don't rely on it for anything important.</li><li>We can change these terms. Big changes are announced on Discord.</li></ul>
-<h3>What we keep about you, and why</h3><table><tr><th class="l">What</th><th class="l">Why</th><th class="l">How long</th></tr>
-<tr><td class="l">Email, or Discord name and ID</td><td class="l">To sign you in</td><td class="l">Until you leave</td></tr>
-<tr><td class="l">Display name, country, average, caller name, emblem</td><td class="l">To run the league and show tables</td><td class="l">Until you leave</td></tr>
-<tr><td class="l">Date of birth</td><td class="l">To check you're 18 or over</td><td class="l">Until you leave</td></tr>
-<tr><td class="l">Board photo with your code</td><td class="l">To prove you're a real player</td><td class="l">Deleted when a Chalker decides</td></tr>
-<tr><td class="l">Results, stats, training and screenshots of results</td><td class="l">Tables, leaderboards and your progress</td><td class="l">Until you leave</td></tr>
-<tr><td class="l">Reports and blocks</td><td class="l">To keep everyone safe</td><td class="l">Up to 2 years</td></tr>
-<tr><td class="l">Seated or helper-scoring setting</td><td class="l">Extra time, and so your opponent knows</td><td class="l">Until you change it</td></tr></table>
+<h3>Who looks after your data</h3><p>Jon runs 11 Darts and decides how your data is used (the "data controller"). Jon is also the safeguarding lead. Contact: <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a>.</p>
+<h3>What we keep about you, why, and the legal reason</h3><table><tr><th class="l">What</th><th class="l">Why</th><th class="l">Legal reason</th><th class="l">How long</th></tr>
+<tr><td class="l">Email, or Discord or Google name and ID</td><td class="l">To sign you in</td><td class="l">Running the league you joined</td><td class="l">Until you leave, or 2 years without signing in</td></tr>
+<tr><td class="l">Display name, country, time zone, average, scoring app, avatar, caller name, emblem</td><td class="l">To run the league, tables and leaderboards</td><td class="l">Running the league</td><td class="l">Until you leave</td></tr>
+<tr><td class="l">Date of birth</td><td class="l">To check you're 18 or over</td><td class="l">Keeping the league adults-only</td><td class="l">Not kept. We only keep that you're 18 or over</td></tr>
+<tr><td class="l">Board photo with your code</td><td class="l">To check you're a real player</td><td class="l">Stopping fake accounts</td><td class="l">Deleted when a Chalker decides</td></tr>
+<tr><td class="l">Results, stats, training, screenshots of results</td><td class="l">Tables, leaderboards and your progress</td><td class="l">Running the league</td><td class="l">Kept for league history. If you leave, your name is removed</td></tr>
+<tr><td class="l">Friends, challenges and their messages, tournament entries</td><td class="l">So you can play people you know</td><td class="l">Running the league</td><td class="l">Until you leave</td></tr>
+<tr><td class="l">Contact details you share to arrange a match</td><td class="l">So you and your opponent can agree a time</td><td class="l">Running the league</td><td class="l">Cleared once the match is confirmed</td></tr>
+<tr><td class="l">Extra throw time or helper-scoring setting (no reason asked)</td><td class="l">Longer throw timer, and so your opponent knows</td><td class="l">Running the league</td><td class="l">Until you change it</td></tr>
+<tr><td class="l">Notifications, phone alerts and email settings</td><td class="l">To send the alerts you chose</td><td class="l">Your choice: turn them off in Profile</td><td class="l">90 days, or until you clear them</td></tr>
+<tr><td class="l">Reports, blocks, bans, appeals, staff notes and the log of staff decisions</td><td class="l">To keep players safe and decisions fair</td><td class="l">Keeping players safe</td><td class="l">2 years after they're closed</td></tr>
+<tr><td class="l">Feedback you send us</td><td class="l">To improve the site</td><td class="l">Improving the site</td><td class="l">Until it's dealt with</td></tr></table>
+<p><b>On Discord</b> we post results, league tables, big finishes and tournament winners with your display name and stats. When you join, staff see your display name, country and average. We never post your email or photos.</p>
 <p><b>Video and voice</b> go straight between you and your opponent. We don't record or store them. Sometimes the stream passes through Cloudflare to connect you; it stays encrypted.</p>
 <p><b>Screenshots you scan</b> are read on your own phone. Only the numbers you confirm are sent.</p>
-<h3>Who else handles it</h3><ul><li>Supabase: our database and sign-in.</li><li>GitHub: hosts the site.</li><li>Cloudflare: helps video connect.</li><li>Google Fonts and jsDelivr: load fonts and the screenshot reader. They see your internet address.</li><li>Discord: if you sign in with it.</li></ul>
+<p><b>Decisions made by the system:</b> at the start of a season players are placed in divisions by 3-dart average. A Chalker can move you if it looks wrong. Nothing else is decided about you automatically.</p>
+<h3>Who else handles it for us</h3><ul><li>Supabase: our database and sign-in (London).</li><li>GitHub: hosts the site (USA).</li><li>Google: sends our emails (Gmail), Google sign-in, and fonts (USA).</li><li>Discord: sign-in if you use it, and our community server (USA).</li><li>Cloudflare: helps video connect (worldwide).</li><li>jsDelivr: loads the screenshot reader. It sees your internet address.</li></ul>
+<p>Some of these are in the USA. Those transfers are covered by the UK-US data bridge or the company's standard UK data protection contracts. Our database host keeps internet addresses in its logs for a few days.</p>
 <p>We never sell your data and there are no adverts.</p>
-<h3>Your rights</h3><p>Ask us to see, correct or delete your data at any time. Email <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a> and we'll reply within a month. Not happy? Complain to the Information Commissioner's Office (ico.org.uk).</p>
+<h3>Your rights</h3><p>You can ask to see, correct or delete your data, to object to how we use it, or to get a copy. Email <a href="mailto:11.darts.jon@gmail.com">11.darts.jon@gmail.com</a> and we'll reply within a month.</p>
+<p><b>Complaints about your data:</b> tell us by email, on Discord or with Menu, then Report something privately. We'll confirm we've got it within 30 days, look into it, and tell you the outcome. If you're still not happy, you can complain to the Information Commissioner's Office at ico.org.uk.</p>
 <h3>Names of other apps</h3><p>DartCounter, Autodarts and Dartsmind belong to their owners. We only use the names so you can say which scoring app you use and link to your profile there. 11 Darts is not linked to, approved by or sponsored by them, or by any darts body or darts maker.</p>
 <h3>Cookies</h3><p>No tracking cookies and no adverts. Your phone stores your sign-in and your display settings so the site works. That's all, so there's no cookie pop-up.</p>`,
 support:()=>`<h2>💬 Help and support</h2><p>Stuck? A real person will help.</p>
@@ -1616,7 +1635,7 @@ const _renderMeA=renderMe;renderMe=function(){_renderMeA();const box=$("mine");i
    <h3>Caller and access</h3>
    <label class="f">Name the caller says<input id="acName" maxlength="16" value="${esc(me.caller_name||"")}" placeholder="${esc(callName(ME.id))}"></label>
    <p class="note">Letters only, up to 16. Leave it empty to use your first name. Keep it friendly: Chalkers reset names that could offend anyone.</p>
-   <label class="check big"><input type="checkbox" id="acSeat" ${me.seated?"checked":""}><span><b>I play seated</b> (wheelchair or chair)<br><span class="note">You get 120 seconds per throw in league matches instead of 60. Same board, same rules.</span></span></label>
+   <label class="check big"><input type="checkbox" id="acSeat" ${me.seated?"checked":""}><span><b>I need extra throw time</b><br><span class="note">You get 120 seconds per throw in league matches instead of 60. You don't need to say why, and we don't ask. Your opponent just sees "Extra time".</span></span></label>
    <label class="check big"><input type="checkbox" id="acHelp" ${me.helper_scoring?"checked":""}><span><b>Someone helps me score</b><br><span class="note">A partner, carer or friend enters your scores. Your opponent sees "🤝 Helper scores".</span></span></label>
    <div class="row"><button class="btn primary" id="acSave">Save emblem and access</button><button class="btn" id="acDisp">Aa Display settings</button></div><p class="err" id="acErr"></p>`;box.appendChild(d);
   const prev=()=>{$("emPrev").innerHTML=`<span class="av em" style="width:72px;height:72px">${emblemSVG(S+":"+C,lv.l,72)}</span>`};prev();
@@ -1631,7 +1650,7 @@ const _renderMeA=renderMe;renderMe=function(){_renderMeA();const box=$("mine");i
 // ---------- profile view: badges, caller name, report/reset ----------
 const _renderProfileA=renderProfile;renderProfile=function(){_renderProfileA();const p=PLAYERS.find(x=>x.id===PROF);const box=$("profOut");if(!p||!box||box.querySelector(".acinfo"))return;
   const h=box.querySelector("h2");const info=document.createElement("div");info.className="acinfo note";const lv=levelOf(p.id);
-  info.innerHTML=`Level ${lv.l} · ${lv.n} match${lv.n===1?"":"es"} · Caller says "<b>${esc(callName(p.id))}</b>"${p.seated?' · <span class="pill">♿ Plays seated</span>':""}${p.helper_scoring?' · <span class="pill">🤝 Helper scores</span>':""}`;
+  info.innerHTML=`Level ${lv.l} · ${lv.n} match${lv.n===1?"":"es"} · Caller says "<b>${esc(callName(p.id))}</b>"${p.seated?' · <span class="pill">⏱ Extra time</span>':""}${p.helper_scoring?' · <span class="pill">🤝 Helper scores</span>':""}`;
   const pp=h&&h.nextElementSibling;(pp||h||box).after(info);
   const staff=STATE&&STATE.profile&&["chalker","admin"].includes(STATE.profile.role);const canAct=ME&&STATE&&!["new","pending","banned"].includes(STATE.profile.status)&&ME.id!==p.id;
   if(p.caller_name&&(staff||canAct)){const b=document.createElement("button");b.className="btn";b.style.cssText="padding:6px 10px;font-size:12px;margin-top:6px";
@@ -1643,7 +1662,7 @@ const _renderProfileA=renderProfile;renderProfile=function(){_renderProfileA();c
 // ---------- scorer: helper/seated tags for the opponent ----------
 const _renderScorerA=renderScorer;renderScorer=function(){_renderScorerA();if(!SC||!SC.m)return;const card=document.querySelector("#scOut .card");if(!card)return;
   card.querySelectorAll(".score2 .side").forEach((el,i)=>{const id=i?SC.m.player_b:SC.m.player_a;if(el.querySelector(".actag"))return;const p=PLAYERS.find(x=>x.id===id);if(!p)return;
-    const t=[p.helper_scoring?"🤝 Helper scores":"",p.seated?"♿ Seated: 120s":""].filter(Boolean).join(" · ");if(!t)return;const s=document.createElement("div");s.className="actag note";s.textContent=t;const nm=el.querySelector(".nm");(nm||el.firstChild).after(s)})};
+    const t=[p.helper_scoring?"🤝 Helper scores":"",p.seated?"⏱ Extra time: 120s":""].filter(Boolean).join(" · ");if(!t)return;const s=document.createElement("div");s.className="actag note";s.textContent=t;const nm=el.querySelector(".nm");(nm||el.firstChild).after(s)})};
 
 // ---------- add to calendar ----------
 function icsDate(d){return d.toISOString().replace(/[-:]/g,"").replace(/\.\d{3}/,"")}
@@ -1841,7 +1860,7 @@ function renderTourn(){const out=$("tOut");if(!out)return;const t=TOURNS.find(x=
   let h=`<div class="card"><button class="btn" id="tBack" style="padding:6px 10px;font-size:12px">← Back</button><h2 style="margin-top:12px">🏆 ${esc(t.name)}</h2>
    <p><span class="pill">${T_ST[t.status]||t.status}</span> ${tWhen(t)} <span class="note">(19:30 UK time)</span></p>${t.note?`<p class="note">${esc(t.note)}</p>`:""}
    ${t.champion?`<p style="font-size:20px">🥇 Champion: <b>${nameLink(t.champion)}</b></p>`:""}
-   <p class="note">One night. Groups of up to 6, best of 3 legs, top 2 go through. Quarter-finals best of 3, semis best of 5, final best of 7. 60 seconds per throw (120 seated).</p>
+   <p class="note">One night. Groups of up to 6, best of 3 legs, top 2 go through. Quarter-finals best of 3, semis best of 5, final best of 7. 60 seconds per throw (120 with extra time).</p>
    ${t.status==="open"?`<p><b>${ent.length}</b> entered${ent.length?": "+ent.map(id=>nameLink(id)).join(", "):""}</p>${before?`<button class="btn ${tIn(t.id)?"":"primary"}" data-tent="${t.id}" data-in="${tIn(t.id)?0:1}">${tIn(t.id)?"Leave this tournament":"Enter this tournament"}</button>`:'<p class="note">Entries closed. Waiting for the draw.</p>'}`:""}
    <div class="row" id="tStaff" style="margin-top:10px"></div><p class="err" id="tErr"></p></div>`;
   // knockouts
@@ -3056,7 +3075,7 @@ function askOpen(){let path=null;const p=document.createElement("div");p.classNa
 async function askStaff(){const box=$("stTop");if(!box)return;const {data,error}=await db.rpc("v2_staff_play_requests");if(error)return;const rows=data||[];let c=$("askCard");
   if(!c){c=document.createElement("div");c.className="card";c.id="askCard"}const ov=box.firstElementChild;if(ov&&c.previousElementSibling!==ov)ov.after(c);else if(!ov)box.prepend(c);
   c.innerHTML=`<h2>Asked to play${rows.length?` <span class="pill bad">${rows.length}</span>`:""}</h2><p class="note">These players have joined and can train. Accept them to put them in the holding pen and let them play friendlies and the Cup. Check the screenshot of their average if they sent one.</p>`+
-    (rows.map(x=>`<div class="item" data-id="${x.id}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
+    (rows.map(x=>`<div class="item" data-id="${x.id}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">${x.age?"18+ checked":"age not checked"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
       ${x.photo?`<img class="photo" data-path="${esc(x.photo)}" alt="Screenshot of their average">`:'<p class="note">No screenshot sent.</p>'}
       <label class="f" style="margin-top:6px">Note to the player if you reject (optional)<input class="askNote" maxlength="200"></label>
       <div class="row" style="margin-top:8px"><button class="btn primary" data-askok="1">Accept</button><button class="btn" data-askok="0">Reject</button></div><p class="err"></p></div>`).join("")||'<p class="note">Nobody waiting.</p>');
@@ -3218,7 +3237,7 @@ askOpen=async function(){let path=null;const p=document.createElement("div");p.c
 askStaff=async function(){const box=$("stTop");if(!box)return;const {data,error}=await db.rpc("v2_staff_play_requests");if(error)return;const rows=data||[];let c=$("askCard");
   if(!c){c=document.createElement("div");c.className="card";c.id="askCard"}const ov=box.firstElementChild;if(ov&&c.previousElementSibling!==ov)ov.after(c);else if(!ov)box.prepend(c);
   c.innerHTML=`<h2>Asked to play${rows.length?` <span class="pill bad">${rows.length}</span>`:""}</h2><p class="note">Check the photo shows a real board <b>and</b> the player's code. If either is missing, reject with a note so they can send a new one.</p>`+
-    (rows.map(x=>`<div class="item" data-id="${x.id}" data-photo="${esc(x.photo||"")}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">age ${x.age??"?"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
+    (rows.map(x=>`<div class="item" data-id="${x.id}" data-photo="${esc(x.photo||"")}"><b>${flag(x.country)} ${esc(x.name)}</b> <span class="note">${x.age?"18+ checked":"age not checked"} · says ${x.avg??"no average"}${x.discord?" · Discord: "+esc(x.discord):""}</span>
       <p style="margin:8px 0 4px">Code to look for: <span class="codebig sm">${esc(x.code||"?")}</span></p>
       ${x.photo?`<img class="photo" data-path="${esc(x.photo)}" alt="Board photo from ${esc(x.name)}">`:'<p class="err">No photo. Reject and ask them to send one.</p>'}
       <label class="f" style="margin-top:6px">Note to the player if you reject (optional)<input class="askNote" maxlength="200" placeholder="e.g. We can't see your code in the photo"></label>
