@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-c3xK8lrNvT00RBhecytD3aQ3noXjSuLMwyRGmscHynQ=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-7chZVY6e/TpJh07APix67GJnjaGgN2mvr72WmxzTzI0=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -465,7 +465,7 @@ function renderMe(){
     const s=$("mSave");if(s)s.onclick=async()=>{const {error}=await db.rpc("v2_update_me",{p_tz:Intl.DateTimeFormat().resolvedOptions().timeZone,p_app:$("mApp").value,p_app_link:$("mLink").value.trim(),p_opt_out:$("mOpt").checked});$("mErr").textContent=error?error.message:"";if(!error){$("mErr").innerHTML='<span class="okmsg">Saved.</span>';load()}};
     $("out2").onclick=()=>db.auth.signOut();}
 }
-const CONDUCT=["I am 18 or over.","I will keep my camera on the board for every match.","I will play fair: no cheating, no fake scores and no fake accounts.","I will be respectful: no abuse, bullying, hate or harassment of any kind.","I will never share indecent images or behave indecently on camera or in chat.","I understand that serious breaches mean a permanent ban. If I think a ban is a mistake, I can ask on Discord within 14 days and an admin who wasn't involved will review it once.","I will reply to my opponent within 72 hours and play by Sunday, or tell a Chalker."];
+const CONDUCT=["I am 18 or over.","I will keep my camera on the board for every match.","I will play fair: no cheating, no fake scores and no fake accounts.","I will be respectful: no abuse, bullying, hate or harassment of any kind.","I will never share indecent images or behave indecently on camera or in chat.","I understand that serious breaches mean a permanent ban. If I think a ban is a mistake, I can appeal on the site (it shows when I sign in) or on Discord within 14 days, and an admin who wasn't involved will review it once.","I will reply to my opponent within 72 hours and play by Sunday, or tell a Chalker."];
 let photoPath=null,JUST_JOINED=false;
 function renderJoin(){
   const d=STATE,p=d.profile;if($("join").dataset.built==="1")return;$("join").dataset.built="1";
@@ -1360,8 +1360,9 @@ function renderBottom(){let b=$("bottomLinks");if(!b){b=document.createElement("
 const _renderPlayFun=renderPlay;renderPlay=function(){_renderPlayFun();const sel=$("frTo");if(!sel||$("frSearch"))return;
   const s=document.createElement("input");s.id="frSearch";s.placeholder="Type a name to find them…";s.autocomplete="off";s.style.marginBottom="6px";sel.before(s);
   s.oninput=()=>{const q=s.value.trim().toLowerCase();let first=null;[...sel.options].forEach(o=>{if(!o.value)return;const hit=!q||o.textContent.toLowerCase().includes(q);o.hidden=!hit;if(hit&&!first)first=o});if(q&&first)sel.value=first.value};
-  const card=sel.closest(".card");if(!card)return;const g=document.createElement("div");
-  g.innerHTML=`<h3>Not on 11 Darts?</h3><p class="note">Play a mate (or your dad) on this phone. It goes on your profile as a friendly, not theirs.</p>
+  const card=sel.closest(".card");if(!card)return;const g=document.createElement("div");g.id="gBox";
+  const h=document.createElement("h3");h.textContent="Someone on 11 Darts";s.before(h);
+  g.innerHTML=`<h3>Someone not on 11 Darts</h3><p class="note">Type their name and play them on this phone. It goes on your profile as a friendly, not theirs.</p>
    <div class="row"><label class="f">Their name<input id="gName" maxlength="30" placeholder="e.g. Dad"></label><label class="f">First to<select id="gFt"><option>1</option><option selected>3</option><option>5</option></select></label><label class="f">Game<select id="gSt"><option selected>501</option><option>301</option></select></label></div>
    <div class="row"><button class="btn primary" id="gGo">Start on this phone</button></div><p class="err" id="gErr"></p>`;card.appendChild(g);
   $("gGo").onclick=()=>{const n=$("gName").value.trim();if(n.length<1){$("gErr").textContent="Give them a name. 'Dad' is fine.";return}
@@ -2459,7 +2460,7 @@ renderMe=function(){const r=_mpRenderMe.apply(this,arguments);
 
 // --- drop-down sections (closed until tapped; the phone remembers which you opened) ---
 let FOLD_OPEN=new Set();try{FOLD_OPEN=new Set(JSON.parse(localStorage.getItem("11d-fold")||"[]"))}catch(_){}
-const FOLD_PLAY=[/^Play a friendly/i,/^Not on 11 Darts/i,/^Challenge someone/i];
+const FOLD_PLAY=[/^Challenge someone/i]; // 17 Nov: "Play a friendly" stays open so players can find it
 const FOLD_ME=[/^My settings/i,/^Display name/i,/^Your emblem/i,/^Caller and access/i,/^Match graph/i,/^Results/i,/^Training$/i,/^Calling cards/i,/Emails$/i,/^Add 11 Darts to your home screen/i];
 function foldSave(){try{localStorage.setItem("11d-fold",JSON.stringify([...FOLD_OPEN]))}catch(_){}}
 function foldOne(h){if(h.dataset.fold)return;const key=h.textContent.replace(/\s+\d+\s*of\s*\d+.*$/,"").trim();
@@ -2489,7 +2490,7 @@ const _kbRenderScorer=renderScorer;renderScorer=function(){if(typeof KB!=="undef
 async function stReports(){const sb=$("stSafety");if(!sb)return;const h=[...sb.querySelectorAll("h3")].find(x=>/^Reports/.test(x.textContent));if(!h)return;
   const s=await db.rpc("v2_staff_safety");if(s.error)return;const all=s.data.reports||[],open=all.filter(r=>(r.status||"open")==="open"),adm=!!(STATE&&STATE.profile&&STATE.profile.role==="admin");
   h.textContent=`Open reports (${open.length})`;let list=h.nextElementSibling;if(!list||!list.classList.contains("list")){list=document.createElement("div");list.className="list";h.after(list)}
-  list.innerHTML=open.map(r=>`<div class="item" data-rid="${r.id}">${r.times_reported>1?`<span class="pill bad">🚩 Reported ${r.times_reported} times</span> `:""}<b>${esc(r.reporter||"?")}</b> about <b>${esc(r.about||"general")}</b> <span class="note">${new Date(r.at).toLocaleString("en-GB")}</span>
+  list.innerHTML=open.map(r=>r.kind==="appeal"?appealRow(r,adm):`<div class="item" data-rid="${r.id}">${r.times_reported>1?`<span class="pill bad">🚩 Reported ${r.times_reported} times</span> `:""}<b>${esc(r.reporter||"?")}</b> about <b>${esc(r.about||"general")}</b> <span class="note">${new Date(r.at).toLocaleString("en-GB")}</span>
     <p>${esc(r.details||"")}</p>${(r.evidence||[]).map(p=>`<img class="photo" data-ev="${esc(p)}" alt="Evidence">`).join("")}
     <label class="f" style="margin-top:6px">What did you do? (optional)<input class="rpOut" maxlength="200" placeholder="e.g. Spoke to both players, no further action"></label>
     <div class="row" style="margin-top:6px"><button class="btn" data-rclose="${r.id}">Close report</button>${adm&&r.about_id&&r.about_status!=="banned"?`<button class="btn danger" data-rerase="${r.about_id}">Remove ${esc(r.about||"player")} and all their data</button>`:""}</div><p class="err"></p></div>`).join("")||'<p class="note">No open reports.</p>';
@@ -2963,16 +2964,13 @@ CARDS.push(["penking","👑","King of the Holding Pen","Finished top of the hold
 (function(){const sec=$("v-training");if(sec&&!$("trSocial")){const d=document.createElement("div");d.id="trSocial";d.style.cssText="display:grid;gap:14px;margin-bottom:14px";sec.prepend(d)}})();
 const SOCIAL_RE=/^(Play a friendly|Challenges)/;
 (function(){const _r=renderPlay;renderPlay=function(){const r=_r.apply(this,arguments);try{socialMove()}catch(e){console.warn(e)}return r}})();
-function socialMove(){const out=$("playOut"),soc=$("trSocial");if(!out||!soc)return;
+function socialMove(){const out=$("playOut");if(!out)return;
+  // 17 Nov: friendlies and challenges live on Play again (under Your matches). Clear anything an older version moved to Training.
+  const soc=$("trSocial");if(soc)soc.querySelectorAll(".card.social").forEach(c=>c.remove());const sp=$("socPtr");if(sp)sp.remove();
   const cards=[...out.querySelectorAll(":scope > .card")].filter(c=>SOCIAL_RE.test(((c.querySelector("h2")||{}).textContent||"").trim()));
-  if(!cards.length)return;soc.querySelectorAll(".card.social").forEach(c=>c.remove());
-  const fc=$("friendsCard");cards.forEach(c=>{c.classList.add("social");if(fc)soc.insertBefore(c,fc.nextSibling&&fc.nextSibling.classList&&fc.nextSibling.classList.contains("social")?null:fc.nextSibling);else soc.appendChild(c)});
-  // keep them in order after the Friends card
-  const order=[$("friendsCard"),...[...soc.querySelectorAll(".card.social")]].filter(Boolean);order.forEach(c=>soc.appendChild(c));
-  const inv=(CHALL||[]).filter(c=>ME&&c.to_id===ME.id&&c.status==="pending").length;
-  if(!$("socPtr")){const p=document.createElement("div");p.id="socPtr";p.className="card";out.appendChild(p)}
-  $("socPtr").innerHTML=`<h2>Friendlies and challenges</h2><p class="note">These are on the Training page now, with your friends list.${inv?` <b>You have ${inv} invite${inv>1?"s":""} waiting.</b>`:""}</p><div class="row"><button class="btn ${inv?"primary":""}" id="socGo">Go to Training</button></div>`;
-  $("socGo").onclick=()=>show("training")}
+  cards.forEach(c=>c.classList.add("social"));
+  const yours=[...out.querySelectorAll(":scope > .card")].find(c=>/^Your matches/.test(((c.querySelector("h2")||{}).textContent||"").trim()));
+  if(yours)cards.slice().reverse().forEach(c=>yours.after(c))}
 (function(){const _t=renderTraining;renderTraining=function(){const r=_t.apply(this,arguments);try{const soc=$("trSocial");if(!soc)return r;
   const inDrill=(typeof DRILL!=="undefined"&&DRILL)||(typeof TRMODE!=="undefined"&&TRMODE);soc.hidden=!!inDrill||!ME||!isMember();if(soc.hidden)return r;
   friendsCard();if(CUR==="training"){const cur=CUR;renderPlay();CUR=cur}}catch(e){console.warn(e)}return r}})();
@@ -3036,7 +3034,7 @@ function camCards(){const need=!!ME&&isMember()&&!camReady();
   [["camHome","memberHome"],["camPlay","playOut"],["camTr","trSocial"]].forEach(([id,host])=>{let c=$(id);const h=$(host);if(!need||!h){if(c)c.remove();return}
     if(!c){c=document.createElement("div");c.id=id;c.className="card mthome"}c.innerHTML=askHTML(id==="camHome"&&JUST_JOINED);
     if(h.firstElementChild!==c)h.prepend(c);const b=c.querySelector("[data-askgo]");if(b)b.onclick=askOpen});
-  const soc=$("trSocial");if(soc){soc.querySelectorAll(".card.social").forEach(c=>c.hidden=need);
+  {document.querySelectorAll(".card.social").forEach(c=>{const gb=c.querySelector("#gBox");if(gb){c.hidden=false;[...c.children].forEach(ch=>{if(ch.tagName!=="H2"&&ch!==gb)ch.hidden=need});return}c.hidden=need});
     ["frTo","chTo"].forEach(id=>{const s=$(id);if(s)[...s.options].forEach(o=>{const p=PLAYERS.find(x=>x.id===o.value);if(p&&!p.camera_ok_at)o.remove()})})}
   const sp=$("socPtr");if(sp)sp.hidden=need}
 (function(){const _p=renderPlay;renderPlay=function(){const r=_p.apply(this,arguments);try{camCards()}catch(_){}return r};
@@ -3126,7 +3124,7 @@ function omItems(){const mem=isMember(),staff=!$("staffTab").hidden;
   if(!mem){const dl=document.querySelector('footer a[href*="discord"]');
     return{play:null,you:[["home","Home"],["how","How it works"],ME?["out","Sign out"]:["signin","Sign in or join"],["page:rules","Rules"],["page:support","Help & support"],["page:legal","Terms & privacy"],["page:accessibility","Accessibility"]].concat(dl?[["discord","Our Discord"]]:[]).concat([["share","Share 11 Darts"]])}}
   const cup=omCup();
-  return{play:[["home","Home"],["play","Play"],["friends","Friendlies"],["training","Training"],["tables","Tables"],[cup?"tourn:"+cup.id:"play","Cup & tournaments"]],
+  return{play:[["home","Home"],["play","Play"],["friendlies","Friendlies"],["training","Training"],["tables","Tables"],[cup?"tourn:"+cup.id:"play","Cup & tournaments"]],
     you:[["me","Profile"],["progress","My progress"],["friends","Friends"],["notes","Notifications"]].concat(staff?[["staff","Chalkers","staff"]]:[]).concat([["help","Help"],["page:rules","Rules"],["share","Share 11 Darts"],["out","Sign out"]])}}
 function omIsCur(k){return k===CUR||(k==="tables"&&CUR==="division")||(k==="play"&&CUR==="scorer")||(k.startsWith("tourn:")&&CUR==="tourn")}
 function omOpen(){let w=$("omWrap");if(!w){w=document.createElement("div");w.id="omWrap";w.className="om";document.body.appendChild(w)}
@@ -3144,6 +3142,7 @@ function omGo(k){const back=k==="x";omClose();if(back){const mb=$("omBtn");if(mb
   if(k.startsWith("page:")){const a=document.querySelector(`footer a[data-page="${k.slice(5)}"]`);if(a)a.click();return}
   if(k==="notes"){const b=$("nBell");if(b&&!b.hidden){b.click();return}k="me"}
   if(k==="how"||k==="signin"){show("home");setTimeout(()=>{const e=$(k==="how"?"howItWorks":"gate");if(e)e.scrollIntoView({behavior:"smooth",block:"start"})},80);return}
+  if(k==="friendlies"){show("play");setTimeout(()=>{const c=[...document.querySelectorAll("#playOut .card")].find(x=>/^Play a friendly/.test((x.querySelector("h2")||{}).textContent||""));if(c)c.scrollIntoView({behavior:"smooth",block:"start"})},150);return}
   if(k==="friends"){show("training");setTimeout(()=>{const c=[...document.querySelectorAll("#trOut .card")].find(x=>/^Friends/.test((x.querySelector("h2")||{}).textContent||""));if(c)c.scrollIntoView({behavior:"smooth",block:"start"})},120);return}
   show(k)}
 document.addEventListener("keydown",e=>{if(e.key==="Escape"&&document.body.classList.contains("omOn"))omGo("x")});
@@ -3397,6 +3396,51 @@ async function bcChooser(code){return new Promise(res=>{const o=document.createE
   $("bcsApp").onclick=()=>{o.remove();res(false)};
   $("bcsForget").onclick=()=>{bcLsS(BCS_CAM,null);o.remove();res(false)}})}
 if(!BCAM&&savedCamPhone()){const _ld=load;let first=true;load=async function(){if(first){first=false;if(await bcChooser(savedCamPhone()))return}load=_ld;return _ld.apply(this,arguments)}}
+
+// ===================== 37 Private reports and ban appeals (17 Nov) =====================
+// Anyone signed in can report privately from the menu (about a player or not). It goes to Chalkers only; Discord gets a short alert with no details.
+function reportOpen(){if(!ME){toast11("Sign in first to send a private report.");return}
+  const p=document.createElement("div");p.className="reppop";p.setAttribute("role","dialog");p.setAttribute("aria-modal","true");p.setAttribute("aria-labelledby","rpTitle");
+  const opts=(PLAYERS||[]).filter(x=>x.id!==ME.id&&!["new"].includes(x.status)).sort((a,b)=>String(a.display_name).localeCompare(b.display_name)).map(x=>`<option value="${x.id}">${esc(x.display_name)}</option>`).join("");
+  p.innerHTML=`<div class="card"><h2 id="rpTitle">Report something privately</h2><p class="note">Only Chalkers and admins can read this. The player is not told who reported them.</p>
+    <label class="f">Who is it about? (optional)<select id="rpWho"><option value="">Not about one player</option>${opts}</select></label>
+    <label class="f">What kind of problem?<select id="rpKind"><option value="conduct">Behaviour or language</option><option value="cheating">Cheating or false scores</option><option value="safety">I feel unsafe</option><option value="other">Something else</option></select></label>
+    <label class="f">What happened?<textarea id="rpText" rows="5" maxlength="2000" placeholder="When it happened, which match, and what was said or done"></textarea></label>
+    <p class="note">If someone is in danger right now, call 999.</p>
+    <div class="row"><button class="btn primary" id="rpSend">Send to Chalkers</button><button class="btn" id="rpX">Cancel</button></div><p class="err" id="rpErr" aria-live="polite"></p></div>`;
+  document.body.appendChild(p);const close=()=>p.remove();$("rpX").onclick=close;p.addEventListener("keydown",e=>{if(e.key==="Escape")close()});$("rpText").focus();
+  $("rpSend").onclick=async()=>{const b=$("rpSend"),txt=$("rpText").value.trim();if(txt.length<10){$("rpErr").textContent="Tell us what happened (a sentence or two).";return}
+    b.disabled=true;b.textContent="Sending…";const {error}=await db.rpc("v2_report",{p_user:$("rpWho").value||null,p_kind:$("rpKind").value,p_details:txt,p_evidence:[]});
+    if(error){b.disabled=false;b.textContent="Send to Chalkers";$("rpErr").textContent=error.message;return}
+    close();toast11("Sent. A Chalker will look at it. Thank you.")}}
+(function(){const _i=omItems;omItems=function(){const r=_i.apply(this,arguments);if(ME&&r&&r.you){const at=r.you.findIndex(x=>x[0]==="help");r.you.splice(at>=0?at:r.you.length,0,["report","Report something privately"])}return r};
+  const _g=omGo;omGo=function(k){if(k==="report"){omClose();reportOpen();return}return _g.apply(this,arguments)}})();
+
+// Banned players see an appeal card when they sign in (once, within 14 days)
+async function appealCard(){const home=$("v-home");let c=$("appealCard");
+  if(!ME||!STATE||!STATE.profile||STATE.profile.status!=="banned"){if(c)c.remove();return}
+  const {data:a,error}=await db.rpc("v2_my_appeal");if(error||!a){if(c)c.remove();return}
+  if(!c){c=document.createElement("div");c.id="appealCard";c.className="card";home.prepend(c)}
+  const dl=a.deadline?new Date(a.deadline).toLocaleDateString("en-GB",{day:"numeric",month:"long"}):null;
+  c.innerHTML=a.appeal_status==="open"?`<h2>Your appeal has been sent</h2><p>An admin who wasn't involved in the ban will review it once. You'll see the decision here and in your notifications.</p>`
+    :a.appeal_status==="closed"?`<h2>Your appeal has been decided</h2><p>${esc(a.outcome||"")}</p>`
+    :a.can_appeal?`<h2>Appeal your ban</h2><p>Your account was closed for breaking the code of conduct. If you think that's a mistake, tell us why${dl?` by <b>${dl}</b>`:""}. An admin who wasn't involved will review it once.</p>
+      <label class="f">Why should the ban be lifted?<textarea id="apText" rows="5" maxlength="2000"></textarea></label>
+      <div class="row"><button class="btn primary" id="apSend">Send my appeal</button></div><p class="err" id="apErr" aria-live="polite"></p>`
+    :`<h2>Account closed</h2><p>The 14 days to appeal this ban have passed.</p>`;
+  const b=$("apSend");if(b)b.onclick=async()=>{const txt=$("apText").value.trim();if(txt.length<20){$("apErr").textContent="Tell us why in a couple of sentences.";return}
+    b.disabled=true;b.textContent="Sending…";const {error}=await db.rpc("v2_appeal",{p_details:txt});if(error){b.disabled=false;b.textContent="Send my appeal";$("apErr").textContent=error.message;return}appealCard()}}
+(function(){const _r=render;render=function(){const r=_r.apply(this,arguments);appealCard().catch(e=>console.warn(e));return r}})();
+
+// Chalkers: an appeal row. Only admins can decide, and the database refuses anyone who took part in the ban.
+function appealRow(r,adm){return `<div class="item" data-rid="${r.id}"><span class="pill gold">⚖️ Ban appeal</span> <b>${esc(r.reporter||"?")}</b> <span class="note">${new Date(r.at).toLocaleString("en-GB")}</span>
+  <p>${esc(r.details||"")}</p>${adm?`<label class="f">Reason for your decision (the player sees this)<input class="apNote" maxlength="180"></label>
+  <div class="row"><button class="btn primary" data-apdec="1">Lift the ban</button><button class="btn" data-apdec="0">Keep the ban</button></div>`:`<p class="note">An admin who wasn't involved in the ban decides this.</p>`}<p class="err"></p></div>`}
+document.addEventListener("click",async e=>{const b=e.target.closest("[data-apdec]");if(!b)return;const it=b.closest(".item");
+  if(b.dataset.armed!=="1"){it.querySelectorAll("[data-apdec]").forEach(x=>{x.dataset.armed="";x.textContent=x.dataset.apdec==="1"?"Lift the ban":"Keep the ban"});b.dataset.armed="1";b.textContent="Tap again to confirm";return}
+  b.disabled=true;const {error}=await db.rpc("v2_staff_appeal_decide",{p_id:+it.dataset.rid,p_overturn:b.dataset.apdec==="1",p_note:(it.querySelector(".apNote")||{}).value||""});
+  if(error){it.querySelector(".err").textContent=error.message;b.disabled=false;b.dataset.armed="";b.textContent=b.dataset.apdec==="1"?"Lift the ban":"Keep the ban";return}
+  toast11("Appeal decided.");stReports()});
 
 load();
 </script>
