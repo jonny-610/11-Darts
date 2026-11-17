@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-Siv05ZXY7ldO6ToLR0mpRs7YAcqKtXWdAE9XhtxwENM=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-c3xK8lrNvT00RBhecytD3aQ3noXjSuLMwyRGmscHynQ=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -351,7 +351,7 @@ body.ohMem #v-home .hero{display:none}
 
   <section id="v-staff" class="view" hidden>
     <div id="stTop" style="display:grid;gap:14px"></div>
-    <div class="card"><h2>Waiting for approval</h2><p class="note">Check the photo shows a dartboard with the player's code written on paper. The photo is removed as soon as you decide.</p><div class="list" id="stPending"></div></div>
+    <div class="card"><h2>Asked to play</h2><p class="note">Check the photo shows a dartboard with the player's code written on paper. The photo is removed as soon as you decide.</p><div class="list" id="stPending"></div></div>
     <div class="card"><h2>Blocks and reports</h2><p class="note">Every block starts a safeguarding check: read the reason, check on the person who blocked, and look at anyone blocked 3 or more times. Bans need two Chalkers or admins to agree.</p><div id="stSafety"></div></div>
   </section>
 </main>
@@ -361,6 +361,7 @@ body.ohMem #v-home .hero{display:none}
 <script>
 const SB_URL="https://gqtdhrlzyrhcdpuhjwov.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdxdGRocmx6eXJoY2RwdWhqd292Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTM3MTc1NjQsImV4cCI6MjEwOTI5MzU2NH0.GQD-eAb_pu-5izhpDoswshYS4a05JzBnm9pqKTDYNJ8";
 const H0=location.hash||"";
+const divLabel=tier=>{const d=(typeof DIVS!=="undefined"&&DIVS||[]).find(x=>x.tier===tier);return (d?d.name:"Division "+tier)+" channel · its results and weekly fixtures"};
 const db=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,detectSessionInUrl:true,flowType:"implicit"}});
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -782,7 +783,7 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
   const pl=await db.rpc("v2_staff_players");const players=pl.data||[];const divs=o.divisions||[];
   const divOpts=sel=>divs.map(d=>`<option value="${d.id}" ${d.id===sel?"selected":""}>${esc(d.name)} (${d.players}/${d.max})</option>`).join("");
   let settings={};if(adm){const s=await db.rpc("v2_admin_settings");settings=s.data||{}}
-  box.innerHTML=`<div class="card"><h2>Overview</h2><div class="kv"><div><b>${o.pending}</b><span>Waiting approval</span></div><div><b>${o.placement}</b><span>In placement</span></div><div><b>${o.active}</b><span>In divisions</span></div><div><b>${o.disputes}</b><span>Disputes</span></div><div><b>${o.awaiting}</b><span>Awaiting accept</span></div><div><b>${o.blocks_unreviewed}</b><span>Blocks to check</span></div><div><b>${o.reports_open}</b><span>Open reports</span></div></div>
+  box.innerHTML=`<div class="card"><h2>Overview</h2><div class="kv"><div><b>${o.pending}</b><span>Asked to play</span></div><div><b>${o.placement}</b><span>In holding pen</span></div><div><b>${o.active}</b><span>In divisions</span></div><div><b>${o.disputes}</b><span>Disputes</span></div><div><b>${o.awaiting}</b><span>Awaiting accept</span></div><div><b>${o.blocks_unreviewed}</b><span>Blocks to check</span></div><div><b>${o.reports_open}</b><span>Open reports</span></div></div>
      <p class="note">You are ${adm?"an <b>admin</b> (all powers)":"a <b>Chalker</b>. Seasons, roles and settings are for admins."}</p></div>
    <div class="card"><h2>Seasons</h2>${(o.seasons||[]).map(s=>`<div class="item"><b>${esc(s.name)}</b> · ${s.status} · starts ${new Date(s.start_date).toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"})} · ${s.weeks} weeks
        ${adm&&s.status==="planned"?`<div class="row" style="margin-top:6px"><button class="btn primary" data-start="${s.id}">Make fixtures and start</button></div><p class="note">Do this once every division has its players. Fixtures are hidden until each Monday.</p>`:""}<p class="err"></p></div>`).join("")||'<p class="note">No seasons.</p>'}
@@ -800,7 +801,7 @@ async function renderStaffTop(){const box=$("stTop");const r=await db.rpc("v2_st
         <label class="f">Founding Five number<select data-fno="${p.id}"><option value="">Not a founder</option>${[1,2,3,4,5].map(n=>`<option value="${n}" ${n===p.founder_no?"selected":""}>${n}</option>`).join("")}</select></label></div>
         <button class="btn" data-mng="${p.id}">Manage ${esc(p.display_name)}</button>`:`<p class="note" style="margin:4px 0 0">${dv?esc(dv.name):"Not in a division"}</p>`}</div>`}).join("")}</div><p class="err" id="plErr"></p><div id="mngBox"></div></div>
    ${adm?`<div class="card"><h2>Discord alerts</h2><p class="note">For each channel: in Discord, Edit Channel › Integrations › Webhooks › New Webhook › Copy Webhook URL, then paste it here and Save. If a box is left empty, its posts go to #results (or #darts-chat for tournaments) instead.</p>
-     ${["discord_results","discord_moments","discord_alerts","discord_tournaments","discord_general","discord_chalkers","discord_newcomers","discord_div1","discord_div2","discord_div3","discord_div4"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_results:"#results · result banners, Sunday tables",discord_moments:"#180s-and-big-finishes · 100+ checkouts, 170s, 9-darters",discord_alerts:"#league-alert · Monday fixtures, match nights, season start",discord_tournaments:"#tournaments · Cup start, knockouts, champion",discord_general:"#darts-chat · general news",discord_chalkers:"Private Chalkers channel · disputes, reports, feedback",discord_newcomers:"New joiners (private) · tells you when someone joins",discord_div1:"Titan Division gen-chat · its results and weekly fixtures",discord_div2:"Championship gen-chat · its results and weekly fixtures",discord_div3:"Division 1 gen-chat · its results and weekly fixtures",discord_div4:"Contender channel · its results and weekly fixtures"}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
+     ${["discord_results","discord_moments","discord_alerts","discord_tournaments","discord_general","discord_chalkers","discord_newcomers","discord_div1","discord_div2","discord_div3","discord_div4"].map(k=>`<div class="row" style="margin-bottom:6px"><label class="f">${{discord_results:"#results · result banners, Sunday tables",discord_moments:"#180s-and-big-finishes · 100+ checkouts, 170s, 9-darters",discord_alerts:"#league-alert · Monday fixtures, match nights, season start",discord_tournaments:"#tournaments · Cup start, knockouts, champion",discord_general:"#darts-chat · general news",discord_chalkers:"Private Chalkers channel · disputes, reports, feedback",discord_newcomers:"New joiners (private) · tells you when someone joins",discord_div1:divLabel(1),discord_div2:divLabel(2),discord_div3:divLabel(3),discord_div4:divLabel(4)}[k]} ${settings[k]?'<span class="pill ok">'+esc(settings[k])+"</span>":""}<input data-wh="${k}" placeholder="https://discord.com/api/webhooks/…"></label><button class="btn" data-whs="${k}">Save</button></div>`).join("")}
      <h3 style="margin-top:14px">Extra channels</h3><p class="note">20 spare webhook slots. Type a name so you know which channel it is (you can change it any time), paste the webhook, then Save. Leave the webhook box empty and Save to clear it.</p>
      ${Array.from({length:20},(_,i)=>i+1).map(n=>`<div class="item" style="margin-bottom:8px"><b>Slot ${n}</b> ${settings["discord_slot"+n]?'<span class="pill ok">'+esc(settings["discord_slot"+n])+"</span>":""}
        <div class="row" style="margin-top:6px"><label class="f">Name<input data-whn="${n}" maxlength="40" value="${esc(settings["whname_slot"+n]||"")}" placeholder="e.g. Nations Cup results"></label>
@@ -2213,8 +2214,12 @@ function notesCard(){const sec=$("v-me");if(!sec)return;let c=$("notesCard");
   const un=nUnread().length;
   c.innerHTML=`<h2>🔔 Notifications${un?` <span class="nbadge">${un}</span>`:""}</h2>
     <ul class="nlist">${nItems(NOTES.slice(0,20))}</ul>
-    <div class="row">${un?`<button class="btn" id="nAllRead">Mark all as read</button>`:""}<button class="btn" id="nToPlay">Go to Play</button>${$("staffTab").hidden?"":'<button class="btn" id="nToSt">Go to Chalkers</button>'}</div>`;const ns=$("nToSt");if(ns)ns.onclick=()=>{notesMarkRead();show("staff")};
-  const a=$("nAllRead");if(a)a.onclick=()=>notesMarkRead();$("nToPlay").onclick=()=>{notesMarkRead();show("play")}}
+    <div class="row">${un?`<button class="btn" id="nAllRead">Mark all as read</button>`:""}<button class="btn" id="nClear">Clear all</button><button class="btn" id="nToPlay">Go to Play</button>${$("staffTab").hidden?"":'<button class="btn" id="nToSt">Go to Chalkers</button>'}</div>`;const ns=$("nToSt");if(ns)ns.onclick=()=>{notesMarkRead();show("staff")};
+  const a=$("nAllRead");if(a)a.onclick=()=>notesMarkRead();$("nToPlay").onclick=()=>{notesMarkRead();show("play")};
+  const cl=$("nClear");if(cl)cl.onclick=async()=>{if(cl.dataset.armed!=="1"){cl.dataset.armed="1";cl.textContent="Tap again to clear all";setTimeout(()=>{if(cl.isConnected){cl.dataset.armed="";cl.textContent="Clear all"}},5000);return}
+    cl.disabled=true;cl.textContent="Clearing…";const {error}=await db.rpc("v2_notes_clear");
+    if(error){cl.disabled=false;cl.dataset.armed="";cl.textContent="Clear all";toast11("Couldn't clear your notifications. Check your signal and try again.");return}
+    NOTES=[];notesBadge();notesCard();toast11("Notifications cleared.")}}
 function notesPop(un){let o=$("nPop");if(!o){o=document.createElement("div");o.id="nPop";o.className="npop";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-labelledby","nPopH");document.body.appendChild(o)}
   const more=un.length-5;
   o.innerHTML=`<div class="card"><h2 id="nPopH">🔔 While you were away</h2><ul class="nlist">${nItems(un.slice(0,5))}</ul>
@@ -2745,7 +2750,7 @@ document.addEventListener("click",e=>{const t=e.target.closest&&e.target.closest
     if(!SC.st.legs.some(l=>l.visits.length)){SC.st.first_to=f.first_to;SC.st.set_legs=f.set_legs;SC.st.draw=false}}}catch(_){}return _r.apply(this,arguments)}})();
 
 // ---------- 14. Chalkers overview: tap a tile to jump to that part of the page ----------
-const OV_GO=[[/Waiting approval/i,/^Waiting for approval/i],[/In placement/i,/^Ready to place/i],[/In divisions/i,/^Players$/i],[/Disputes/i,/^Disputes$/i],
+const OV_GO=[[/Asked to play/i,/^Asked to play/i],[/In holding pen/i,/^Ready to place/i],[/In divisions/i,/^Players$/i],[/Disputes/i,/^Disputes$/i],
   [/Awaiting accept/i,/^Matches to be played/i],[/Blocks/i,/^Blocks and reports/i],[/Open reports/i,/^Open reports|^Blocks and reports/i]];
 (function(){const st=document.createElement("style");st.textContent=`
 #v-staff .card{scroll-margin-top:96px}.ovgo{cursor:pointer;transition:transform .1s}.ovgo:hover,.ovgo:focus-visible{outline:3px solid var(--accent);outline-offset:2px}.ovgo:active{transform:scale(.97)}
@@ -3171,7 +3176,7 @@ function ocheHome(){const h=$("v-home");if(!h)return;const mem=isMember()&&!!ME;
     <button data-oh="training"><span class="ohIc">${OM_SVG.target}</span><span><b>Training</b><small>Drills on your own</small></span></button>
     <button data-oh="training"><span class="ohIc">${OM_SVG.bolt}</span><span><b>The Punisher</b><small>Beat the computer</small></span></button>
    </div>
-   <button class="ohShare" data-oh="share">${OM_SVG.share}Share 11 Darts with a mate</button>`;
+   <button class="ohShare" data-oh="share">${OM_SVG.share}Share 11 Darts</button>`;
   o.querySelectorAll("[data-oh]").forEach(b=>b.onclick=()=>omGo(b.dataset.oh));
   if(h.firstElementChild!==o)h.prepend(o);["pushHome","camHome"].forEach(id=>{const c=$(id);if(c&&c.parentElement===h)o.after(c)});
   const sr=$("shareRow");if(sr)sr.hidden=true;try{hydrateAvatars()}catch(_){}}
