@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-r21uflFV3HDiu1uEeuASIdELowvEmrik+gNKPnZmnAU=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-X77tVYzGl7wzIE5UishZhbBbjzaseKi8Mh9XfsIjK9k=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -1013,16 +1013,22 @@ let CALLER=true;try{CALLER=localStorage.getItem("11d-caller")!=="0"}catch(_){}
 let SAID=null;
 const ONES=["","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"],TENS=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
 function words(n){if(n===0)return "no score";if(n<20)return ONES[n];if(n<100)return TENS[Math.floor(n/10)]+(n%10?"-"+ONES[n%10]:"");return ONES[Math.floor(n/100)]+" hundred"+(n%100?" and "+words(n%100):"")}
+// Jon's recorded voice (files in /voice). Falls back to the computer voice if a clip is missing.
+let VTOK=0,VAU=null;
+function vTts(t){return new Promise(res=>{if(!("speechSynthesis" in window)||!t)return res();try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=0.95;u.pitch=0.9;const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang));if(v)u.voice=v;u.onend=u.onerror=()=>res();speechSynthesis.speak(u);setTimeout(res,6000)}catch(_){res()}})}
+function vClip(k,t){return new Promise(res=>{try{const a=new Audio("/voice/"+k+".mp3");VAU=a;let done=false;const fin=ok=>{if(done)return;done=true;ok?res():vTts(t).then(res)};a.onended=()=>fin(true);a.onerror=()=>fin(false);a.play().catch(()=>fin(false));setTimeout(()=>fin(true),8000)}catch(_){vTts(t).then(res)}})}
+async function vSay(parts,cap){caption(cap);if(!CALLER)return;const tok=++VTOK;try{if(VAU)VAU.pause();speechSynthesis.cancel()}catch(_){}
+  for(const p of parts){if(tok!==VTOK)return;await (p.k?vClip(p.k,p.t):vTts(p.t))}}
 function say(t){caption(t);if(!CALLER||!("speechSynthesis" in window))return;try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=0.95;u.pitch=0.9;const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(_){}}
 let ANN_ID=null;
 function callLast(){if(!SC)return;const st=SC.st;
-  if(st.legs.length===1&&!st.legs[0].visits.length&&!st.done&&ANN_ID!==SC.m.id){const f=turnOf(st.legs[0]);if(f){ANN_ID=SC.m.id;clearTimeout(window.REQ_T);say("May the arrows be in your favour. "+callName(f==="A"?SC.m.player_a:SC.m.player_b)+" to throw first. Have at it!")}}
+  if(st.legs.length===1&&!st.legs[0].visits.length&&!st.done&&ANN_ID!==SC.m.id){const f=turnOf(st.legs[0]);if(f){ANN_ID=SC.m.id;clearTimeout(window.REQ_T);{const nm=callName(f==="A"?SC.m.player_a:SC.m.player_b);vSay([{k:"intro",t:"May the arrows be in your favour."},{t:nm},{k:"throw_first",t:"to throw first."},{k:"have_at_it",t:"Have at it!"}],"May the arrows be in your favour. "+nm+" to throw first. Have at it!")}}}
   let L=st.legs[st.legs.length-1];let last=L.visits[L.visits.length-1],legNo=st.legs.length;
   if(!last&&st.legs.length>1){L=st.legs[st.legs.length-2];last=L.visits[L.visits.length-1];legNo--}
   const key=SC.m.id+":"+legNo+":"+(last?L.visits.length:0);if(SAID===null){SAID=key;return}if(!last||key===SAID)return;SAID=key;
-  let t=last.bust?"no score":last.co?(st.done?"game shot, and the match!":"game shot, and the leg!"):(last.s===180?"one hundred and eighty!":words(last.s));
-  const cur=st.legs[st.legs.length-1],nx=turnOf(cur);let req="";if(!st.done&&nx&&!last.co){const r=legRem(cur,nx);if(r<=170&&!BOGEY.includes(r))req=callName(nx==="A"?SC.m.player_a:SC.m.player_b)+", you require "+words(r)}
-  clearTimeout(window.REQ_T);say(t);if(req)window.REQ_T=setTimeout(()=>say(req),3000);if(SC.mode==="online"&&last.p&&last.p!==SC.side&&!st.done)buzzTurn()}
+  let t=last.bust?"no score":last.co?(st.done?"game shot, and the match!":"game shot, and the leg!"):(last.s===180?"one hundred and eighty!":words(last.s));const tk=last.bust?"no_score":last.co?(st.done?"game_shot_match":"game_shot_leg"):(last.s>0?String(last.s):"no_score");
+  const cur=st.legs[st.legs.length-1],nx=turnOf(cur);let req=null;if(!st.done&&nx&&!last.co){const r=legRem(cur,nx);if(r<=170&&!BOGEY.includes(r)){const nm=callName(nx==="A"?SC.m.player_a:SC.m.player_b);req={p:[{t:nm},{k:"you_require",t:"you require"},{k:String(r),t:words(r)}],c:nm+", you require "+words(r)}}}
+  clearTimeout(window.REQ_T);vSay([{k:tk,t}],t);if(req)window.REQ_T=setTimeout(()=>vSay(req.p,req.c),3000);if(SC.mode==="online"&&last.p&&last.p!==SC.side&&!st.done)buzzTurn()}
 
 // ---------- hook into the scorer ----------
 const _openScorerV=openScorer;
@@ -1036,7 +1042,7 @@ renderScorer=function(){_renderScorerV();if(!SC)return;const box=$("scOut");cons
   if(head&&!head.querySelector("#camBtn")){const span=document.createElement("span");span.className="row";
     span.innerHTML=`<button class="btn" id="callBtn" style="padding:6px 10px;font-size:12px" title="Caller">${CALLER?"🔊 Caller":"🔇 Caller"}</button>${SC.mode==="online"?`<button class="btn camb ${V.live?"live":""}" id="camBtn" title="Camera">📷</button>`:""}`;
     head.appendChild(span);
-    $("callBtn").onclick=()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER)say("Caller on");renderScorer()};
+    $("callBtn").onclick=()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER)vSay([{k:"caller_on",t:"Caller on"}],"Caller on");renderScorer()};
     const cb=$("camBtn");if(cb)cb.onclick=cameraButton}
   // phones: while your opponent throws, show their camera and hide the keypad
   const pad=box.querySelector(".pad");if(pad&&SC.mode==="online"&&!isWide()&&(V.live||(V.remote&&V.remote.getVideoTracks().length))){pad.style.display=V.turn?"":"none";if(V.lastTurn!==V.turn){V.lastTurn=V.turn;const tgt=V.turn?box:document.getElementById("vidBox");if(tgt)setTimeout(()=>tgt.scrollIntoView({behavior:"smooth",block:"start"}),60)}}
@@ -2627,7 +2633,7 @@ function msRender(){if(!MS||!SC)return msClose();const v=$("v-scorer");v.classLi
   on("[data-mst-a]",()=>{MS.starter="A";msRender()});on("[data-mst-b]",()=>{MS.starter="B";msRender()});
   on("[data-msk-total]",()=>{DPAD="total";try{localStorage.setItem("11d-pad",DPAD)}catch(_){}msRender()});
   on("[data-msk-darts]",()=>{DPAD="darts";try{localStorage.setItem("11d-pad",DPAD)}catch(_){}msRender()});
-  on("[data-ms-call]",()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER&&typeof say==="function")say("Caller on");msRender()});
+  on("[data-ms-call]",()=>{CALLER=!CALLER;try{localStorage.setItem("11d-caller",CALLER?"1":"0")}catch(_){}if(CALLER&&typeof vSay==="function")vSay([{k:"caller_on",t:"Caller on"}],"Caller on");msRender()});
   on("[data-msc-this]",async()=>{MS.cam="this";if(B.state!=="off"||B.on)await bcStop(true);if(!V.raw||!V.raw.getVideoTracks().length)await camThisPhone();else{V.setup=true;renderCamSetup()}msRender()});
   on("[data-msc-other]",async()=>{MS.cam="other";await camOtherPhone();msRender()});
   on("[data-msc-none]",()=>{MS.cam="none";stopCamera(false);renderCamSetup();msRender()});
