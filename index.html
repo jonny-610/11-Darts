@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-X77tVYzGl7wzIE5UishZhbBbjzaseKi8Mh9XfsIjK9k=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-qRTAHEseDs0K4+4sv4YM9MTELuTjZ3qM8nTCAjJ5kBw=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -1016,7 +1016,7 @@ function words(n){if(n===0)return "no score";if(n<20)return ONES[n];if(n<100)ret
 // Jon's recorded voice (files in /voice). Falls back to the computer voice if a clip is missing.
 let VTOK=0,VAU=null;
 function vTts(t){return new Promise(res=>{if(!("speechSynthesis" in window)||!t)return res();try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=0.95;u.pitch=0.9;const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang));if(v)u.voice=v;u.onend=u.onerror=()=>res();speechSynthesis.speak(u);setTimeout(res,6000)}catch(_){res()}})}
-function vClip(k,t){return new Promise(res=>{try{const a=new Audio("/voice/"+k+".mp3");VAU=a;let done=false;const fin=ok=>{if(done)return;done=true;ok?res():vTts(t).then(res)};a.onended=()=>fin(true);a.onerror=()=>fin(false);a.play().catch(()=>fin(false));setTimeout(()=>fin(true),8000)}catch(_){vTts(t).then(res)}})}
+function vClip(k,t){return new Promise(res=>{try{const a=new Audio((/^\d+$/.test(k)&&+k<=90?"/voice/":"/voice%20part2/")+k+".mp3");VAU=a;let done=false;const fin=ok=>{if(done)return;done=true;ok?res():vTts(t).then(res)};a.onended=()=>fin(true);a.onerror=()=>fin(false);a.play().catch(()=>fin(false));setTimeout(()=>fin(true),8000)}catch(_){vTts(t).then(res)}})}
 async function vSay(parts,cap){caption(cap);if(!CALLER)return;const tok=++VTOK;try{if(VAU)VAU.pause();speechSynthesis.cancel()}catch(_){}
   for(const p of parts){if(tok!==VTOK)return;await (p.k?vClip(p.k,p.t):vTts(p.t))}}
 function say(t){caption(t);if(!CALLER||!("speechSynthesis" in window))return;try{const u=new SpeechSynthesisUtterance(t);u.lang="en-GB";u.rate=0.95;u.pitch=0.9;const v=speechSynthesis.getVoices().find(v=>/en-GB/i.test(v.lang));if(v)u.voice=v;speechSynthesis.speak(u)}catch(_){}}
