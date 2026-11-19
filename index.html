@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-+ynxnbTl4pZl+r3HD9MJDWmhgLgGzVHkptRKr9fhvCI=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'sha256-4IjU0FmHjA3fgUdsdEROyq4G1BzbA2rNJnEKGGm6JgU=' 'sha256-JGM+GZJ+295dK/HStSQWASVuTzqLhyXMRxsi4ogKl1s=' https://cdn.jsdelivr.net 'wasm-unsafe-eval'; worker-src 'self' blob: https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob: https://gqtdhrlzyrhcdpuhjwov.supabase.co; connect-src 'self' https://gqtdhrlzyrhcdpuhjwov.supabase.co wss://gqtdhrlzyrhcdpuhjwov.supabase.co https://cdn.jsdelivr.net; manifest-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#4A3878" media="(prefers-color-scheme: light)">
@@ -546,7 +546,7 @@ async function renderStaff(){
     it.querySelector(".err").innerHTML=error?esc(error.message):data==="requested"?'<span class="okmsg">Ban requested. A second Chalker or admin must confirm it.</span>':'<span class="okmsg">Banned.</span>';});
 }
 // ===================== v2: play, scorer, tables, training, progress, chalkers =====================
-const PN=id=>{const p=PLAYERS.find(x=>x.id===id);return p?p.display_name:"Removed player"};
+const PN=id=>{if(id==="bot")return "The Punisher";const p=PLAYERS.find(x=>x.id===id);return p?p.display_name:"Removed player"};
 const PF=id=>{const p=PLAYERS.find(x=>x.id===id);return p?flag(p.country):""};
 const nameLink=id=>`<a class="pn" href="#" data-prof="${id}" style="color:inherit">${PF(id)} ${esc(PN(id))}</a>${window.__odot2?window.__odot2(id):""}`;
 function manageUser(id,players){const p=players.find(x=>x.id===id)||{};const box=$("mngBox");if(!box)return;const removed=p.status==="suspended"&&/Removed player|Erased player/.test(p.display_name);
@@ -1018,8 +1018,8 @@ function callLast(){if(!SC)return;const st=SC.st;let L=st.legs[st.legs.length-1]
   if(!last&&st.legs.length>1){L=st.legs[st.legs.length-2];last=L.visits[L.visits.length-1];legNo--}
   const key=SC.m.id+":"+legNo+":"+(last?L.visits.length:0);if(SAID===null){SAID=key;return}if(!last||key===SAID)return;SAID=key;
   let t=last.bust?"no score":last.co?(st.done?"game shot, and the match!":"game shot, and the leg!"):(last.s===180?"one hundred and eighty!":words(last.s));
-  const cur=st.legs[st.legs.length-1],nx=turnOf(cur);if(!st.done&&nx&&!last.co){const r=legRem(cur,nx);if(r<=170&&!BOGEY.includes(r))t+=". "+callName(nx==="A"?SC.m.player_a:SC.m.player_b)+", you require "+words(r)}
-  say(t);if(SC.mode==="online"&&last.p&&last.p!==SC.side&&!st.done)buzzTurn()}
+  const cur=st.legs[st.legs.length-1],nx=turnOf(cur);let req="";if(!st.done&&nx&&!last.co){const r=legRem(cur,nx);if(r<=170&&!BOGEY.includes(r))req=callName(nx==="A"?SC.m.player_a:SC.m.player_b)+", you require "+words(r)}
+  clearTimeout(window.REQ_T);say(t);if(req)window.REQ_T=setTimeout(()=>say(req),3000);if(SC.mode==="online"&&last.p&&last.p!==SC.side&&!st.done)buzzTurn()}
 
 // ---------- hook into the scorer ----------
 const _openScorerV=openScorer;
@@ -1450,7 +1450,7 @@ a11yApply();
 
 // ---------- people helpers ----------
 const meP=()=>ME?PLAYERS.find(x=>x.id===ME.id)||{}:{};
-function callName(id){const p=PLAYERS.find(x=>x.id===id);if(!p)return "Player";return (p.caller_name||String(p.display_name||"Player").trim().split(/\s+/)[0])}
+function callName(id){if(id==="bot")return "Punisher";const p=PLAYERS.find(x=>x.id===id);if(!p)return "Player";return (p.caller_name||String(p.display_name||"Player").trim().split(/\s+/)[0])}
 const isSeated=id=>{const p=PLAYERS.find(x=>x.id===id);return !!(p&&p.seated)};
 
 // ---------- throw timer length: 60 league, +30 seated, 120 friendlies ----------
@@ -1739,7 +1739,7 @@ function trPadHTML(mod){return `<div class="dpad"><div class="dmods">${["S","D",
 
 renderTraining=function(){const out=$("trOut");if(!out)return;
   if(!TRMODE){out.innerHTML=`<div class="card"><h2>Training</h2><p class="note">Pick a drill. Results are saved and graphed, so you can see when you're improving or dipping.</p>
-     <div class="divs">${Object.entries(TDRILLS).map(([k,d])=>{const l=trLast(k);return `<a href="#" data-tr="${k}">${d.i} ${d.n}<small>${l?"Last: "+(+l.score).toFixed(k==="ladder"?0:1):"Not tried yet"}</small></a>`}).join("")}</div></div>
+     <div class="divs">${Object.entries(TDRILLS).filter(([k,d])=>!d.hidden).map(([k,d])=>{const l=trLast(k);return `<a href="#" data-tr="${k}">${d.i} ${d.n}<small>${l?"Last: "+(+l.score).toFixed(k==="ladder"?0:1):"Not tried yet"}</small></a>`}).join("")}</div></div>
     ${botRecord()}${doublesTable()}
     ${Object.entries(TDRILLS).filter(([k])=>TRAIN.some(t=>t.drill===k)).map(([k,d])=>`<div class="card"><h3>${d.n} (${d.better} is better)</h3>${graph(TRAIN.filter(t=>t.drill===k).slice(-20).map(t=>({v:+t.score,l:new Date(t.at).toLocaleDateString("en-GB",{day:"numeric",month:"short"})})),d.unit)}</div>`).join("")}`;
     out.querySelectorAll("[data-tr]").forEach(a=>a.onclick=e=>{e.preventDefault();TRMODE=a.dataset.tr;TS={};renderTraining()});return}
@@ -3460,6 +3460,46 @@ document.addEventListener("click",async e=>{const b=e.target.closest("[data-apde
   b.disabled=true;const {error}=await db.rpc("v2_staff_appeal_decide",{p_id:+it.dataset.rid,p_overturn:b.dataset.apdec==="1",p_note:(it.querySelector(".apNote")||{}).value||""});
   if(error){it.querySelector(".err").textContent=error.message;b.disabled=false;b.dataset.armed="";b.textContent=b.dataset.apdec==="1"?"Lift the ban":"Keep the ban";return}
   toast11("Appeal decided.");stReports()});
+
+// ===================== 35 Training: Doubles, Big Finish (19 Nov) =====================
+TDRILLS.g121.hidden=true;
+TDRILLS.doubles={n:"Doubles",i:"🎯",d:"Every double from D1 to D20, then the bull. Pick 3, 6 or 9 darts at each one. Hit it and you move on. Miss them all and it's noted and you move on. Your result is how many of the 21 you hit.",unit:"doubles hit (of 21)",better:"higher"};
+TDRILLS.bigfin={n:"Big Finish",i:"🏁",d:"Pick a finish: 101, 121, or a nine-dart finish (141, 144 or 167). Pick 3, 6 or 9 darts. Ten attempts. Your result is % checked out.",unit:"% checked out",better:"higher"};
+const DBL=[...Array.from({length:20},(_,i)=>({l:"D"+(i+1),v:2*(i+1)})),{l:"Bull",v:50}];
+function dblState(log,n){let i=0,u=0;const res=[];for(const h of log){u++;if(h){res.push({hit:1,d:u});i++;u=0}else if(u>=n){res.push({hit:0,d:n});i++;u=0}if(i>=DBL.length)break}return {i,u,res,done:i>=DBL.length}}
+(function(){const _r=renderTraining;renderTraining=function(){if(!["doubles","bigfin"].includes(TRMODE))return _r.apply(this,arguments);
+  const out=$("trOut");if(!out)return;const D=TDRILLS[TRMODE];let body="",done=false,score=0,detail={},started=!!TS.go,k=0;
+  const chips=(key,vals,cur)=>`<div class="chips">${vals.map(v=>`<button class="chip" data-${key}="${v}" aria-pressed="${cur===v}">${v}</button>`).join("")}</div>`;
+  if(!started){TS.n=TS.n||3;if(TRMODE==="bigfin")TS.tg=TS.tg||121;
+    body=(TRMODE==="bigfin"?`<label class="f">Finish<select id="bfT">${[101,121,141,144,167].map(v=>`<option value="${v}" ${TS.tg===v?"selected":""}>${v}${v>=141?" (nine-darter finish)":""}</option>`).join("")}</select></label>`:"")+
+     `<h3 style="margin-top:12px">Darts ${TRMODE==="doubles"?"at each double":"per attempt"}</h3>${chips("dn",[3,6,9],TS.n)}
+     <div class="row" style="margin-top:12px"><button class="btn primary" id="trGo" style="width:100%;min-height:52px">Start</button></div>`}
+  else if(TRMODE==="doubles"){TS.log=TS.log||[];const st=dblState(TS.log,TS.n);k=TS.log.length;done=st.done;score=st.res.filter(r=>r.hit).length;
+    const thrown=st.res.reduce((a,r)=>a+r.d,0)+st.u;detail={darts_each:TS.n,results:st.res.map((r,j)=>({t:DBL[j].l,hit:!!r.hit,darts:r.d})),hit_rate:thrown?Math.round(score/thrown*100):0};
+    const t=DBL[Math.min(st.i,DBL.length-1)];
+    body=`<div class="kv"><div><b>${score}/21</b><span>Hit</span></div><div><b>${thrown?Math.round(score/thrown*100):0}%</b><span>Hit rate</span></div><div><b>${trBest("doubles")||"–"}</b><span>Your best</span></div></div>
+     <div class="b27h">${DBL.map((d,j)=>`<span class="${j===st.i&&!done?"now":j<st.res.length&&!st.res[j].hit?"z":""}">${d.l}${j<st.res.length?(st.res[j].hit?" ✓":" ✗"):""}</span>`).join("")}</div>
+     ${done?`<p class="okmsg"><b>Finished! You hit ${score} of 21 doubles (${detail.hit_rate}% of darts).</b></p>`:
+     `<div style="text-align:center;margin:12px 0"><div style="font-family:var(--disp,inherit);font-size:88px;line-height:1;font-weight:800">${t.v}</div><div class="note" style="font-size:20px"><b>${t.l}</b> · dart ${st.u+1} of ${TS.n}</div></div>
+      <div class="b27" style="grid-template-columns:1fr 1fr"><button data-dh="1" style="min-height:90px;font-size:26px">Hit</button><button data-dh="0" class="miss" style="min-height:90px;font-size:26px">Miss</button></div>`}`}
+  else{TS.g=TS.g||[];k=TS.g.length;done=k>=10;const ok=TS.g.filter(Boolean).length;score=k?Math.round(ok/10*100):0;detail={target:TS.tg,darts:TS.n,goes:TS.g};
+    body=`<div class="kv"><div><b>${TS.tg}</b><span>Finish</span></div><div><b>${TS.n}</b><span>Darts</span></div><div><b>${Math.min(k+1,10)}/10</b><span>Attempt</span></div><div><b>${ok}</b><span>Checked out</span></div></div>
+     <div class="b27h">${TS.g.map((x,j)=>`<span class="${x?"":"z"}">${j+1} ${x?"✓":"✗"}</span>`).join("")}</div>
+     ${done?`<p class="okmsg"><b>Done! You checked out ${TS.tg} ${ok} times out of 10 (${score}%).</b></p>`:`<p style="text-align:center;margin:10px 0 0"><b>${TS.n} darts to check out ${TS.tg}.</b></p>
+      <div class="b27" style="grid-template-columns:1fr 1fr"><button data-bf="1" style="min-height:90px;font-size:24px">Checked out</button><button data-bf="0" class="miss" style="min-height:90px;font-size:24px">Missed</button></div>`}`}
+  out.innerHTML=`<div class="card"><h2>${D.i} ${D.n}</h2><p class="note">${D.d}</p>${body}
+   ${started?`<div class="row" style="margin-top:8px"><button class="btn" data-du="1" ${k?"":"disabled"}>↶ Undo</button>${done?'<button class="btn primary" id="hSave">Save result</button>':""}</div>`:""}
+   <p class="err" id="trErr"></p><div class="row" style="margin-top:10px"><button class="btn" id="trBack">← Back to training</button></div></div>`;
+  const err=m=>{$("trErr").textContent=m};
+  out.querySelectorAll("[data-dn]").forEach(b=>b.onclick=()=>{TS.n=+b.dataset.dn;renderTraining()});
+  const sel=$("bfT");if(sel)sel.onchange=()=>{TS.tg=+sel.value};
+  const go=$("trGo");if(go)go.onclick=()=>{if(sel)TS.tg=+sel.value;TS.go=1;renderTraining()};
+  out.querySelectorAll("[data-dh]").forEach(b=>b.onclick=()=>{const h=b.dataset.dh==="1";TS.log.push(h);try{if(h)navigator.vibrate&&navigator.vibrate(80)}catch(_){}renderTraining()});
+  out.querySelectorAll("[data-bf]").forEach(b=>b.onclick=()=>{const h=b.dataset.bf==="1";TS.g.push(h);try{if(h)navigator.vibrate&&navigator.vibrate(120)}catch(_){}renderTraining()});
+  out.querySelectorAll("[data-du]").forEach(b=>b.onclick=()=>{(TRMODE==="doubles"?TS.log:TS.g).pop();renderTraining()});
+  $("trBack").onclick=()=>{if(k&&!done&&!confirm2())return;TRMODE=null;TS={};renderTraining()};
+  const sv=$("hSave");if(sv)sv.onclick=async()=>{sv.disabled=true;const {error}=await db.rpc("v2_log_training",{p_drill:TRMODE,p_score:score,p_detail:detail});
+    if(error){err(error.message);sv.disabled=false;return}TRMODE=null;TS={};await load();show("training")}}})();
 
 load();
 </script>
